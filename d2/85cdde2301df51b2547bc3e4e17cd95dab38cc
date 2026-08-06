@@ -1,0 +1,1575 @@
+templates/REMEDIATION-PLAN.md
+  s_86d58b85ce2aee::t_7adce09feac1b9 1-64
+scripts/hook-wrapper.sh
+  s_c0ec649ca3b468::t_a33af4625e4fdd 1-25
+skills-bundle/discipline-of-programming-dijkstra/references/s14-notes-on-structured-programming-ii.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-124
+config/agent-generator-nouns.txt
+  s_c0ec649ca3b468::t_64e160f9ae89c2 1-8
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/api-design-principles/dtos.py
+  s_a8277377e1c964::t_8ee88f979d2e81 1-103
+config/agent-generator-adjectives.txt
+  s_c0ec649ca3b468::t_a7542e15de13d0 1-8
+skills-bundle/algorithmic-thinking/references/ch03-memoization-and-dp.md
+  s_b9f47addb8ceda::t_2dd9db3153ab07 2-4
+  s_b9f47addb8ceda::t_51617907d8e005 115-117
+  s_b9f47addb8ceda::t_81820a8622165d 5-114
+  s_b9f47addb8ceda::t_5c6970e6a2a737 1
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/testing-principles/test_circular_route.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-72
+tests/fixture-agent-manifest.sh
+  s_c0ec649ca3b468::t_fefb52d2060932 1-81
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/scripts/principles_rules.json
+  s_c0ec649ca3b468::t_d86ca376426f42 1-604
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/testing-principles/config_parser.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-61
+scripts/lib/agent-manifest.sh
+  s_c0ec649ca3b468::t_1d0b62f6db590c 1-170
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/coding-principles/single_return.py
+  s_c0ec649ca3b468::t_1a3fc2f7011f30 1-81
+skills-bundle/clean-code-principles-python-silen/evals/benchmark.md
+  s_a8277377e1c964::t_7df6822edea6fe 1
+  s_e19505a6a840a9::t_6ac5ca4d41d0ce 2-11
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/concurrent-programming-principles/choose_concurrency_model.py
+  s_a8277377e1c964::t_f7140632df556b 1-74
+skills-bundle/discipline-of-programming-dijkstra/references/d01-executional-abstraction-and-languages.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-93
+skills-bundle/modern-devops-practices-skill/references/ch09-ansible-config-mgmt.md
+  s_26b0fd34674788::t_3cb6f1db065f8f 147
+  s_26b0fd34674788::t_64076be50e48bd 418-435
+  s_26b0fd34674788::t_64ef730618c1c1 91
+  s_26b0fd34674788::t_a09c6cabdd223f 6-26
+  s_a8277377e1c964::t_939eb41a251a13 1-5,27-90,92-107,109-146,148-380,414-417,436-437
+  s_26b0fd34674788::t_fef97d0693e38d 108
+  s_26b0fd34674788::t_de45deee8beb90 381-413
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch23-attribute-descriptors.md
+  s_bc0b4fe7542c49::t_322d8e6effcd3f 33
+  s_bc0b4fe7542c49::t_d9ca7d904b1362 8
+  s_e19505a6a840a9::t_ace44ca74d20ab 1-3,5-6,10-12,14-16,18-19,21-26,28-32,34-44
+  s_bc0b4fe7542c49::t_0a7692bdef92a7 9
+  s_bc0b4fe7542c49::t_493c0b8957447b 13
+  s_bc0b4fe7542c49::t_2fc357f138fff4 4
+  s_bc0b4fe7542c49::t_dfd7542fa0c5f4 7
+  s_bc0b4fe7542c49::t_878a9e7157c42b 17
+  s_bc0b4fe7542c49::t_f40e446a56174c 20
+  s_bc0b4fe7542c49::t_53258249a7fa63 27
+skills-bundle/modern-devops-practices-skill/references/ch07-caas-and-serverless.md
+  s_b9f47addb8ceda::t_c12f227761e4f3 1-9,11,18-20,29-68,70-87,89-297,299-330,350-351,369-384
+  s_26b0fd34674788::t_7b52fe5c86ec8c 88
+  s_26b0fd34674788::t_57af2cbe6fe268 331-349
+  s_26b0fd34674788::t_b7ce6e291c3a5d 12-17
+  s_26b0fd34674788::t_6c2210e6e942a0 69
+  s_26b0fd34674788::t_a3229fbf77c94a 10
+  s_26b0fd34674788::t_b9d093d0c444db 21-28
+  s_26b0fd34674788::t_d6cd817d1be88b 352-368
+  s_26b0fd34674788::t_2bf4d5445196ea 298
+skills-bundle/clean-code-principles-python-silen/evals/evals.json
+  s_a8277377e1c964::t_83ee9d74ed9eea 10
+  s_a8277377e1c964::t_3b5c257b7982c3 7-9
+  s_a8277377e1c964::t_53a6e9eabe63cd 5,11-15,20-21,28-29,36-37
+  s_a8277377e1c964::t_a28700365f08ea 16
+  s_a8277377e1c964::t_b7ab4464c0767e 17-19,25,27,33,35,41,43
+  s_a8277377e1c964::t_4b2c7310abe946 2-4
+  s_a8277377e1c964::t_1372928b940dbc 6
+  s_a8277377e1c964::t_1d6c9d25be2a18 22-24
+  s_a8277377e1c964::t_6bc742e64268f0 26
+  s_a8277377e1c964::t_1bf79d61ea6492 30-32
+  s_a8277377e1c964::t_bab61316e3e55d 34
+  s_a8277377e1c964::t_ba8d005fa18a03 38-40
+  s_a8277377e1c964::t_c66121a5a61ccc 42
+  s_a8277377e1c964::t_390e89202df482 44-46
+  s_a8277377e1c964::t_02e1f58db8a0c3 1
+config/defaults.json
+  s_e19505a6a840a9::t_4a07629fcff921 1-59
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/devsecops/structured_logging.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-141
+skills-bundle/modern-devops-practices-skill/references/ch02-git-and-gitops.md
+  s_26b0fd34674788::t_df5d09bf7b786b 191
+  s_26b0fd34674788::t_890fb508190fab 171-188
+  s_26b0fd34674788::t_d318649c9decde 141-154
+  s_26b0fd34674788::t_0fff5bff414f47 71-74
+  s_a8277377e1c964::t_376e8edbe83704 1-9,12-13,26-70,75-103,105-127,129-134,137-140,155-162,169-170,189-190,192-211
+  s_26b0fd34674788::t_0d44f25ee92d1e 135-136
+  s_26b0fd34674788::t_44ebd3ff5ca19a 10-11
+  s_26b0fd34674788::t_89d808d41459bb 128
+  s_26b0fd34674788::t_f9ba201f76c7cd 14-25
+  s_26b0fd34674788::t_1f1ed9cfca5b43 212
+  s_26b0fd34674788::t_72ad7c337d519e 104
+  s_26b0fd34674788::t_7a413e77a38d41 163-168
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch13-interfaces-protocols-and-abcs.md
+  s_bc0b4fe7542c49::t_458a9970e561b9 25-27
+  s_bc0b4fe7542c49::t_32bdac7468e164 29-31
+  s_bc0b4fe7542c49::t_bc12f1833c8242 28
+  s_bc0b4fe7542c49::t_e83e55542ba17a 18
+  s_bc0b4fe7542c49::t_13b48c19346c8b 3-5
+  s_bc0b4fe7542c49::t_e15888d80a8f2e 17
+  s_bc0b4fe7542c49::t_146f476c3a20d8 14-16
+  s_bc0b4fe7542c49::t_bc2cea947ee0a7 11-12
+  s_bc0b4fe7542c49::t_83db289e136fab 20-23
+  s_bc0b4fe7542c49::t_15e791fea16825 24
+  s_bc0b4fe7542c49::t_cb82d78a55bbe6 13
+  s_bc0b4fe7542c49::t_e45ce796ebabf5 10
+  s_bc0b4fe7542c49::t_7b36df2d501cdc 19
+  s_bc0b4fe7542c49::t_afb4d8e30ff58d 6
+  s_bc0b4fe7542c49::t_b9ffc0d8ff69cd 7-9
+  s_bc0b4fe7542c49::t_47d32373dff6ea 1-2
+  s_bc0b4fe7542c49::t_14ef9bd22d15f8 32-34
+  s_a8277377e1c964::t_603b6f5c70af18 35-50
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch06-creative-teamwork.md
+  s_f34ec743d91c06::t_b9519a761435fa 1-67
+templates/agent-roles/coding-dijkstra.md.tpl
+  s_e19505a6a840a9::t_d484d7174a1a3d 1-18,20-114
+  s_c0ec649ca3b468::t_98de94beb29994 19
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch09-teamwork-principles.md
+  s_a8277377e1c964::t_fdc59042963d3c 59,80,136
+  s_a8277377e1c964::t_91ba2114bc4f89 98-100
+  s_a8277377e1c964::t_10dd016d375379 9-19
+  s_a8277377e1c964::t_59308c6f05076d 2-4,6-8,20-24,26-34,36-39,41-54,58,60,66,68-71,73,75,77-79,81-85,87-91,93,95-97,101-105,107-116,118-126,130-135,137-139,141-144,148-152,155-159,161-162,168-172,184-189
+  s_a8277377e1c964::t_4d09ac750a22a2 72
+  s_a8277377e1c964::t_5ec837ab47d859 86
+  s_a8277377e1c964::t_33c11a266a7648 61-65
+  s_a8277377e1c964::t_6bc5bca0dcaa5e 76
+  s_a8277377e1c964::t_25caa949432735 106
+  s_a8277377e1c964::t_9d8640546d201d 67
+  s_a8277377e1c964::t_795a23074d8d7d 117
+  s_a8277377e1c964::t_8812e56b58fc02 35
+  s_a8277377e1c964::t_81f7be101102ab 94
+  s_a8277377e1c964::t_3340085d666ce1 145-147
+  s_a8277377e1c964::t_84e5f002942868 153-154
+  s_a8277377e1c964::t_0a929cab53e8f4 5
+  s_a8277377e1c964::t_ee0d9e743dcf58 1
+  s_a8277377e1c964::t_9292271ee7dd2f 92
+  s_a8277377e1c964::t_bca43db79833cc 140
+  s_a8277377e1c964::t_dfdeaacabc4e9f 160
+  s_a8277377e1c964::t_27732f502d97a6 173-183
+  s_a8277377e1c964::t_d804c9ab27dc37 190-193
+  s_a8277377e1c964::t_0d49534b52350a 25
+  s_a8277377e1c964::t_ac7554b7619984 40
+  s_a8277377e1c964::t_2f6f38744aa83b 127-129
+  s_a8277377e1c964::t_347986bd830f45 163-167
+  s_a8277377e1c964::t_5da92491cb31fe 74
+  s_a8277377e1c964::t_3f5d91865a1cf3 55-57
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch08-concurrent-programming-principles.md
+  s_a8277377e1c964::t_b352ef0a6571ce 191
+  s_a8277377e1c964::t_352f79b2f1e6c1 49
+  s_a8277377e1c964::t_02c4b28edb58ad 132
+  s_a8277377e1c964::t_0345beade96334 165
+  s_a8277377e1c964::t_c4c54bd2d156a8 232
+  s_a8277377e1c964::t_f02a3caeafa1a9 67
+  s_a8277377e1c964::t_cccdc2d68bf0b8 185
+  s_a8277377e1c964::t_fdc59042963d3c 154,217
+  s_a8277377e1c964::t_5a860745664474 1
+  s_a8277377e1c964::t_d79494c889d2ae 43
+  s_a8277377e1c964::t_89335ef93f64f4 11
+  s_a8277377e1c964::t_cb346a092fb854 202,222
+  s_a8277377e1c964::t_1b3bf40e4b3398 227
+  s_a8277377e1c964::t_d9e96b6a3cf1d3 160
+  s_a8277377e1c964::t_66118f35ff201e 233
+  s_a8277377e1c964::t_169410b29e7c34 236
+  s_a8277377e1c964::t_5c5770997919bf 27
+  s_a8277377e1c964::t_0285108a87c670 179
+  s_a8277377e1c964::t_88a0cdf3ccf507 171
+  s_a8277377e1c964::t_b0a2b4c74c673f 83
+  s_a8277377e1c964::t_536d3683fc437d 15
+  s_a8277377e1c964::t_15917c61c4f813 2,4-10,12-14,16-26,28-42,44-48,50-54,56-65,68-82,84-109,111-124,126,128-130,133-153,155-159,161-164,166-170,172-178,180-184,186-190,192-201,203-216,218-220,223-225,228,230-231,235,237,239-243
+  s_a8277377e1c964::t_312c1f54e85fa4 66
+  s_a8277377e1c964::t_098520f2141aad 226
+  s_a8277377e1c964::t_7e98c9cf9c4718 234
+  s_a8277377e1c964::t_a4ccf9cabcdccd 110
+  s_a8277377e1c964::t_745e29ad3b4e96 125
+  s_a8277377e1c964::t_bf4854350ab67d 3
+  s_a8277377e1c964::t_eb01bcf8548f40 131
+  s_a8277377e1c964::t_5493d95c0d5413 244-248
+  s_a8277377e1c964::t_b867b3e992a859 238
+  s_a8277377e1c964::t_aa81fe7b7110f9 55
+  s_a8277377e1c964::t_ee7658d0c78c1f 229
+  s_a8277377e1c964::t_b54bed04e56805 221
+  s_a8277377e1c964::t_3e33042d9c8f38 127
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch05-security-principles.md
+  s_a8277377e1c964::t_ae859d62f4913f 1-109,112-165,167-228
+  s_a8277377e1c964::t_cd878c855a903f 110-111
+  s_a8277377e1c964::t_fdc59042963d3c 166
+skills-bundle/discipline-of-programming-dijkstra/references/d09-hamming-pattern-matching-two-squares.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-130
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/concurrent-programming-principles/optimistic_locking_idempotency.py
+  s_a8277377e1c964::t_f7140632df556b 1-99
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/scripts/clean_check.py
+  s_a8277377e1c964::t_dc9a3b32a09fbf 302
+  s_a8277377e1c964::t_58fa4ebb0ff40a 2-138
+  s_a8277377e1c964::t_1b9979e82afe01 1,139-301,303-343
+skills-bundle/discipline-of-programming-dijkstra/references/s16-notes-on-data-structuring-ii.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-120
+skills-bundle/discipline-of-programming-dijkstra/references/d06-nondeterminacy-and-scope.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-135
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/encapsulation_tell_dont_ask.py
+  s_a8277377e1c964::t_02aa242762bbe0 1-83
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch11-orchestration-and-flow.md
+  s_f34ec743d91c06::t_ffc3a0ce8bdde8 1-64
+skills-bundle/modern-devops-practices-skill/README.md
+  s_a8277377e1c964::t_01e893d48d4704 2-10,20-46,48-57,59-61
+  s_26b0fd34674788::t_367b969ac3a006 11-19
+  s_26b0fd34674788::t_2941740ef86c08 1
+  s_26b0fd34674788::t_032e782c058646 47
+  s_26b0fd34674788::t_a1af4cf588094e 58
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/teamwork-principles/open_closed_plugin.py
+  s_a8277377e1c964::t_c5345db28b3ef5 1-51,53-92
+  s_a8277377e1c964::t_02aa242762bbe0 52
+scripts/lib/lbwc-cache-key.sh
+  s_c0ec649ca3b468::t_9cc19b35ff87c5 1-23
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch04-testing-principles.md
+  s_a8277377e1c964::t_bc70cc9c8fbe59 1,7-25,183
+  s_a8277377e1c964::t_56b4d6308f7142 2-6,26-147,149-182,184-227
+  s_a8277377e1c964::t_88c522a48f56cb 148
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/architectural-principles-and-patterns/event_sourcing_cqrs.py
+  s_a8277377e1c964::t_14fb900e5301e4 1-106
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch14-rethinking-data-entry-storage-and-retrieval.md
+  s_f34ec743d91c06::t_9e5906f4fe2a8e 1-68
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch18-designing-for-the-desktop.md
+  s_26b0fd34674788::t_8c3d9124f0297c 1-20,22-136
+  s_ccc4c0e682642d::t_c44dddb565ab90 21
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/password_hashing.py
+  s_a8277377e1c964::t_fab256aba84c15 1-85
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch05-data-class-builders.md
+  s_bc0b4fe7542c49::t_efb1f8f1232acd 17
+  s_bc0b4fe7542c49::t_e11c8de56da7dd 25
+  s_bc0b4fe7542c49::t_d245efc8f732e4 7
+  s_a8277377e1c964::t_c8b1934753919c 1-6,8-9,11-15,18-19,21-24,26-48
+  s_bc0b4fe7542c49::t_add946f9e64f67 10
+  s_bc0b4fe7542c49::t_75a13784f4d9c4 16
+  s_bc0b4fe7542c49::t_83508113a3871f 20
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch21-design-details-controls-and-dialogs.md
+  s_f34ec743d91c06::t_772e3412980917 1-72
+templates/agent-roles/qa.md.tpl
+  s_58849211a94dc9::t_3712a81f857f26 1-214
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/cache_aside.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-90
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch02-an-array-of-sequences.md
+  s_bc0b4fe7542c49::t_7a0756509cbc03 27
+  s_bc0b4fe7542c49::t_54b0696dd6cf9b 6
+  s_bc0b4fe7542c49::t_1fff0960a417e0 17-18
+  s_bc0b4fe7542c49::t_143744dcef44c0 9
+  s_bc0b4fe7542c49::t_ced5bef52d0be6 24-25
+  s_bc0b4fe7542c49::t_3b88bfd84a2f44 20-22
+  s_bc0b4fe7542c49::t_3bc15750b97a00 16
+  s_bc0b4fe7542c49::t_9d5812ff3f3731 29-30
+  s_bc0b4fe7542c49::t_aaa95aa4d64ee7 23
+  s_bc0b4fe7542c49::t_9bce7e3c63c1ba 14
+  s_bc0b4fe7542c49::t_170b8da47211ad 31-43
+  s_bc0b4fe7542c49::t_0c3b23cc8ef2c8 44-46
+  s_bc0b4fe7542c49::t_5502f2b469d39f 7-8
+  s_bc0b4fe7542c49::t_51e5f6e1da924b 28
+  s_bc0b4fe7542c49::t_e184f6434133ab 15
+  s_bc0b4fe7542c49::t_c800d37557cf15 2-4
+  s_bc0b4fe7542c49::t_663fa56ffcfc56 10-13
+  s_bc0b4fe7542c49::t_dd3ca911efd862 5
+  s_bc0b4fe7542c49::t_302c58070a588c 19
+  s_bc0b4fe7542c49::t_abc4afd88fbc1d 26
+  s_bc0b4fe7542c49::t_6d043f4d86c789 1
+  s_bc0b4fe7542c49::t_7019a57d5f3ff7 47-49
+  s_a8277377e1c964::t_744c616e34b021 50-55
+skills-bundle/algorithmic-thinking/references/ch00-introduction.md
+  s_b9f47addb8ceda::t_ba9277bbcc4561 15
+  s_b9f47addb8ceda::t_0fa4d4dfbb5328 37
+  s_a8277377e1c964::t_0113421d613221 1-8,10-14,16-22,24-30,32-34,36,38-44,46,48-56,58,60-62,64-68,70-73
+  s_b9f47addb8ceda::t_da45081f1b7877 59
+  s_b9f47addb8ceda::t_4333f666fc9f98 63
+  s_b9f47addb8ceda::t_568c19023049cd 57
+  s_b9f47addb8ceda::t_c16001d9e1d0dd 31
+  s_b9f47addb8ceda::t_716e0c5ea9459d 45
+  s_b9f47addb8ceda::t_98b66e154e2028 47
+  s_b9f47addb8ceda::t_0bb738ae90e64a 9
+  s_b9f47addb8ceda::t_69634b8e328abc 23
+  s_b9f47addb8ceda::t_453127e71060c8 69
+  s_b9f47addb8ceda::t_cc7d01a80a5f28 35
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/teamwork-principles/replaceable_dependency.py
+  s_a8277377e1c964::t_c198f8cf2a2cad 1-95
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch07-lists-of-things.md
+  s_f34ec743d91c06::t_51d23f27a6d0e3 1-110
+templates/REQUIREMENTS.md
+  s_6ef0e951f7d046::t_9d96ffd98db66e 1-38
+skills-bundle/algorithmic-thinking/references/ch01-hash-tables.md
+  s_b9f47addb8ceda::t_c4424d73da1251 7
+  s_b9f47addb8ceda::t_d47437684cae1a 15-146
+  s_b9f47addb8ceda::t_cb1d001596dedc 8-14
+  s_b9f47addb8ceda::t_cd9e9cad7a78e4 4-6
+  s_b9f47addb8ceda::t_18dc6c6e996e2e 1-3
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/app.py
+  s_c0ec649ca3b468::t_0eb12977bb482a 1-43
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch01-architectural-principles-and-patterns.md
+  s_a8277377e1c964::t_939e5877e3754d 1
+  s_a8277377e1c964::t_ccdcde1ba7c08a 2-34,36-100,102-111,113-205,207-293
+  s_a8277377e1c964::t_65c787bac1766f 35
+  s_a8277377e1c964::t_fdc59042963d3c 101,112,206
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/testing-principles/test_resource_fetcher.py
+  s_c0ec649ca3b468::t_dfe6aa9fc3a7cb 1-94
+skills-bundle/modern-devops-practices-skill/references/ch05-kubernetes-orchestration.md
+  s_a8277377e1c964::t_cdc4c37ad292aa 1-9,22-63,65-90,92-108,110-142,144-373,383-384,393-394,408-409,413-425
+  s_26b0fd34674788::t_f7f1588ca5c815 395-407
+  s_26b0fd34674788::t_76e45e74162875 426-427
+  s_26b0fd34674788::t_f916faa4659af2 109
+  s_26b0fd34674788::t_9d596e0a00848f 10-21
+  s_26b0fd34674788::t_379e13bc7e2e92 385-392
+  s_26b0fd34674788::t_a523a63d50f68e 64
+  s_26b0fd34674788::t_e7e80c8ad2584a 91
+  s_26b0fd34674788::t_34d928a6e763f5 410-412
+  s_26b0fd34674788::t_4e87fe80b3b6af 374-382
+  s_26b0fd34674788::t_fbb614747abfd2 143
+skills-bundle/discipline-of-programming-dijkstra/references/d08-search-permutation-flag-file-merging.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-117
+skills-bundle/clean-code-principles-python-silen/NOTICE.md
+  s_a8277377e1c964::t_6e25a8e85b43d7 7
+  s_a8277377e1c964::t_8cdcf8fe65d611 8-10
+  s_a8277377e1c964::t_5b89261f309cd1 4-6
+  s_a8277377e1c964::t_49e69472546dd1 11-12
+  s_a8277377e1c964::t_5e05c8541f3a5a 13-22
+  s_a8277377e1c964::t_a1f0411958b8f8 24-26
+  s_a8277377e1c964::t_cec5b9df94cc0c 23
+  s_a8277377e1c964::t_db3503d915d595 1-3
+  s_a8277377e1c964::t_25a4a97fae93d7 27-29
+  s_a8277377e1c964::t_0346549c057c65 30-37
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch07-functions-as-first-class-objects.md
+  s_bc0b4fe7542c49::t_8f7402a0e6be12 26
+  s_bc0b4fe7542c49::t_44a44a55b027f3 4
+  s_bc0b4fe7542c49::t_039a710f1c3581 31-38
+  s_bc0b4fe7542c49::t_58a6b575eac466 15
+  s_a8277377e1c964::t_224b36ab5769f0 1-3,5-7,9-14,16-25,27-30,39-46
+  s_bc0b4fe7542c49::t_4e39a41edc77fe 8
+skills-bundle/algorithmic-thinking/references/ch06-shortest-paths-weighted-graphs.md
+  s_b9f47addb8ceda::t_f995180cbd345b 63
+  s_b9f47addb8ceda::t_23cb0b5df94ff3 85
+  s_a8277377e1c964::t_222e72e060e2be 1-12,14-24,26,28,30-40,42-48,50-52,54-62,64-72,74-84,86,88-90,92
+  s_b9f47addb8ceda::t_aea83ccaff5094 87
+  s_b9f47addb8ceda::t_e15f82bb13d080 91
+  s_b9f47addb8ceda::t_33bd0650e63ec0 93
+  s_b9f47addb8ceda::t_77a9e18277e934 41
+  s_b9f47addb8ceda::t_fa057f361bd64c 13
+  s_b9f47addb8ceda::t_0416c72b9852d5 27
+  s_b9f47addb8ceda::t_c85e4e42caec59 25
+  s_b9f47addb8ceda::t_3db100efd15fa9 73
+  s_b9f47addb8ceda::t_2d55246511712c 29
+  s_b9f47addb8ceda::t_bb1ba2583876ab 49
+  s_b9f47addb8ceda::t_3563471512df8c 53
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/repository_pattern.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-155
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/entities.py
+  s_a8277377e1c964::t_f7ffbdfad01b60 1-7,9-80
+  s_a8277377e1c964::t_870ea5fa0d35e3 8
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/teamwork-principles/documented_function.py
+  s_a8277377e1c964::t_05c59692b7a265 1-38,40-71
+  s_a8277377e1c964::t_9f52a6ac32c70e 39
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/dtos.py
+  s_a8277377e1c964::t_170dd11637834f 1-43
+skills-bundle/modern-devops-practices-skill/.gitignore
+  s_f34ec743d91c06::t_ce66f4b6a06971 1-2
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/architectural-principles-and-patterns/encapsulation_repository.py
+  s_a8277377e1c964::t_7cd69cafad502b 1-3,5-97
+  s_a8277377e1c964::t_aa33933a5a9fb3 4
+skills-bundle/discipline-of-programming-dijkstra/references/d11-rem-equivalence-convex-hull.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-115
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch05-visual-style-and-aesthetics.md
+  s_f34ec743d91c06::t_fc48e221ee363f 1-67
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/jwt_verification.py
+  s_a8277377e1c964::t_02aa242762bbe0 1-162
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch02-object-oriented-design-principles.md
+  s_a8277377e1c964::t_3367847a0f7447 1-72,74-78,80-136,138-146,148,150-158,160-171,173-179,181-182,184-221
+  s_a8277377e1c964::t_9fca9037f655d3 73
+  s_a8277377e1c964::t_7303e3427a0a73 79,137,147,149,159,172,180,183
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch03-coding-principles.md
+  s_a8277377e1c964::t_87c563f61fff36 1-30,32-50,52-105,107-117,119-135,137-139,141-171,173-191,193-234,236-247
+  s_a8277377e1c964::t_f97a329f2940ea 51,106,118,136,140,172,192,235
+  s_a8277377e1c964::t_fdc59042963d3c 31
+skills-bundle/algorithmic-thinking/references/ch07-binary-search.md
+  s_b9f47addb8ceda::t_b21fedb90ca0b8 7
+  s_b9f47addb8ceda::t_a86648993f8afa 47
+  s_b9f47addb8ceda::t_182865ee1a6f6f 71
+  s_b9f47addb8ceda::t_1c7408e989ed3e 55
+  s_b9f47addb8ceda::t_155e7693c41da2 1-4,6,8-12,14-20,22-31,34-38,40-45,49-51,54,56-60,62-64,66,68-70,72,74-116,118,120-121,123
+  s_b9f47addb8ceda::t_72c0167396cd99 5
+  s_b9f47addb8ceda::t_2601c45945f84e 32
+  s_b9f47addb8ceda::t_3efc4401a7e5f8 117
+  s_b9f47addb8ceda::t_a9ee368c08ca5c 122
+  s_b9f47addb8ceda::t_b41b3eb0b13a58 65
+  s_b9f47addb8ceda::t_53cef486f909c1 39
+  s_b9f47addb8ceda::t_a97a413171996f 53
+  s_b9f47addb8ceda::t_ca2cfc67d9ab74 21,48,67
+  s_b9f47addb8ceda::t_11485c6a65416b 33
+  s_b9f47addb8ceda::t_772f63afcd7b53 73
+  s_b9f47addb8ceda::t_c6528983805ec6 46
+  s_b9f47addb8ceda::t_9410c1e7f61edc 52
+  s_b9f47addb8ceda::t_a321b16218585d 61
+  s_b9f47addb8ceda::t_6b020ea4aa6daf 13
+  s_b9f47addb8ceda::t_74c77dc6ff1cc1 119
+skills-bundle/discipline-of-programming-dijkstra/references/d04-termination-and-euclid.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-129
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/primitive_obsession.py
+  s_a8277377e1c964::t_e4e0348809bcf5 1-62
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch14-inheritance-for-better-or-for-worse.md
+  s_bc0b4fe7542c49::t_9998514dbb35b7 15
+  s_a8277377e1c964::t_fc62da109980d2 1-5,7,9-12,14,16-17,19-44
+  s_bc0b4fe7542c49::t_3dab0f516fcb29 18
+  s_bc0b4fe7542c49::t_3c27842866964b 6
+  s_bc0b4fe7542c49::t_55511537da3075 8
+  s_bc0b4fe7542c49::t_1e17c0a8d637bf 13
+scripts/resolve-agent-max-turns.sh
+  s_e19505a6a840a9::t_4a2f9b8ec25724 1-199
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/connection_url_from_env.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-85
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch02-understanding-the-problem-design-research.md
+  s_f34ec743d91c06::t_a21fac9b19b2d8 1-84
+skills-bundle/fluent-python/README.md
+  s_bc0b4fe7542c49::t_8e6b10856ca93e 67
+  s_b9f47addb8ceda::t_20ed3032ab7a40 1-66
+skills-bundle/discipline-of-programming-dijkstra/references/d03-wp-semantics-of-the-language.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-130
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch19-concurrency-models-in-python.md
+  s_bc0b4fe7542c49::t_86ab16407d72d9 32
+  s_bc0b4fe7542c49::t_2358a4d41849cd 16
+  s_bc0b4fe7542c49::t_a619dbe87c2937 17
+  s_bc0b4fe7542c49::t_e078659daac59a 5
+  s_bc0b4fe7542c49::t_7be9f51e604c3e 7
+  s_bc0b4fe7542c49::t_6a9fe8462c1787 26
+  s_bc0b4fe7542c49::t_39d12d15896849 25
+  s_bc0b4fe7542c49::t_85cfa80737ed1b 23
+  s_bc0b4fe7542c49::t_8b457e1594ac0c 20
+  s_bc0b4fe7542c49::t_9516f16aaa5324 3
+  s_a8277377e1c964::t_89d8b33248803d 1-2,4,6,8-15,18,21-22,24,27-31,33-35,37-44
+  s_bc0b4fe7542c49::t_74d236f461bd99 19
+  s_bc0b4fe7542c49::t_153cb2ab745165 36
+skills-bundle/algorithmic-thinking/references/ch08-heaps-and-segment-trees.md
+  s_e19505a6a840a9::t_49e5ff8f119ded 1-8,133
+  s_b9f47addb8ceda::t_a2168ae076d69c 9-132
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/coding-principles/off_by_one_and_structures.py
+  s_a8277377e1c964::t_0f6410bd23f4d3 1-82
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch03-dictionaries-and-sets.md
+  s_bc0b4fe7542c49::t_454f1327785f13 29-31
+  s_bc0b4fe7542c49::t_74849977ac52e7 26
+  s_bc0b4fe7542c49::t_acff94bb3a5c24 17
+  s_bc0b4fe7542c49::t_5c2a839fe6be41 1-2
+  s_bc0b4fe7542c49::t_5bfcaea1c6eeb3 16
+  s_bc0b4fe7542c49::t_ed25e522ce8318 27
+  s_bc0b4fe7542c49::t_8227d8490b0e7b 24
+  s_bc0b4fe7542c49::t_b950aa850eae66 11-13
+  s_bc0b4fe7542c49::t_7d0d639172e140 3
+  s_bc0b4fe7542c49::t_e0cfe8f2f7dfd7 4-5
+  s_bc0b4fe7542c49::t_eb5a1a10e4b33a 19-22
+  s_bc0b4fe7542c49::t_07c89218f70a30 10
+  s_bc0b4fe7542c49::t_0709e6dae42730 15
+  s_bc0b4fe7542c49::t_9b641e62f4627e 6
+  s_bc0b4fe7542c49::t_e7f66f4941497a 18
+  s_bc0b4fe7542c49::t_74ccd817296f42 23
+  s_bc0b4fe7542c49::t_d87d03245a9778 28
+  s_bc0b4fe7542c49::t_040f4c8554ff64 9
+  s_bc0b4fe7542c49::t_20ab93f90079a8 25
+  s_bc0b4fe7542c49::t_207db6a3660517 7-8
+  s_bc0b4fe7542c49::t_b27d7e87d3cfca 14
+  s_bc0b4fe7542c49::t_f0508295c18cb0 32-34
+  s_a8277377e1c964::t_9c9f4378c0c00e 35-46
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/concurrent-programming-principles/thread_safety_lock.py
+  s_a8277377e1c964::t_f7140632df556b 1-83
+skills-bundle/clean-code-principles-python-silen/evals/fixtures/messy_order_service.py
+  s_c0ec649ca3b468::t_a4034a3fc323df 1-38
+skills-bundle/algorithmic-thinking/references/appendix-b-extras.md
+  s_b9f47addb8ceda::t_072c2890f92b70 122
+  s_b9f47addb8ceda::t_bf30526e02ee28 111
+  s_b9f47addb8ceda::t_7829070a9bb2a0 69
+  s_b9f47addb8ceda::t_8b0fe88a5f265c 53
+  s_b9f47addb8ceda::t_52790a3fac5ec2 112-120
+  s_b9f47addb8ceda::t_14e31f5723c5df 42
+  s_b9f47addb8ceda::t_c1512268359d1f 52
+  s_b9f47addb8ceda::t_8b0b0bee8fd9c7 123
+  s_b9f47addb8ceda::t_f8879bf2d0af5d 20-34
+  s_b9f47addb8ceda::t_e1292e385bc750 60
+  s_b9f47addb8ceda::t_70ae9249d98d2e 79
+  s_b9f47addb8ceda::t_1784901eb1bd72 5,64-68
+  s_b9f47addb8ceda::t_bd3a656c6a3010 71-78
+  s_b9f47addb8ceda::t_b93c6c27ad8e8b 11-18
+  s_b9f47addb8ceda::t_704c31b572153d 10
+  s_b9f47addb8ceda::t_40a76ad0adf99c 44
+  s_b9f47addb8ceda::t_cb82e65f4c2760 80-110
+  s_b9f47addb8ceda::t_e32f6e2c1931b8 35
+  s_b9f47addb8ceda::t_5b2920f3e93f85 70
+  s_b9f47addb8ceda::t_cda4fe8c92a80c 121
+  s_b9f47addb8ceda::t_c30c70d8ad3bf4 45-50
+  s_b9f47addb8ceda::t_4124e71db0d5c2 51
+  s_b9f47addb8ceda::t_6957244dd9db9b 61-62
+  s_b9f47addb8ceda::t_f5f67a43b34950 128-130
+  s_b9f47addb8ceda::t_a60b12cefbbd3d 124-126
+  s_b9f47addb8ceda::t_3e40d4f6995277 54-59
+  s_b9f47addb8ceda::t_e8b5bba09856fc 36-41
+  s_b9f47addb8ceda::t_721fa11c42da00 7-9
+  s_b9f47addb8ceda::t_b846915e43959b 43
+  s_b9f47addb8ceda::t_0d20cb0f136d5c 63
+  s_b9f47addb8ceda::t_a86f9ec4789718 127
+  s_b9f47addb8ceda::t_3d123b4a1b9dd5 19
+  s_b9f47addb8ceda::t_34978e087aa75f 2-4
+  s_b9f47addb8ceda::t_e8b56847079fe8 6
+  s_b9f47addb8ceda::t_564e7369dc3a72 131-133
+  s_a8277377e1c964::t_ced5ecff4f9a54 1
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch05-designing-the-product-framework-and-refinement.md
+  s_f34ec743d91c06::t_2ebf21c2c6eb13 1-67
+skills-bundle/algorithmic-thinking/references/appendix-c-problem-credits.md
+  s_b9f47addb8ceda::t_08e1c96010ee04 5-68
+  s_26b0fd34674788::t_53e686409ab80b 1-4
+skills-bundle/check-lifecycle.sh
+  s_c0ec649ca3b468::t_d02110798ee9bd 1-18
+skills-bundle/discipline-of-programming-dijkstra/references/d07-array-variables.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-137
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch15-more-about-type-hints.md
+  s_bc0b4fe7542c49::t_018269d7674174 40
+  s_bc0b4fe7542c49::t_431a8a8fa717ee 6
+  s_bc0b4fe7542c49::t_bb9ab28c1988e5 4
+  s_bc0b4fe7542c49::t_f743d1e610c785 13
+  s_bc0b4fe7542c49::t_4a36da76d23167 15
+  s_bc0b4fe7542c49::t_30ccbd93da3b86 7
+  s_bc0b4fe7542c49::t_9dcfebcba8b413 9
+  s_e19505a6a840a9::t_0cd37703a793be 1-3,5,8,10-12,14,16,18,20-23,25-26,28-30,41-48
+  s_bc0b4fe7542c49::t_b27a18db64bda5 17
+  s_bc0b4fe7542c49::t_ff716b754c534d 19
+  s_bc0b4fe7542c49::t_51d6caa02042db 24
+  s_bc0b4fe7542c49::t_97d7ec7bfd328b 27
+  s_bc0b4fe7542c49::t_7059d7d62f2477 31-39
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/testing-principles/resource_fetcher.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-61
+templates/agent-roles/docs.md.tpl
+  s_58849211a94dc9::t_93fc30d2db1403 1-143
+skills-bundle/interaction-design-cooper-tidwell/references/index.md
+  s_f34ec743d91c06::t_74be86f2e54bee 1-478
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/parameterized_queries.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-112
+skills-bundle/modern-devops-practices-skill/references/ch01-modern-devops-foundations.md
+  s_26b0fd34674788::t_710bea4f5989ed 108-110
+  s_26b0fd34674788::t_0eee75d6c678bc 19-34
+  s_26b0fd34674788::t_45d36a56d2112d 111-134
+  s_26b0fd34674788::t_fd11314679566e 51-57
+  s_26b0fd34674788::t_9740d0e117d2be 58-78
+  s_26b0fd34674788::t_8530066f757d15 3-5
+  s_26b0fd34674788::t_fbc124b4369c8e 135-139
+  s_26b0fd34674788::t_8b1adfdea79f99 79-83
+  s_26b0fd34674788::t_705a9e3d38284c 148
+  s_26b0fd34674788::t_b3f908194e4e1e 6-11
+  s_26b0fd34674788::t_5b45aec390b012 50
+  s_26b0fd34674788::t_463cdc36cde818 35-49
+  s_26b0fd34674788::t_7ecdb61f1098a8 140
+  s_26b0fd34674788::t_9ba798364e93ea 149-151
+  s_26b0fd34674788::t_fc1da648408946 84-107
+  s_26b0fd34674788::t_278775396bfb78 12-18
+  s_26b0fd34674788::t_629de91c4d814f 141-147
+  s_26b0fd34674788::t_529a1c8baf95ba 1-2
+  s_26b0fd34674788::t_272c3c4ac9a2a7 152-154
+  s_a8277377e1c964::t_db992fa6f4a0d6 155
+.agent-discipline.json
+  s_c0ec649ca3b468::t_d973ab1e36c839 1-5
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/avoid_n_plus_one.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-88
+skills-bundle/discipline-of-programming-dijkstra/references/d10-prime-factor-villages-spanning-tree.md
+  s_b9f47addb8ceda::t_9b56299b088dd5 1-16,18-51,53-121
+  s_0d6857aabc7d16::t_fd7f538d19da0f 52
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 17
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/solid_principles.py
+  s_a8277377e1c964::t_2ab65755a9c2f4 1-135
+templates/agent-roles/qa-author.md.tpl
+  s_e8b702480499cf::t_a527dfa9f56569 1-98
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch08-doing-things-actions-and-commands.md
+  s_f34ec743d91c06::t_df341764843489 1-59
+scripts/agent-spawn-guard.sh
+  s_c0ec649ca3b468::t_187d18e7e7548b 1-164
+templates/agent-roles/debugger.md.tpl
+  s_58849211a94dc9::t_c1b24201f22f99 1-139
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch10-optimizing-for-intermediates.md
+  s_f34ec743d91c06::t_2660867cb98d44 1-52
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-appa-design-principles.md
+  s_f34ec743d91c06::t_2810293353c79b 1-173
+skills-bundle/modern-devops-practices-skill/references/ch03-docker-containerization.md
+  s_e19505a6a840a9::t_384756608a3589 1-8,10-11,19-82,84-110,112-239,241-265,267-268,270-273,282-283,301-318
+  s_26b0fd34674788::t_ba3a564aaddea6 266
+  s_26b0fd34674788::t_8b2662f17788d9 111
+  s_26b0fd34674788::t_8cfaea7c6ce0ef 284-300
+  s_26b0fd34674788::t_0ae3663000d321 9
+  s_26b0fd34674788::t_07dd7ebd905494 240
+  s_26b0fd34674788::t_7b243778dc6195 274-281
+  s_26b0fd34674788::t_ae4c9a157b20c9 83
+  s_26b0fd34674788::t_f9a7c2a1b78da4 12-18
+  s_26b0fd34674788::t_9ebacbe13ac016 269
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/devsecops/metrics_instrumentation.py
+  s_a8277377e1c964::t_f7d95e8385a9c4 1-8,10-130
+  s_a8277377e1c964::t_558b29b5e0a4dc 9
+templates/UAT.md
+  s_6ef0e951f7d046::t_57cdcebe829bfb 1-72
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/coding-principles/error_handling.py
+  s_a8277377e1c964::t_0f6410bd23f4d3 1-85
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch07-databases-and-database-principles.md
+  s_a8277377e1c964::t_50c35ad46827fb 29-41,43-48,119-127,129,197-201,203-205,268-269
+  s_a8277377e1c964::t_a86eb5c8512758 1-28,49-118,130-196,206-267
+  s_a8277377e1c964::t_fdc59042963d3c 42,128,202
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch09-decorators-and-closures.md
+  s_bc0b4fe7542c49::t_b402864806be3b 16
+  s_bc0b4fe7542c49::t_920c528e9b76d7 3
+  s_b9f47addb8ceda::t_678548f85920ee 1-2,4,6-15,17-45
+  s_bc0b4fe7542c49::t_b567150c232827 5
+skills-bundle/algorithmic-thinking/references/code-examples.md
+  s_b9f47addb8ceda::t_26444339ae7cb1 1
+  s_b9f47addb8ceda::t_e9a94a3fe3ecb4 7-1548
+  s_b9f47addb8ceda::t_6a36c2d5e9aa7f 2-6
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/concurrent-programming-principles/pubsub_condition_queue.py
+  s_a8277377e1c964::t_f7140632df556b 1-77
+skills-bundle/discipline-of-programming-dijkstra/references/d02-states-and-semantic-characterization.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-110
+skills-bundle/discipline-of-programming-dijkstra/SKILL.md
+  s_c0ec649ca3b468::t_06af6b25f7c5db 1-89
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/normalization.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-92
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch01-the-python-data-model.md
+  s_26b0fd34674788::t_d34324e788eea2 1-7,9,11-25,27-43
+  s_bc0b4fe7542c49::t_5c2faaeee64462 8
+  s_bc0b4fe7542c49::t_35bc1dbe9a33a5 10
+  s_bc0b4fe7542c49::t_3b7a3d920e32d5 26
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/index.md
+  s_a8277377e1c964::t_4dbb02a3ed18e9 9
+  s_a8277377e1c964::t_d9be817eae8a40 5
+  s_a8277377e1c964::t_287e153b1b7b46 3
+  s_b9f47addb8ceda::t_0ecb7cba065156 1-2,4,6-8,10-24
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/api-design-principles/rest_controller.py
+  s_a8277377e1c964::t_fab256aba84c15 1-111
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/teamwork-principles/pr_checklist.md
+  s_a8277377e1c964::t_ded75fd726ce66 20
+  s_a8277377e1c964::t_ec748c23564a98 15
+  s_a8277377e1c964::t_61a4835cf8a3e2 22
+  s_bc0b4fe7542c49::t_cf63f3818d00bb 1-6,12-14,16-19,21,23-24,26-36
+  s_a8277377e1c964::t_934154062357a4 7-11
+  s_a8277377e1c964::t_67c3869d32d92a 25
+  s_a8277377e1c964::t_b8bacad0564f75 37
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/repository.py
+  s_a8277377e1c964::t_b2842c82ca1136 1-43
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch15-preventing-errors-and-informing-decisions.md
+  s_f34ec743d91c06::t_6404c2363e2b7f 1-73
+scripts/tests/agent-generator-core.sh
+  s_278a833762aed7::t_e191a4fad3dd5e 1-107
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch21-asynchronous-programming.md
+  s_bc0b4fe7542c49::t_628f474135d668 17
+  s_bc0b4fe7542c49::t_f6140833204b90 27
+  s_bc0b4fe7542c49::t_16d910d0173164 14
+  s_bc0b4fe7542c49::t_4318d3df31f165 3
+  s_bc0b4fe7542c49::t_5e33afe337176b 18
+  s_bc0b4fe7542c49::t_faefc784190478 20
+  s_e19505a6a840a9::t_e26cda58504d4f 1-2,4-8,10-13,15-16,19,21-23,25-26,28-47
+  s_bc0b4fe7542c49::t_4bfda8d541e971 9
+  s_bc0b4fe7542c49::t_068750f2bea425 24
+config/model-pricing.json
+  s_278a833762aed7::t_ee188e206d7d3e 1-253
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/testing-principles/circular_route.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-30
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch16-operator-overloading.md
+  s_bc0b4fe7542c49::t_7b149e8c045db9 4
+  s_bc0b4fe7542c49::t_24bc4a73a4b8dd 19
+  s_b9f47addb8ceda::t_4764ad942ced9a 1-3,5,7-12,14-18,20-46
+  s_bc0b4fe7542c49::t_d287e88ff19a63 13
+  s_bc0b4fe7542c49::t_481fa6c2bc90f1 6
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch17-iterators-generators-and-classic-coroutines.md
+  s_bc0b4fe7542c49::t_f9427c0f935adb 11-13
+  s_bc0b4fe7542c49::t_499342b5a58b61 21-23
+  s_bc0b4fe7542c49::t_45058480cff578 8
+  s_bc0b4fe7542c49::t_385e70845977ac 9
+  s_bc0b4fe7542c49::t_bdfbe18520190a 27
+  s_bc0b4fe7542c49::t_8505070578607e 5
+  s_bc0b4fe7542c49::t_909a65dcf2a946 25
+  s_bc0b4fe7542c49::t_97c4ee304aba84 28-30
+  s_bc0b4fe7542c49::t_2461b01e581e5b 1-3
+  s_bc0b4fe7542c49::t_01780c7a9b9df1 18
+  s_bc0b4fe7542c49::t_8f6c684502c6b8 6-7
+  s_bc0b4fe7542c49::t_3d6142f557e549 10
+  s_bc0b4fe7542c49::t_4fb0140dffe39c 26
+  s_bc0b4fe7542c49::t_ccaf8bc19f0358 4
+  s_bc0b4fe7542c49::t_ac265177dd6193 20
+  s_bc0b4fe7542c49::t_4db00a9996b483 19
+  s_bc0b4fe7542c49::t_b5e39c2f67abe0 24
+  s_bc0b4fe7542c49::t_af15eef6b2c590 14
+  s_bc0b4fe7542c49::t_c1a7707dba4c1e 15-17
+  s_bc0b4fe7542c49::t_c3f58c0eea3096 31-33
+  s_a8277377e1c964::t_ed1be9359545b9 34-48
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/errors.py
+  s_c0ec649ca3b468::t_4c1d2ee4b7a599 1-31
+templates/CONTEXT.md
+  s_6ef0e951f7d046::t_eb96eb0200ff32 1-33
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/container.py
+  s_a8277377e1c964::t_3b2883b576ea99 1-24
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch10-getting-input-from-users-forms-and-controls.md
+  s_f34ec743d91c06::t_ad7496c4dd65bb 1-122
+skills-bundle/modern-devops-practices-skill/references/ch06-advanced-kubernetes.md
+  s_26b0fd34674788::t_5727f5e93f673c 10-24
+  s_26b0fd34674788::t_a567e25ef86670 239
+  s_26b0fd34674788::t_20cfe7b274a022 194
+  s_26b0fd34674788::t_039ec9c89466fc 57-68
+  s_26b0fd34674788::t_e08d0f20414269 109-111
+  s_26b0fd34674788::t_b8f6aeb671b590 129
+  s_26b0fd34674788::t_d7b9084f5b304b 267
+  s_26b0fd34674788::t_32e6d2326d77f6 372-384
+  s_26b0fd34674788::t_774197b4602477 387-394
+  s_b9f47addb8ceda::t_076e70023a9b2e 1-9,25-56,69-108,112-128,130-146,148-166,168-193,195-238,240-266,268-371,385-386,395-397,410-425
+  s_26b0fd34674788::t_1428b15fdcce88 398-409
+  s_26b0fd34674788::t_0b906eecd92d68 147
+  s_26b0fd34674788::t_c3dd79d9ba043f 167
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch13-metaphors-idioms-and-affordances.md
+  s_f34ec743d91c06::t_081098ceeec2e6 1-70
+skills-bundle/discipline-of-programming-dijkstra/references/d12-strong-components-manuals-retrospect.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-110
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch04-unicode-text-versus-bytes.md
+  s_26b0fd34674788::t_9c0457f175232b 1-3,5,7-12,14-15,18,21-46
+  s_bc0b4fe7542c49::t_9eca734550441c 20
+  s_bc0b4fe7542c49::t_db7ba19d927406 16
+  s_bc0b4fe7542c49::t_94655cae856279 4
+  s_bc0b4fe7542c49::t_f5b1780ab6c184 6
+  s_bc0b4fe7542c49::t_33d9900b033075 17
+  s_bc0b4fe7542c49::t_77f7a3f3219f8d 13
+  s_bc0b4fe7542c49::t_a02a9cae5a6a92 19
+templates/RESEARCH.md
+  s_6ef0e951f7d046::t_550e494106e8d5 1-25
+skills-bundle/modern-devops-practices-skill/references/ch04-container-images.md
+  s_26b0fd34674788::t_59e5fdc2ce7c28 58-62
+  s_26b0fd34674788::t_baae9edf2a82cb 102
+  s_26b0fd34674788::t_c651fb16179e37 69
+  s_26b0fd34674788::t_e93259cb02737b 34
+  s_26b0fd34674788::t_32867d16a137ca 127
+  s_26b0fd34674788::t_b1de3ed01a5a09 219-220
+  s_26b0fd34674788::t_1f779126568a5b 6
+  s_26b0fd34674788::t_4ff07a3d797593 78
+  s_26b0fd34674788::t_9ea15262ce64ec 225-226
+  s_26b0fd34674788::t_dd7f6adba8765d 91
+  s_b9f47addb8ceda::t_d667272b09fb47 1-5,7-8,18-22,24-33,35-57,63-68,70-77,79-90,92-101,103-126,128-172,174-178,187-190,196-197,209-211,214-218,221-224
+  s_26b0fd34674788::t_0277a95cfb01f5 9-17
+  s_26b0fd34674788::t_3fc4cd67d13d21 23
+  s_26b0fd34674788::t_e7d71e77443ff2 173
+  s_26b0fd34674788::t_827edd23ba2b61 212-213
+  s_26b0fd34674788::t_0c3c198be3eff7 191-195
+  s_26b0fd34674788::t_2b0074c21442f0 198-208
+  s_26b0fd34674788::t_cb1e1bcf0966b7 179-186
+templates/agent-roles/scout.md.tpl
+  s_58849211a94dc9::t_31bdcc54c44a47 1-130
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch20-designing-for-the-web.md
+  s_f34ec743d91c06::t_f2ffead7aa4229 1-60
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch18-with-match-and-else-blocks.md
+  s_bc0b4fe7542c49::t_bf18d32161a186 6-9
+  s_bc0b4fe7542c49::t_d7ca5496299b5b 16
+  s_bc0b4fe7542c49::t_37009f1ea4093e 10
+  s_bc0b4fe7542c49::t_339bfa1b0afa70 24-26
+  s_bc0b4fe7542c49::t_b82272a01d529b 4
+  s_bc0b4fe7542c49::t_98aee307bfb5ec 11-15
+  s_bc0b4fe7542c49::t_8320111c03292f 1-3
+  s_bc0b4fe7542c49::t_916c7e5827d848 23
+  s_bc0b4fe7542c49::t_04c6107e5b9e09 5
+  s_bc0b4fe7542c49::t_1606d99974f43d 27
+  s_bc0b4fe7542c49::t_e5fe00b32c731d 17-22
+  s_bc0b4fe7542c49::t_ebfcfcf657c63f 28-30
+  s_bc0b4fe7542c49::t_311a368013d227 31-33
+  s_a8277377e1c964::t_dae6d15a487317 34-46
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch11-user-interface-systems-and-atomic-design.md
+  s_f34ec743d91c06::t_7d9fc32ded9a9c 1-53
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch04-layout-of-screen-elements.md
+  s_f34ec743d91c06::t_a78e386e106105 1-107
+skills-bundle/discipline-of-programming-dijkstra/references/s13-notes-on-structured-programming-i.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-134
+templates/agent-roles/lead.md.tpl
+  s_58849211a94dc9::t_56bf67e345c543 1-151
+skills-bundle/algorithmic-thinking/references/ch10-randomization.md
+  s_b9f47addb8ceda::t_e9b8ad0ad1f3f1 7
+  s_b9f47addb8ceda::t_014717d5b90c91 59
+  s_a8277377e1c964::t_00c17952f69cf9 1-6,8-20,22,24,26-28,30-36,39-48,50-54,56,58,60,62-70,72-78,80-90,92-98,100-101
+  s_b9f47addb8ceda::t_a4f9f494c1fb33 25
+  s_b9f47addb8ceda::t_9c6044e955c5d9 91
+  s_b9f47addb8ceda::t_0e3f6abb9ffd74 55
+  s_b9f47addb8ceda::t_eb5e51d1bcdb9a 99
+  s_b9f47addb8ceda::t_3e60ea46751420 38
+  s_b9f47addb8ceda::t_f2072068c644d8 79
+  s_b9f47addb8ceda::t_9e7b678ec18569 37
+  s_b9f47addb8ceda::t_3ad354668b3f1b 57
+  s_b9f47addb8ceda::t_98020f5f1e83b7 61
+  s_b9f47addb8ceda::t_8fbfdc68fb6288 21
+  s_b9f47addb8ceda::t_99650da0b8fb79 49
+  s_b9f47addb8ceda::t_8f2c55f6d06d64 23
+  s_b9f47addb8ceda::t_b6f34229e595a6 71
+  s_b9f47addb8ceda::t_4f9b61c2136eb0 29
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch12-special-methods-for-sequences.md
+  s_bc0b4fe7542c49::t_3fa2b1f7e9e826 14
+  s_bc0b4fe7542c49::t_7d02231c2b21c4 6
+  s_b9f47addb8ceda::t_c41ef14002d9ac 1-2,4-5,7-13,15-17,20-23,25-46
+  s_bc0b4fe7542c49::t_6adcea01520135 18-19
+  s_bc0b4fe7542c49::t_397e137e01b082 24
+  s_bc0b4fe7542c49::t_4659bf029e8cb8 3
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/service.py
+  s_a8277377e1c964::t_2224c85deeafd1 1-66
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/deny_by_default_authz.py
+  s_c0ec649ca3b468::t_8fa745e4a0af46 1-124
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/design_patterns_creational.py
+  s_a8277377e1c964::t_e28f3562bc85bb 1-97
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch22-dynamic-attributes-and-properties.md
+  s_bc0b4fe7542c49::t_55efce4263b992 23
+  s_bc0b4fe7542c49::t_07473cd78c9311 10
+  s_b9f47addb8ceda::t_04c68882365c82 1-5,7-9,11-12,15-16,19-22,24-27,29-45
+  s_bc0b4fe7542c49::t_c7bff4fe5fec40 17
+  s_bc0b4fe7542c49::t_f7654ff1266fc0 6
+  s_bc0b4fe7542c49::t_e5fe03911d27f9 14
+  s_bc0b4fe7542c49::t_ddec95622ddcd2 28
+  s_bc0b4fe7542c49::t_7b03b114cc1dbc 18
+  s_bc0b4fe7542c49::t_7f3c49c7689ed6 13
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch01-designing-for-people.md
+  s_f34ec743d91c06::t_f82f4182528bfb 1-80
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/secrets_and_config.py
+  s_c0ec649ca3b468::t_e602403d151575 1-98
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch24-class-metaprogramming.md
+  s_bc0b4fe7542c49::t_fc362ef15d5305 9
+  s_bc0b4fe7542c49::t_575cfde509d7e1 26
+  s_bc0b4fe7542c49::t_3fc5db46fcffca 37
+  s_bc0b4fe7542c49::t_1e0b447bf18256 35
+  s_bc0b4fe7542c49::t_3a91d39afa19da 23
+  s_bc0b4fe7542c49::t_592567368c0259 31
+  s_bc0b4fe7542c49::t_9b44a46305fb24 36
+  s_b9f47addb8ceda::t_1ce6956e8923fc 1-3,5,7-8,10-14,16-19,21-22,24-25,27-30,39-46
+  s_bc0b4fe7542c49::t_40a46813051e25 4
+  s_bc0b4fe7542c49::t_b0f8740a10e6b6 38
+  s_bc0b4fe7542c49::t_d0822556f7dcad 32
+  s_bc0b4fe7542c49::t_56f6137163b804 20
+  s_bc0b4fe7542c49::t_fe51a1db2bc242 34
+  s_bc0b4fe7542c49::t_1d66c536feffba 15
+  s_bc0b4fe7542c49::t_1b4be582425632 33
+  s_bc0b4fe7542c49::t_db3650fbe223e2 6
+skills-bundle/clean-code-principles-python-silen/evals/benchmark.json
+  s_a8277377e1c964::t_0ff95112fee583 42-461
+  s_26b0fd34674788::t_7eb4deb0a565da 1-41,462-524,531-532
+  s_a8277377e1c964::t_375a7667ff07bd 525-530
+templates/REMEDIATION-SUMMARY.md
+  s_6ef0e951f7d046::t_83c5d7da37895a 1-45
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch12-reducing-work-and-eliminating-excise.md
+  s_f34ec743d91c06::t_bf1aee5ddd924c 1-63
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch08-type-hints-in-functions.md
+  s_bc0b4fe7542c49::t_18d5dee72863c3 9
+  s_bc0b4fe7542c49::t_83c635f2bc8518 5
+  s_bc0b4fe7542c49::t_242ec0ad3e9e63 15
+  s_bc0b4fe7542c49::t_668986fe47e3c6 31-38
+  s_bc0b4fe7542c49::t_8d21f5b58bcda0 28
+  s_bc0b4fe7542c49::t_3401ca985a21f8 13
+  s_bc0b4fe7542c49::t_8b68cc84692d90 19
+  s_a8277377e1c964::t_806cb219228868 1-4,6-8,10-12,14,16-18,20-27,29-30,39-47
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/design_patterns_structural.py
+  s_a8277377e1c964::t_703064f589cc96 1-124
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/concurrent-programming-principles/avoid_shared_mutable_state.py
+  s_a8277377e1c964::t_f7140632df556b 1-55
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch17-integrating-visual-design.md
+  s_0d6857aabc7d16::t_b187b659d5e338 1-32,34-43,45-68
+  s_ccc4c0e682642d::t_158f204ebb9571 33
+  s_ccc4c0e682642d::t_f49631091bf076 44
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/SKILL.md
+  s_a8277377e1c964::t_6566b0f71a64ed 165
+  s_a8277377e1c964::t_135badb7adc80d 154-156
+  s_a8277377e1c964::t_5ce0c8015b5a60 47
+  s_a8277377e1c964::t_7f9b3e1f1f902b 46
+  s_a8277377e1c964::t_d893f9b07274d3 36-38
+  s_a8277377e1c964::t_15050e239c1072 129-146
+  s_a8277377e1c964::t_d26fb6d5a8c5d3 123-124
+  s_a8277377e1c964::t_b07de8328bce56 16
+  s_a8277377e1c964::t_7cebff6690623a 96-107
+  s_a8277377e1c964::t_4cf7cd47af9949 83-92
+  s_a8277377e1c964::t_24e06c9d545df2 59
+  s_a8277377e1c964::t_673ae0fa9b733b 173
+  s_a8277377e1c964::t_3b1b8d1c8693b7 112-114
+  s_a8277377e1c964::t_1b748556f859de 41
+  s_a8277377e1c964::t_6309b57efe2a7d 6-12
+  s_b9f47addb8ceda::t_fba528e7a711ba 1-5,13-15,17-35,39-40,42-45,48-58,60-82,93-95,108-111,116-122,125-128,147-153,157,160-164,166-172,174
+  s_a8277377e1c964::t_1becedba3ae705 115
+  s_a8277377e1c964::t_3a4e443cec55d6 158-159
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/api-design-principles/repository.py
+  s_a8277377e1c964::t_fab256aba84c15 1-166
+tests/self-check.sh
+  s_c0ec649ca3b468::t_734ab3184f03f6 1-127
+skills-bundle/modern-devops-practices-skill/references/ch10-packer-immutable-infra.md
+  s_26b0fd34674788::t_e7e4a819461662 120-345
+  s_26b0fd34674788::t_3f62de44c9e6d3 346-370
+  s_26b0fd34674788::t_944adedfd5db77 119
+  s_26b0fd34674788::t_3e80b144d62020 3-5
+  s_26b0fd34674788::t_d8f8aaf1ea5353 60-118
+  s_26b0fd34674788::t_755fec307d5560 371-374
+  s_26b0fd34674788::t_4e4a3ed3fc36fe 6-21
+  s_26b0fd34674788::t_0c9eff34a6c5c4 22-58
+  s_26b0fd34674788::t_3020c720123b8a 375-387
+  s_26b0fd34674788::t_43c75211389ab1 59
+  s_26b0fd34674788::t_867fc777a4368a 1-2
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch06-mobile-interfaces.md
+  s_f34ec743d91c06::t_25765772b3b1ca 1-109
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/coding-principles/refactoring.py
+  s_a8277377e1c964::t_0f6410bd23f4d3 1-95
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/testing-principles/test_config_parser.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-95
+skills-bundle/algorithmic-thinking/references/ch04-advanced-memoization-and-dp.md
+  s_b9f47addb8ceda::t_53c73b08699d2f 54-65
+  s_b9f47addb8ceda::t_423bbb9e9c12ad 85
+  s_b9f47addb8ceda::t_d448c5f187fee7 51
+  s_b9f47addb8ceda::t_82fb111035f9b2 84
+  s_b9f47addb8ceda::t_4552b1e40547f6 87-95
+  s_b9f47addb8ceda::t_fb2c2ff9f39d58 6
+  s_b9f47addb8ceda::t_74e6c594cd28f4 66
+  s_b9f47addb8ceda::t_76b7e9ec0b4cc9 67-71
+  s_b9f47addb8ceda::t_2ec38b9852bfc9 42-50
+  s_b9f47addb8ceda::t_ea4362e607cb70 73-83
+  s_b9f47addb8ceda::t_4705b9ead05ec6 40
+  s_b9f47addb8ceda::t_f68e0b444dbf21 97-98
+  s_b9f47addb8ceda::t_855386d288fcfc 52
+  s_b9f47addb8ceda::t_571c54eeaca932 53
+  s_b9f47addb8ceda::t_586433f922e094 96
+  s_b9f47addb8ceda::t_cf771678c14fb2 41
+  s_b9f47addb8ceda::t_3d66bf70c665d0 72
+  s_b9f47addb8ceda::t_015295468392b3 7-39
+  s_b9f47addb8ceda::t_ef8487a5a6453b 3-5
+  s_b9f47addb8ceda::t_db297d1a3312f9 86
+  s_b9f47addb8ceda::t_bef8a419b1f2da 1-2
+templates/DEBUG-SESSION.md
+  s_6ef0e951f7d046::t_ab6690053f7eb3 1-79
+skills-bundle/algorithmic-thinking/references/ch02-trees-and-recursion.md
+  s_b9f47addb8ceda::t_fa0c34951eee13 58
+  s_b9f47addb8ceda::t_1d49965469a216 2-4
+  s_b9f47addb8ceda::t_0624f519109a75 60-72
+  s_b9f47addb8ceda::t_2046d79550eb2d 6-12
+  s_b9f47addb8ceda::t_81ab8fe078f0ba 5
+  s_b9f47addb8ceda::t_87d01f4536bb90 13
+  s_b9f47addb8ceda::t_c9a2fdf8850992 59
+  s_b9f47addb8ceda::t_eb336b3de502c0 20
+  s_b9f47addb8ceda::t_8a10f205e2453e 57
+  s_b9f47addb8ceda::t_fc4b3242143ae5 78-92
+  s_b9f47addb8ceda::t_ed266b1853a2e4 22-24
+  s_b9f47addb8ceda::t_0169b52768d15c 53
+  s_b9f47addb8ceda::t_0a1f433119c98f 73
+  s_b9f47addb8ceda::t_3c969a41408bb1 94-95
+  s_b9f47addb8ceda::t_75ef0a46ddcd0d 26-34
+  s_b9f47addb8ceda::t_171a6cb61fdf6a 35
+  s_b9f47addb8ceda::t_300ef93dfeb740 21
+  s_b9f47addb8ceda::t_a192b1ddb78027 14-18
+  s_b9f47addb8ceda::t_9baecba5e82074 46-52
+  s_b9f47addb8ceda::t_e111705df6d16f 74-76
+  s_b9f47addb8ceda::t_e389548cba20e2 93
+  s_b9f47addb8ceda::t_99c396b72ae979 19
+  s_b9f47addb8ceda::t_3e502973b0b66b 38-44
+  s_b9f47addb8ceda::t_48dd783b7b70df 25
+  s_b9f47addb8ceda::t_17dfcd14594eaa 37
+  s_b9f47addb8ceda::t_1782878887a0ab 54-56
+  s_b9f47addb8ceda::t_a3e98b3a4a598f 36
+  s_b9f47addb8ceda::t_57eb188f1557d0 45
+  s_b9f47addb8ceda::t_f7a27e2706c3f1 77
+  s_b9f47addb8ceda::t_d9f6103c49a773 1
+skills-bundle/algorithmic-thinking/README.md
+  s_c0ec649ca3b468::t_fd78eb160a6970 1-126
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/composition_over_inheritance.py
+  s_c0ec649ca3b468::t_fcac2cc4665a46 1-74
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch09-showing-complex-data.md
+  s_f34ec743d91c06::t_78be6e5879db42 1-81
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch10-devsecops.md
+  s_a8277377e1c964::t_daf57a200d1bb9 48-49
+  s_a8277377e1c964::t_7f53620a289d2d 93
+  s_a8277377e1c964::t_eed3d215abc517 157-158
+  s_a8277377e1c964::t_4deec87906aa69 177
+  s_a8277377e1c964::t_bcad5ce9358120 178
+  s_a8277377e1c964::t_415ef8a6869243 140
+  s_a8277377e1c964::t_4f0fafc8cc2b9a 68-72
+  s_a8277377e1c964::t_d8d36eb15b9f52 191
+  s_a8277377e1c964::t_b66bf8a230b366 20-24,26-42,44-47,50-54,56-67,73-92,95-111,113-117,119-121,126-128,130-139,141-143,145,147-151,153-156,159-161,163-166,168-172,174-176,179-185,187-189,192-202,205-218,221-232,244-249
+  s_a8277377e1c964::t_c17824e70839e6 167
+  s_a8277377e1c964::t_9e1b0f6a72141d 129
+  s_a8277377e1c964::t_5866308e90e5c1 250-252
+  s_a8277377e1c964::t_60c172218b1357 94
+  s_a8277377e1c964::t_3d70eefa53721c 146
+  s_a8277377e1c964::t_61df57c57ed1ed 173
+  s_a8277377e1c964::t_6bb34910b3e52a 219-220
+  s_a8277377e1c964::t_619bffc6a84a6e 190
+  s_a8277377e1c964::t_94a9b441bf1eba 118
+  s_a8277377e1c964::t_e6233b8e4b0e84 203-204
+  s_a8277377e1c964::t_d259f34f6e9631 55
+  s_a8277377e1c964::t_142389cc6319db 25
+  s_a8277377e1c964::t_3f04b2a56e472b 152
+  s_a8277377e1c964::t_ff104e4a27b501 122-125
+  s_a8277377e1c964::t_e1b5d1412be3f7 144
+  s_a8277377e1c964::t_253f31dc996d3b 162
+  s_a8277377e1c964::t_fb60b2b552cec3 233-243
+  s_a8277377e1c964::t_0b82605016f4fe 1-19
+  s_a8277377e1c964::t_abfbad74e57dad 112
+  s_a8277377e1c964::t_411303eb0285f5 186
+  s_a8277377e1c964::t_2f38acb3d02425 43
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/architectural-principles-and-patterns/service_aggregation.py
+  s_a8277377e1c964::t_87f74dbefe6f23 1-119
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/databases-and-database-principles/unit_of_work.py
+  s_a8277377e1c964::t_715bcc4ba55606 1-118
+skills-bundle/interaction-design-cooper-tidwell/SKILL.md
+  s_f34ec743d91c06::t_9f31e96def43c4 1-121
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/architectural-principles-and-patterns/externalized_config.py
+  s_a8277377e1c964::t_40cfadc27de169 11,76
+  s_a8277377e1c964::t_7d3d7d22c92898 1-10,12-75,77-100
+skills-bundle/algorithmic-thinking/references/appendix-a-algorithm-runtime.md
+  s_b9f47addb8ceda::t_25429a03e6c634 21
+  s_b9f47addb8ceda::t_486568d646381d 72-80
+  s_b9f47addb8ceda::t_ba0a066a107a70 15
+  s_b9f47addb8ceda::t_95ee81474bda03 20
+  s_b9f47addb8ceda::t_4169d650be97d7 42
+  s_b9f47addb8ceda::t_5aabe2bf2fdfe9 43-49
+  s_b9f47addb8ceda::t_bf4c839ea50d07 71
+  s_b9f47addb8ceda::t_d4fefd7c6e5e30 56
+  s_b9f47addb8ceda::t_4633f197259525 9
+  s_b9f47addb8ceda::t_fdf3c36ab363d0 51
+  s_b9f47addb8ceda::t_c2485daee8d34c 53-55
+  s_b9f47addb8ceda::t_89214f32ccfbed 17
+  s_b9f47addb8ceda::t_8cf03da50d8a97 18
+  s_b9f47addb8ceda::t_4150d4f294bc50 19
+  s_b9f47addb8ceda::t_ee3fbe3e161e93 81
+  s_b9f47addb8ceda::t_1efb457552d82a 52
+  s_b9f47addb8ceda::t_df762bde5af657 92
+  s_b9f47addb8ceda::t_335461c241fd44 93
+  s_b9f47addb8ceda::t_83949dcde114f5 57-70
+  s_b9f47addb8ceda::t_588338eb3bf5ee 6-8
+  s_b9f47addb8ceda::t_e2b0bd560426ca 16
+  s_b9f47addb8ceda::t_7617d8afac62b3 94-96
+  s_b9f47addb8ceda::t_f75d1d4deaf633 91
+  s_b9f47addb8ceda::t_401926e624c384 22-41
+  s_b9f47addb8ceda::t_58ebd1b841fa32 83
+  s_b9f47addb8ceda::t_c381574227707f 50
+  s_b9f47addb8ceda::t_e2b089f5515dd9 82
+  s_b9f47addb8ceda::t_dcaef07d306651 10-13
+  s_b9f47addb8ceda::t_ed18aa4a460f3b 14
+  s_b9f47addb8ceda::t_729257d54b4417 84-90
+  s_b9f47addb8ceda::t_6826ac0028408e 3-5
+  s_b9f47addb8ceda::t_2048459a807664 97
+  s_a8277377e1c964::t_2e466d41fddac8 1-2
+skills-bundle/discipline-of-programming-dijkstra/references/s17-hierarchical-program-structures.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-109
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/safe_deserialization_and_subprocess.py
+  s_a8277377e1c964::t_fab256aba84c15 1-97
+skills-bundle/clean-code-principles-python-silen/README.md
+  s_a8277377e1c964::t_95c207c17ea043 4
+  s_a8277377e1c964::t_c1ff2d26abca5d 12-16
+  s_a8277377e1c964::t_ea718fd65c4ff3 1-3,5-6,9-11,17-20,22-79
+  s_a8277377e1c964::t_dc4df407e9c208 80-83
+  s_a8277377e1c964::t_3c4ca7a9b83874 21
+  s_a8277377e1c964::t_1702a4ec4fe36d 7-8
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch02-tactical-ddd.md
+  s_a8277377e1c964::t_2fc99f20465870 1-122
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch20-concurrent-executors.md
+  s_bc0b4fe7542c49::t_a3ee9db4735935 19
+  s_bc0b4fe7542c49::t_3357e8a372bb08 17
+  s_bc0b4fe7542c49::t_a8407c5fc68b92 25
+  s_bc0b4fe7542c49::t_3d99da7bb6866c 1-3,5,7-12,16,18,20-24,26,29-41
+  s_bc0b4fe7542c49::t_9463b7ade49a92 14
+  s_bc0b4fe7542c49::t_bd9e3ff0a97451 27
+  s_bc0b4fe7542c49::t_ad5039c880038b 4
+  s_bc0b4fe7542c49::t_71ee8d0bdcc911 15
+  s_bc0b4fe7542c49::t_a9e2cc72869e00 13
+  s_bc0b4fe7542c49::t_042f7608d04374 6
+  s_bc0b4fe7542c49::t_c1576861c73575 28
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch19-designing-for-mobile-and-other-devices.md
+  s_f34ec743d91c06::t_12082ba09f84d7 1-130
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/api-design-principles/errors.py
+  s_a8277377e1c964::t_305596c5849bf3 1-6,8-103
+  s_a8277377e1c964::t_a9e18d72859486 7
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/api-design-principles/cross_cutting_decorators.py
+  s_a8277377e1c964::t_fab256aba84c15 1-117
+skills-bundle/modern-devops-practices-skill/references/ch08-terraform-iac.md
+  s_26b0fd34674788::t_4f064909ddef4b 315
+  s_26b0fd34674788::t_dc74eb01c2c812 329
+  s_26b0fd34674788::t_ac88ce8f1cd3f7 9-23
+  s_a8277377e1c964::t_19fccba8b9fd0b 1-8,24-40,42-271,294-295,312-314,316-323,325-328,330
+  s_26b0fd34674788::t_d9c1bdda9ce396 272-293
+  s_26b0fd34674788::t_6cc214bb610007 324
+  s_26b0fd34674788::t_fbbc546094cc0a 41
+  s_26b0fd34674788::t_79e1e69779ca91 296-311
+scripts/agent-lifecycle.sh
+  s_c0ec649ca3b468::t_e9ad423b8fc865 1-253
+skills-bundle/modern-devops-practices-skill/references/appendix-ai-in-devops.md
+  s_a8277377e1c964::t_49bde80d346c54 1-5,20-24,53-58,78-80,96-111
+  s_26b0fd34674788::t_eaa49b44332d50 59-77
+  s_26b0fd34674788::t_bfe89c42d51763 81-95
+  s_26b0fd34674788::t_1928f8adddbb7f 25-52
+  s_26b0fd34674788::t_203024705d6de4 6-19
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch10-design-patterns-with-first-class-functions.md
+  s_bc0b4fe7542c49::t_601a57268e0e88 13
+  s_26b0fd34674788::t_ae72be47cddc84 1-12,14-17,20-25,27-49
+  s_bc0b4fe7542c49::t_3a6d10efe71911 26
+  s_bc0b4fe7542c49::t_56e0633467c95c 18-19
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch03-getting-around-navigation-signposts-and-wayfinding.md
+  s_f34ec743d91c06::t_a3a13f59fa95e1 1-127
+skills-bundle/modern-devops-practices-skill/SKILL.md
+  s_26b0fd34674788::t_d542cc9372eefc 89-97
+  s_26b0fd34674788::t_5dc3fe4089df33 105-107
+  s_26b0fd34674788::t_5e8612e01792a6 30-38
+  s_26b0fd34674788::t_7197d0ca8bb67d 98-100
+  s_26b0fd34674788::t_042ecae866dc5a 112-114
+  s_26b0fd34674788::t_cc1f9a96575610 127-128
+  s_26b0fd34674788::t_ca7af4979878b7 135-166
+  s_26b0fd34674788::t_3740b39b08f143 129-133
+  s_26b0fd34674788::t_f789f486b6601a 119-122
+  s_26b0fd34674788::t_f6b3b4e08f1bc8 108-111
+  s_26b0fd34674788::t_c9718a55882dfc 168-179
+  s_26b0fd34674788::t_a55f850a5a00a2 180
+  s_26b0fd34674788::t_a2d1efb87abedb 123-126
+  s_26b0fd34674788::t_cff5ec8b48bff2 46-48
+  s_26b0fd34674788::t_44294c3e9bb606 19
+  s_26b0fd34674788::t_b00d9daa516c45 1,13-18
+  s_26b0fd34674788::t_ebd947ad22d4df 20-29
+  s_26b0fd34674788::t_cbfa9e8a246139 134
+  s_26b0fd34674788::t_cf1204e255986e 62-88
+  s_26b0fd34674788::t_6981064a608369 115-118
+  s_26b0fd34674788::t_ddaf110057f4a0 39-45
+  s_26b0fd34674788::t_7b21deedfa62da 12
+  s_26b0fd34674788::t_ec4b77aef1a52f 101-104
+  s_26b0fd34674788::t_b1430cb4babc89 167
+  s_26b0fd34674788::t_0865ec2fa13854 9-11
+  s_26b0fd34674788::t_6254e49913c6ff 49-61
+  s_26b0fd34674788::t_f130804565a292 2-4,6-8
+  s_a8277377e1c964::t_0d52977083e81e 5
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/coding-principles/avoid_comments.py
+  s_a8277377e1c964::t_0f6410bd23f4d3 1-82
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch06-object-references-mutability-and-recycling.md
+  s_bc0b4fe7542c49::t_c7e84a31fe5dd1 19
+  s_bc0b4fe7542c49::t_5031abc70e954f 3
+  s_bc0b4fe7542c49::t_e65e546cd73b0b 14
+  s_bc0b4fe7542c49::t_9e912a1744683b 31-38
+  s_bc0b4fe7542c49::t_04dd43d1093815 13
+  s_bc0b4fe7542c49::t_348be1e11ff008 7
+  s_bc0b4fe7542c49::t_5ae7c6a4beeaa8 17
+  s_bc0b4fe7542c49::t_eaa85b72106431 9
+  s_a8277377e1c964::t_4927194541024d 1-2,4-6,8,10-12,15-16,18,20-30,39-44
+templates/MILESTONE-CONTEXT.md
+  s_6ef0e951f7d046::t_facd55ec141280 1-31
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch04-setting-the-vision-scenarios-and-design-requirements.md
+  s_f34ec743d91c06::t_6c435ffbee0a53 1-91
+skills-bundle/modern-devops-practices-skill/references/ch13-securing-testing-cicd.md
+  s_26b0fd34674788::t_163a96ecc46182 84
+  s_26b0fd34674788::t_d4a2f4a4095c8c 9-10
+  s_26b0fd34674788::t_21aabe60bc3e1e 458-465
+  s_26b0fd34674788::t_69e29ecc68e3ad 14-15
+  s_26b0fd34674788::t_79bbd9faa01dde 18-26
+  s_40f8998cdd821c::t_03ed4f87a7a620 1-8,11-13,16-17,27-83,85-154,156-445,456-457,466-467,480-481,496-498
+  s_26b0fd34674788::t_71e4e45a838824 155
+  s_26b0fd34674788::t_87767877b172e8 482-495
+  s_26b0fd34674788::t_a677f57ea8af30 446-455
+  s_26b0fd34674788::t_a757b2e69a7cd8 468-479
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/coding-principles/naming.py
+  s_a8277377e1c964::t_0f6410bd23f4d3 1-74
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/scripts/ast_rules.py
+  s_a8277377e1c964::t_042d54ec5132c0 1-136,138-139,141-180,182-214,216-314,316-334,336-341,343-352,355-369,372-378,381-407,409,411-428,430-469
+  s_a8277377e1c964::t_d3e3698569f3e8 137,140
+  s_a8277377e1c964::t_bf291644ecefc7 181,215,354,370-371,379-380,410
+  s_a8277377e1c964::t_353568e7b6e796 315,335,342,353,408,429
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch02-organizing-the-content-information-architecture-and-applicat.md
+  s_f34ec743d91c06::t_b45a001468af20 1-141
+templates/PLAN.md
+  s_0e6a41e1e30cd3::t_a2416870955181 1-51
+skills-bundle/modern-devops-practices-skill/references/ch12-cd-argocd.md
+  s_26b0fd34674788::t_13baa6b6a4336a 23-25
+  s_26b0fd34674788::t_a75fd8039a1a63 178-194
+  s_26b0fd34674788::t_49af61936260a9 245
+  s_26b0fd34674788::t_64f6af110abb08 341-343
+  s_26b0fd34674788::t_eb06e8c8b3ac90 360-374
+  s_26b0fd34674788::t_3bb348415ce908 91
+  s_26b0fd34674788::t_8ebba7566691a8 21
+  s_26b0fd34674788::t_a971cdf0c9eb3e 174-176
+  s_26b0fd34674788::t_33049bc415861d 217-244
+  s_26b0fd34674788::t_d746a3b6ab4dcb 196-215
+  s_26b0fd34674788::t_575be0c618142e 340
+  s_26b0fd34674788::t_77662457ff7525 381-384
+  s_26b0fd34674788::t_fa52cd3f1cbdfe 18-19
+  s_26b0fd34674788::t_5cc4dae2bc5d87 353-356
+  s_26b0fd34674788::t_687514a07d2a49 9-11
+  s_26b0fd34674788::t_933aad440d8176 26-30
+  s_26b0fd34674788::t_f73665ed3b05a1 157
+  s_26b0fd34674788::t_0cf8cb337eee01 345
+  s_26b0fd34674788::t_0d855d4a50c8a2 158-172
+  s_26b0fd34674788::t_c8b3881b2049e3 346-347
+  s_26b0fd34674788::t_26012d7ffd2df5 387-390
+  s_26b0fd34674788::t_5eeb2457929b0e 285
+  s_26b0fd34674788::t_f9f54b8319dba6 92-146
+  s_26b0fd34674788::t_4d65d1985fde4f 358-359
+  s_26b0fd34674788::t_c1a43c256f654b 246-284
+  s_26b0fd34674788::t_ce4db052e994d1 348-352
+  s_26b0fd34674788::t_99bdeeb29f4bcd 147
+  s_26b0fd34674788::t_85e386d529086e 16
+  s_26b0fd34674788::t_9cfd8bba1b2a54 335
+  s_26b0fd34674788::t_022512efee4cea 195
+  s_26b0fd34674788::t_fe2f7cef5399bd 385-386
+  s_26b0fd34674788::t_9f5b35c74dd5b8 17
+  s_26b0fd34674788::t_b0a3073d303e6e 75-90
+  s_26b0fd34674788::t_baa8442af980b6 12-13
+  s_26b0fd34674788::t_c1aba52362d07f 286-334
+  s_26b0fd34674788::t_27c82a24958087 148-156
+  s_26b0fd34674788::t_e74009731f9ffc 216
+  s_26b0fd34674788::t_ebcc82806b5f1f 357
+  s_26b0fd34674788::t_f9bbe7d959979a 375-380
+  s_26b0fd34674788::t_e83f68e8513191 391-392
+  s_26b0fd34674788::t_1ff85afb7e3264 344
+  s_26b0fd34674788::t_f392cd5894e0ff 74
+  s_26b0fd34674788::t_d654016c10e2fd 20
+  s_26b0fd34674788::t_c983ae7ca0245f 6-8
+  s_26b0fd34674788::t_1484af090eeb71 14-15
+  s_26b0fd34674788::t_ebde509006215b 336-339
+  s_26b0fd34674788::t_4a36a6194ef570 31-73
+  s_26b0fd34674788::t_b0c60f56325d1c 173
+  s_26b0fd34674788::t_d0e989f4168b7c 22
+  s_26b0fd34674788::t_5014b0d35e2418 177
+  s_26b0fd34674788::t_bc6f3552246bd9 3-5
+  s_a8277377e1c964::t_cd855b11606575 1-2
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/input_validation_dtos.py
+  s_c0ec649ca3b468::t_7d840223feeb85 1-126
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch07-a-basis-for-good-product-behavior.md
+  s_f34ec743d91c06::t_a992fb7ee2f618 1-73
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch03-modeling-users-personas-and-goals.md
+  s_f34ec743d91c06::t_e902d4d592f4e1 1-97
+skills-bundle/fluent-python/claude-code/fluent-python/SKILL.md
+  s_c0ec649ca3b468::t_e5e3e21489bd9f 1-69
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/__init__.py
+  s_a8277377e1c964::t_120cdd8511fbac 1-27
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch06-api-design-principles.md
+  s_a8277377e1c964::t_0b7d32f2276b46 1-53,55-58,60-78,80-86,88-94,96-108,110-123,125-144,147-155,157-225
+  s_a8277377e1c964::t_7fed2512229942 54,59,79,87,95,109,124,156
+  s_a8277377e1c964::t_3e805186292ea4 145-146
+skills-bundle/modern-devops-practices-skill/references/ch14-production-kpis.md
+  s_26b0fd34674788::t_59688197bb4d75 132
+  s_26b0fd34674788::t_84fed71eff96e5 80-98
+  s_26b0fd34674788::t_168341c6779c18 13-19
+  s_26b0fd34674788::t_768f3cb52f4994 47-50
+  s_bc0b4fe7542c49::t_3f7b04c8702a09 1-5,7-10,12,20-22,27-46,51-54,56-57,62-67,75-79,99-100,133-146,148-155
+  s_26b0fd34674788::t_b29e34c034bc00 6
+  s_26b0fd34674788::t_d25ceb0507847a 68-74
+  s_26b0fd34674788::t_c30aef624d91b9 11
+  s_26b0fd34674788::t_10a59f2f8488f8 58-61
+  s_26b0fd34674788::t_8c43beff3cfb6d 23-26
+  s_26b0fd34674788::t_74b4d8aaf75dc2 55
+  s_26b0fd34674788::t_aaa53656251019 101-131
+  s_26b0fd34674788::t_47a836b4de8516 147
+  s_26b0fd34674788::t_dd035af44ee56f 156
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch08-digital-etiquette.md
+  s_f34ec743d91c06::t_afe51f220f1929 1-127
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/scripts/clean_ruff.toml
+  s_c0ec649ca3b468::t_7ff5c974e82f6d 1-39
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch16-designing-for-different-needs.md
+  s_f34ec743d91c06::t_5ceaf0b29c56a0 1-88
+skills-bundle/modern-devops-practices-skill/references/ch11-ci-github-actions-jenkins.md
+  s_26b0fd34674788::t_e5ed59cf13a425 123
+  s_26b0fd34674788::t_d361b791c65114 272
+  s_26b0fd34674788::t_20c90490111edd 268
+  s_26b0fd34674788::t_5ab5ac73909a59 289
+  s_26b0fd34674788::t_a1ed3faea5715e 269
+  s_26b0fd34674788::t_564a7795abfff8 14
+  s_26b0fd34674788::t_ea613ed6d4e4e5 6
+  s_26b0fd34674788::t_46a924b3b2da6e 292
+  s_26b0fd34674788::t_1f387cfe7935f2 24
+  s_26b0fd34674788::t_b8f348ea5158b2 23
+  s_26b0fd34674788::t_90b62a84524870 25
+  s_26b0fd34674788::t_b0f8739f84bba4 11
+  s_26b0fd34674788::t_95dcb1d2ff2968 274
+  s_26b0fd34674788::t_baf4d66871df6a 279
+  s_26b0fd34674788::t_84e74b6e6b26d2 9
+  s_26b0fd34674788::t_7a98ba27fa874e 20
+  s_26b0fd34674788::t_ac97397665aa08 248
+  s_26b0fd34674788::t_60b4a4f901dcbc 16
+  s_26b0fd34674788::t_f0b6108355b19e 267
+  s_26b0fd34674788::t_a7f9f421a8b43d 257
+  s_26b0fd34674788::t_ef7415c2051e75 260
+  s_26b0fd34674788::t_b8b0275e86aef8 282
+  s_26b0fd34674788::t_06757fb63acf7d 271
+  s_26b0fd34674788::t_7725b39cbeb9c0 281
+  s_26b0fd34674788::t_4b8f37ba496715 285
+  s_26b0fd34674788::t_ffde58bfeaa665 21
+  s_26b0fd34674788::t_a9ed8b89fdba9f 254
+  s_26b0fd34674788::t_7e75f535d0ee58 288
+  s_26b0fd34674788::t_ad97967729a8fd 266
+  s_26b0fd34674788::t_2d603435a0aad5 235
+  s_26b0fd34674788::t_f39d6b6a78bb6c 1-5,7-8,10,12,15,17-19,26-29,31-83,85-122,124-129,131-234,236-247,249-251,255-256,259,262,264-265,276-278,280,290-291,293-294
+  s_26b0fd34674788::t_bdf6ba24cee030 252
+  s_26b0fd34674788::t_2de82359687169 258
+  s_26b0fd34674788::t_9b921f992c5e84 283
+  s_26b0fd34674788::t_cc82125770ad1e 270
+  s_26b0fd34674788::t_71d44da2afa5cc 273
+  s_26b0fd34674788::t_9a49be3a861f28 22
+  s_26b0fd34674788::t_c059620769e63b 284
+  s_26b0fd34674788::t_f793033cb5b5e4 130
+  s_26b0fd34674788::t_5dc670edfcd0e8 30
+  s_26b0fd34674788::t_1d7d81489faa2f 261
+  s_26b0fd34674788::t_77dc7ccd8b0e79 13
+  s_26b0fd34674788::t_3e1d7eb3913b2a 286
+  s_26b0fd34674788::t_5773db569c5a95 287
+  s_26b0fd34674788::t_ec294d56e6f054 84
+  s_26b0fd34674788::t_18e4d30bfa079c 253
+  s_26b0fd34674788::t_b9a525dbc1e061 263
+  s_26b0fd34674788::t_ddfb3ed13d1877 275
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/architectural-principles-and-patterns/saga_orchestration.py
+  s_a8277377e1c964::t_051d876b286b90 1-123
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/devsecops/health_probes.py
+  s_a8277377e1c964::t_558b29b5e0a4dc 1-105
+skills-bundle/algorithmic-thinking/references/ch09-union-find.md
+  s_a8277377e1c964::t_0704d00321ccd6 1-4,6-18,20-32,34-38,40-45,47-89,91-93
+  s_b9f47addb8ceda::t_29eb8d79ab00e9 94
+  s_b9f47addb8ceda::t_ecb47e8d6047fa 19
+  s_b9f47addb8ceda::t_3641bc2545787e 39
+  s_b9f47addb8ceda::t_ea9741f3e58e29 90
+  s_b9f47addb8ceda::t_14bbf208cbbb3b 5
+  s_b9f47addb8ceda::t_85d3b2a3f97d23 33
+  s_b9f47addb8ceda::t_6b41a7837d0b9a 46
+skills-bundle/interaction-design-cooper-tidwell/references/designing-interfaces-ch12-beyond-and-behind-the-screen.md
+  s_f34ec743d91c06::t_fdb71348cd5b40 1-57
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/references/ch02-design-patterns.md
+  s_a8277377e1c964::t_9c9c2578b06a0d 1-142
+scripts/resolve-agent-settings.sh
+  s_c0ec649ca3b468::t_3235bdf67da20f 1-120
+skills-bundle/discipline-of-programming-dijkstra/references/d05-formal-treatment-of-small-examples.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-147
+templates/REMEDIATION-RESEARCH.md
+  s_6ef0e951f7d046::t_6e77b727c3e58b 1-26
+templates/agent-roles/defaults.json
+  s_e19505a6a840a9::t_7cb4e63e57f609 1-117
+skills-bundle/modern-devops-practices-skill/references/ch15-istio-service-mesh.md
+  s_26b0fd34674788::t_b6f7255300b43b 70
+  s_26b0fd34674788::t_e2203c36a4ef58 171-174
+  s_26b0fd34674788::t_4f449a41244bd6 256
+  s_26b0fd34674788::t_844842b19e6c4a 257-269
+  s_26b0fd34674788::t_2d021a54f4b67c 295
+  s_26b0fd34674788::t_90097eb2a228be 209
+  s_26b0fd34674788::t_1b8ffc96442e75 340-368
+  s_26b0fd34674788::t_fbdca04845beb4 240-255
+  s_26b0fd34674788::t_ac9296661b1598 105-170
+  s_26b0fd34674788::t_8900caf6302491 17-26
+  s_26b0fd34674788::t_85ea808ce1e434 175-208
+  s_26b0fd34674788::t_efba6fd79e5126 10
+  s_26b0fd34674788::t_5941ed32a26f28 270
+  s_26b0fd34674788::t_6b66fdfaca406b 56
+  s_26b0fd34674788::t_74bfcc1aa51d54 296-339
+  s_26b0fd34674788::t_7ff10d719c0dfa 57-69
+  s_26b0fd34674788::t_506efd9acf649a 7-9
+  s_26b0fd34674788::t_7a965445a1c257 27-55
+  s_26b0fd34674788::t_dc47ae1fbf8ae9 104
+  s_26b0fd34674788::t_38da9ab453b929 210-238
+  s_26b0fd34674788::t_84c07c3226813b 271-294
+  s_26b0fd34674788::t_48699e770effad 369-393
+  s_26b0fd34674788::t_6f303cc0d983b3 11-16
+  s_26b0fd34674788::t_c31ce9dfa5183f 239
+  s_26b0fd34674788::t_6f7f9fbd83f2ac 71-103
+  s_26b0fd34674788::t_eff28eb974e42a 4-6
+  s_a8277377e1c964::t_882806f799a946 1-3
+skills-bundle/fluent-python/claude-code/fluent-python/references/index.md
+  s_c0ec649ca3b468::t_911f26bd9d0481 1-38
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/object-oriented-design-principles/orderservice/controller.py
+  s_a8277377e1c964::t_41ef681ba91017 1-28
+skills-bundle/algorithmic-thinking/references/ch05-graphs-and-bfs.md
+  s_b9f47addb8ceda::t_924273c62f8746 9
+  s_b9f47addb8ceda::t_b62d3bdfb42591 36
+  s_b9f47addb8ceda::t_0e8406c1e64b1c 25
+  s_b9f47addb8ceda::t_9f2f50b647ed61 21
+  s_b9f47addb8ceda::t_7637db194fe911 5
+  s_b9f47addb8ceda::t_8000eead48de9f 111
+  s_b9f47addb8ceda::t_3b165a90640454 114
+  s_b9f47addb8ceda::t_3c83129f84d914 35
+  s_b9f47addb8ceda::t_1f9192bf532d20 89
+  s_b9f47addb8ceda::t_ffd0eda7e45a02 43
+  s_b9f47addb8ceda::t_4a6807dd31c7c0 1-4,6-8,10,12,14-20,22-24,26-34,37-42,45,47-58,60-88,90-110,112-113,115-119,121-123
+  s_b9f47addb8ceda::t_c5321138e90264 13
+  s_b9f47addb8ceda::t_f4810a1e068f75 44
+  s_b9f47addb8ceda::t_7e7f105d4c393f 11
+  s_b9f47addb8ceda::t_3e5ef50b71f0db 46
+  s_b9f47addb8ceda::t_51adcd12bb2727 120
+  s_b9f47addb8ceda::t_094ebb76e59b7e 59
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch01-a-design-process-for-digital-products.md
+  s_f34ec743d91c06::t_e9e73cedfcc0c8 1-66
+templates/agent-roles/coding-dijkstra-critic.md.tpl
+  s_e19505a6a840a9::t_25f90450f17ece 1-18,20-99
+  s_c0ec649ca3b468::t_cebfbb3425d379 19
+skills-bundle/algorithmic-thinking/SKILL.md
+  s_e19505a6a840a9::t_24bf876fccd0b5 1-64,66-86
+  s_c0ec649ca3b468::t_d9c5890239dc3a 65
+skills-bundle/interaction-design-cooper-tidwell/references/about-face-ch09-platform-and-posture.md
+  s_f34ec743d91c06::t_b63eecb1101293 1-83
+skills-bundle/fluent-python/claude-code/fluent-python/references/ch11-a-pythonic-object.md
+  s_bc0b4fe7542c49::t_e71a0eddce83c3 31-38
+  s_26b0fd34674788::t_db827d1dd3a499 1-6,8,10-13,16-18,20-22,24,27-30,39-48
+  s_bc0b4fe7542c49::t_4261a0c17c6efa 9
+  s_bc0b4fe7542c49::t_dabe922e752539 7
+  s_bc0b4fe7542c49::t_d909bd6178150b 14-15
+  s_bc0b4fe7542c49::t_cecbfa43e31191 19
+  s_bc0b4fe7542c49::t_0cd9eab416e838 25-26
+  s_bc0b4fe7542c49::t_baa90a7469c13d 23
+skills-bundle/discipline-of-programming-dijkstra/references/s15-notes-on-data-structuring-i.md
+  s_0d6857aabc7d16::t_5d22c0abfe4bf4 1-98
+templates/agent-roles/architect.md.tpl
+  s_58849211a94dc9::t_976b1a31b9c9c3 1-82
+skills-bundle/clean-code-principles-python-silen/skills/clean-code-principles-python-silen/examples/security-principles/parameterized_sql.py
+  s_a8277377e1c964::t_02aa242762bbe0 1-86
+skills-bundle/clean-code-principles-python-silen/evals/trigger_eval.json
+  s_a8277377e1c964::t_399743370e1498 7
+  s_a8277377e1c964::t_1946bb9f87fc38 5
+  s_b9f47addb8ceda::t_f1fe55d86ff2f8 1-4,6,8-22
+.gitignore
+  s_a8277377e1c964::t_cd6e407fa1bfc1 1-5
+config/model-profiles.json
+  s_a8277377e1c964::t_e0c398add17b50 1-29
+config/reasoning-profiles.json
+  s_a8277377e1c964::t_0e63ea74e8844f 1-29
+hooks/hooks.json
+  s_a8277377e1c964::t_54c9af951aa568 1-84
+hooks/skill_gate.py
+  s_a8277377e1c964::t_972ba9b1c753b3 1-147
+scripts/agent-generator.sh
+  s_a8277377e1c964::t_e905d9ff5cc090 1-437
+scripts/render-agent-template.sh
+  s_a8277377e1c964::t_9e3a91173296d9 1-142
+scripts/resolve-agent-model.sh
+  s_a8277377e1c964::t_fe63e7cc4f8b94 1-195
+scripts/resolve-agent-reasoning.sh
+  s_a8277377e1c964::t_40c88f6345b5cb 1-116
+skills-bundle/INDEX.md
+  s_a8277377e1c964::t_27af711fbd90bd 1-10
+templates/PROJECT.md
+  s_a8277377e1c964::t_f89f84adf62bac 1-25
+templates/ROADMAP.md
+  s_a8277377e1c964::t_caae5216208939 1-25
+templates/STANDALONE-RESEARCH.md
+  s_a8277377e1c964::t_7f248ba792e863 1-32
+templates/STATE.md
+  s_a8277377e1c964::t_6fc1bedb3f5edc 1-24
+templates/SUMMARY.md
+  s_a8277377e1c964::t_e7321c33391ebe 1-35
+templates/VERIFICATION.md
+  s_a8277377e1c964::t_6c080ad8d6954e 1-83
+templates/agent-roles/python-critic.md.tpl
+  s_a8277377e1c964::t_b30e96c36502a9 1-96
+templates/agent-roles/python-engineer.md.tpl
+  s_a8277377e1c964::t_8bdade1c318e5e 1-123
+templates/agent-roles/web-code-critic.md.tpl
+  s_a8277377e1c964::t_84db3b84766c87 1-99
+templates/agent-roles/web-engineer.md.tpl
+  s_a8277377e1c964::t_686802d504883f 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d285cdde2301df51b2547bc3e4e17cd95dab38cc",
+  "prompts": {},
+  "sessions": {
+    "s_0d6857aabc7d16": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cad29f7e-817d-4302-9aaa-6ca71b469c81",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_0e6a41e1e30cd3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f5acbb2-f08e-44f2-bc94-ad94397dd129",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_26b0fd34674788": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a532376-266a-45f9-b3ae-a12b156d2f7c",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_278a833762aed7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "557e4eb4-4808-4bab-94c1-1fcd2f88c014",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_40f8998cdd821c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f9e1771-5a67-4aa3-a0c7-8e5d9a791b78",
+        "model": "claude-haiku-4-5-20251001"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_58849211a94dc9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a93b1e36-c511-4112-8e32-e0fbdf710600",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_6ef0e951f7d046": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32b96d9e-2f7c-4f57-88c2-54535491e857",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_86d58b85ce2aee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07d7797e-6c7f-4c9c-bdd0-a2660d0d8697",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_a8277377e1c964": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71cea852-101e-40d9-b072-45fafd5342a7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_b9f47addb8ceda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b09d234-45a8-4a6c-896f-9f7c705d7df7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_bc0b4fe7542c49": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9935e88a-00ba-40ec-8472-2c483e66d8bd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_c0ec649ca3b468": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc8d61a2-e83b-41c3-be06-0e72a2b62466",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_ccc4c0e682642d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6530a1b-d9f1-4e84-9554-134bb9202964",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_e19505a6a840a9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13adbdef-7ca2-4549-a57b-6f431188c81e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_e8b702480499cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b86dd062-285e-44f0-9749-b1a13364f007",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_f34ec743d91c06": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2491931b-87d0-49c3-89ee-29fdb4126027",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
