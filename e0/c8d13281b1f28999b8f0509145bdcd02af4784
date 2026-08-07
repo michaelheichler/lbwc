@@ -1,0 +1,67 @@
+config/model-pricing.json
+  s_330f4196008463::t_b88464d137e7de 25
+scripts/render-agent-template.sh
+  s_330f4196008463::t_b5cd1c3245a6cc 37
+commands/research.md
+  s_330f4196008463::t_376b06ab52602d 1-12
+  s_330f4196008463::t_13d467577039ab 13
+commands/build.md
+  s_330f4196008463::t_406e1aba56c91e 1-14,16-21
+  s_330f4196008463::t_30efcc4fa6088c 15
+scripts/resolve-agent-model.sh
+  s_330f4196008463::t_d4588e5cb57786 36,39
+commands/init.md
+  s_330f4196008463::t_54f32450ec801c 1-19
+commands/status.md
+  s_330f4196008463::t_c2d55cdc261177 1-11
+templates/agent-roles/defaults.json
+  h_49622c3802c0ed 123
+commands/qa.md
+  s_330f4196008463::t_4c209ce584080d 1-14
+config/model-profiles.json
+  s_330f4196008463::t_530ec31f524bf4 10-14,24-28,38-42
+commands/vibe.md
+  s_330f4196008463::t_e8a5aad4df1bd1 12,14
+  s_330f4196008463::t_6cc5fbf5f233e9 16-20
+  s_330f4196008463::t_e5be9c474a854a 15
+  s_330f4196008463::t_d388de447d0298 23
+  s_330f4196008463::t_172d6e2cb80d4e 1-11,13,21-22
+references/agent-spawn-protocol.md
+  s_330f4196008463::t_d71dcb0e6fa875 29
+  s_330f4196008463::t_f488ac5effd0f6 1-28,30-45
+commands/uat.md
+  s_330f4196008463::t_302920c965adb0 1-14
+commands/plan.md
+  s_330f4196008463::t_812ff115643a86 1-15
+config/reasoning-profiles.json
+  s_330f4196008463::t_3422b458e5157f 10-14,24-28,38-42
+commands/debug.md
+  s_330f4196008463::t_fb86a12a317ad0 1-14
+scripts/resolve-agent-max-turns.sh
+  s_330f4196008463::t_e8a453a77be405 15,18,33-36
+scripts/agent-generator.sh
+  s_330f4196008463::t_25150c17b7c99e 20
+scripts/resolve-agent-reasoning.sh
+  s_330f4196008463::t_8c22dabeec713f 38,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e0c8d13281b1f28999b8f0509145bdcd02af4784",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_330f4196008463": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d9466f39-98db-4d35-a825-45848c76eecf",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
