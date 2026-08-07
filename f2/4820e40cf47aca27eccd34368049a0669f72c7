@@ -1,0 +1,104 @@
+skills-bundle/unit-testing-art-osherove/references/ch04-mock-objects.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-118
+scripts/resolve-agent-max-turns.sh
+  s_c0ec649ca3b468::t_48dee7449de40b 15,18,32
+templates/agent-roles/test-dev.md.tpl
+  s_c0ec649ca3b468::t_25b8d41f0981cc 1-71,73-83
+  s_c0ec649ca3b468::t_f5334f64af880d 72
+templates/agent-roles/python-critic.md.tpl
+  s_c0ec649ca3b468::t_a543727fdd0a26 74-77
+hooks/message_scope_guard.py
+  s_c0ec649ca3b468::t_ce50f5a6c72b6f 1-53
+skills-bundle/unit-testing-art-osherove/references/ch03-stubs.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-148
+skills-bundle/unit-testing-art-osherove/references/ch09-readability.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-80
+config/defaults.json
+  s_c0ec649ca3b468::t_e88d4a334c4de2 35-36
+scripts/render-agent-template.sh
+  s_c0ec649ca3b468::t_ffd1e530bc1ca5 37
+skills-bundle/unit-testing-art-osherove/references/ch02-first-test.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-113
+scripts/resolve-agent-reasoning.sh
+  s_c0ec649ca3b468::t_0771f224126ef5 38,41
+hooks/test_scope_guard.py
+  s_c0ec649ca3b468::t_906fe9de6977d6 1-62
+skills-bundle/INDEX.md
+  s_c0ec649ca3b468::t_4d33145b931a5d 11
+skills-bundle/unit-testing-art-osherove/references/ch08-maintainability.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-188
+scripts/agent-generator.sh
+  s_c0ec649ca3b468::t_82bb67d3f9299d 378-401,406,413-415
+  s_c0ec649ca3b468::t_b145d929fdab7c 312-321
+  s_c0ec649ca3b468::t_6ac7212e538bb5 16,20,27,31-32
+  s_c0ec649ca3b468::t_65bb41c2e8931d 475-479
+  s_c0ec649ca3b468::t_4657469268c71f 96
+  s_cae90e722f2c24::t_7cb8d71fb63092 33
+skills-bundle/unit-testing-art-osherove/references/ch10-test-strategy.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-102
+hooks/skill_gate.py
+  s_c0ec649ca3b468::t_eb2ee0690e5978 15
+skills-bundle/unit-testing-art-osherove/references/appendix-monkey-patching.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-92
+scripts/resolve-agent-model.sh
+  s_c0ec649ca3b468::t_0922c42b4a1879 36,39
+config/model-profiles.json
+  s_c0ec649ca3b468::t_f77d24d228ec2a 9-10,19-20,29-30
+skills-bundle/unit-testing-art-osherove/references/ch06-async.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-138
+skills-bundle/unit-testing-art-osherove/references/ch07-trustworthy-tests.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-144
+skills-bundle/unit-testing-art-osherove/references/ch12-legacy-code.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-69
+hooks/hooks.json
+  s_c0ec649ca3b468::t_2e166b25c16ad8 22-26,36-45
+scripts/agent-spawn-guard.sh
+  s_c0ec649ca3b468::t_10220e355053b5 101-118,120,139
+  s_c0ec649ca3b468::t_187ad82447a885 89,94-96
+  s_c0ec649ca3b468::t_3e3961a9a32d7d 154
+  s_c0ec649ca3b468::t_849cfd50fed2e8 128
+templates/agent-roles/web-code-critic.md.tpl
+  s_c0ec649ca3b468::t_d3fe3bf7882aaf 77-80
+skills-bundle/unit-testing-art-osherove/references/ch05-isolation-frameworks.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-161
+templates/agent-roles/coding-dijkstra-critic.md.tpl
+  s_c0ec649ca3b468::t_ceaa6231dcb38c 69-72
+config/reasoning-profiles.json
+  s_c0ec649ca3b468::t_dc12732839e066 9-10,19-20,29-30
+skills-bundle/unit-testing-art-osherove/SKILL.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-24
+skills-bundle/unit-testing-art-osherove/references/ch01-basics.md
+  s_c0ec649ca3b468::t_e3995740bbb431 1-182
+templates/agent-roles/defaults.json
+  h_49622c3802c0ed 4-5,12,14,41,51,63,83-84,100,108
+  s_c0ec649ca3b468::t_0b25010efa7e2f 120-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "f24820e40cf47aca27eccd34368049a0669f72c7",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_c0ec649ca3b468": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc8d61a2-e83b-41c3-be06-0e72a2b62466",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_cae90e722f2c24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f265697-b376-48b4-bc85-8f71d7b70d11",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
