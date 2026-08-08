@@ -1,0 +1,451 @@
+tests/fixtures/phase-detect-output/qa-remediation.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+scripts/uat-utils.sh
+  s_31e8faaae0edf2::t_b958c2dac5b4ca 1-479
+config/model-profiles.json
+  s_9ca1fa1dcf9ec1::t_0636036bfa1296 15-16
+  s_31e8faaae0edf2::t_795f6fcc076b9a 36
+  s_9ca1fa1dcf9ec1::t_8051b17ec5f7ce 47-48
+  s_31e8faaae0edf2::t_928fd13536f2fb 4
+  h_49622c3802c0ed 5-6,11,14,19,21-24,26-30,35,37-44,46
+  s_9ca1fa1dcf9ec1::t_957afc86620291 31-32
+  s_31e8faaae0edf2::t_164eac1dd274c6 20
+  s_31e8faaae0edf2::t_a6dbab650ebc74 8
+  s_31e8faaae0edf2::t_35a9d1913a3fb3 3
+  s_9e6d2f414acbf6::t_9b7e9a31f205a6 7
+scripts/map-staleness.sh
+  s_31e8faaae0edf2::t_eaa9424264844e 1-70
+templates/agent-roles/qa.md.tpl
+  s_31e8faaae0edf2::t_decbe18b63cad6 35
+  s_31e8faaae0edf2::t_9f4ffea92b0d65 19
+  s_31e8faaae0edf2::t_b80e5e596c09ca 24
+scripts/lib/resolve-caveman-level.sh
+  s_31e8faaae0edf2::t_24906529e42a9a 3-28,44-45,51
+  s_31e8faaae0edf2::t_7bf7d152f9c8fc 1-2,29-43,46-50,52-55
+scripts/deviq-build-gate.sh
+  s_31e8faaae0edf2::t_82aeb2f3f50ffa 1-47
+scripts/parse-uat-issues.awk
+  s_31e8faaae0edf2::t_b958c2dac5b4ca 1-113
+commands/build.md
+  s_31e8faaae0edf2::t_2b9560bd6fc626 8
+  s_31e8faaae0edf2::t_4257d84ba1c12d 18
+hooks/skill_gate.py
+  s_31e8faaae0edf2::t_177862bd36c636 118-128,163-164
+  s_31e8faaae0edf2::t_16136266982b62 53,58,60-61,64,66-79
+  s_31e8faaae0edf2::t_3c0d51c65337ae 135-152,165,169,171-172,174
+  s_31e8faaae0edf2::t_7a11614c31cabd 1,17,20
+tests/phase-detect-output-contract.bats
+  s_31e8faaae0edf2::t_5aba5e6f37f27b 74
+  s_31e8faaae0edf2::t_4a7fca472f3520 1-73,75-90
+scripts/phase-detect.sh
+  s_31e8faaae0edf2::t_af34778e29293f 70-75,82,85,89,97
+  s_31e8faaae0edf2::t_29f9b838755fdd 1-41,76-77,79-81,83,98-289
+  s_31e8faaae0edf2::t_617827e18a2a05 42-69,78,84,88,96
+  s_31e8faaae0edf2::t_d45023cde7a551 86-87,90-95
+tests/probe-map-tools.bats
+  s_31e8faaae0edf2::t_24e9259a6616b8 1-110
+scripts/worktree-cleanup.sh
+  s_31e8faaae0edf2::t_3084e2346ca6c5 1-57
+scripts/validate-frontmatter.sh
+  s_31e8faaae0edf2::t_3dd96e7e801836 1-82
+templates/agent-roles/docs.md.tpl
+  s_31e8faaae0edf2::t_8c3a89f5ecbeed 25
+  s_31e8faaae0edf2::t_7e7e2b369c54a7 80,82
+  s_31e8faaae0edf2::t_fbe220917bd722 21
+  s_31e8faaae0edf2::t_decbe18b63cad6 33,43,103,108
+  s_31e8faaae0edf2::t_85d8f33b909748 19
+hooks/test_skill_gate.py
+  s_31e8faaae0edf2::t_f3677b72fc113e 72
+  s_31e8faaae0edf2::t_1ed329de1a4329 52
+  s_31e8faaae0edf2::t_be55f0e05faa43 1-34,42-51,53-71,73-92
+  s_31e8faaae0edf2::t_eccbaaeb002b02 35-41
+scripts/probe-map-tools.sh
+  s_31e8faaae0edf2::t_d1e07789ae7301 1-88
+templates/agent-roles/debugger.md.tpl
+  s_31e8faaae0edf2::t_40b14ae958455b 25
+  s_31e8faaae0edf2::t_43426df6e83b6b 19
+  s_31e8faaae0edf2::t_decbe18b63cad6 39,104
+scripts/agent-generator.sh
+  s_31e8faaae0edf2::t_c33ed5ee9989ef 20
+scripts/lib/active-agent-state.sh
+  s_31e8faaae0edf2::t_d2de463659a16e 6,13,17,20,24-25,27,29,31,35-37,56,60-62,66-73,78,82-83,85-86,104-106,108-109,111-112,114-115,117-118,120-121,123-124,126,128,130,144,146,151-153,155,159,161,164,166,170,173,175,179,181,185,187-188,191,193,195,197,202,205-207,216,218,221,226,233,235-237,242,246-247,253,255,259,261-262,264,267,270,278-279,281,284,286,293,297,299-301,304,307-312,315-317,320,322,325-326,336,338-339,344,346-347,349,352-353,356-359,362,364-368,371,373,377-378,381,385,389,392,394,398,401,405-409,412,415-416,418,426,428-430,434,437,439-440,443,446,448,452,456,458-460,465,467-468,472-473,475-476
+  s_31e8faaae0edf2::t_7a826d56225bf2 1-5,7-12,14-16,18-19,21-23,26,28,30,32-34,38-55,57-59,63-65,74-77,79-81,84,87-103,107,110,113,116,119,122,125,127,129,131-143,145,147-150,154,156-158,160,162-163,165,167-169,171-172,174,176-178,180,182-184,186,189-190,192,194,196,198-201,203-204,208-215,217,219-220,222-225,227-232,234,238-241,243-245,248-252,254,256-258,260,263,265-266,268-269,271-277,280,282-283,285,287-292,294-296,298,302-303,305-306,313-314,318-319,321,323-324,327-335,337,340-343,345,348,350-351,354-355,360-361,363,369-370,372,374-376,379-380,382-384,386-388,390-391,393,395-397,399-400,402-404,410-411,413-414,417,419-425,427,431-433,435-436,438,441-442,444-445,447,449-451,453-455,457,461-464,466,469-471,474,477
+commands/uat.md
+  s_31e8faaae0edf2::t_9db9552ed094ff 13
+ARCHITECTURE.md
+  s_31e8faaae0edf2::t_7d1f3ff962ce5b 75
+  s_31e8faaae0edf2::t_5d248dbdc09f9a 93
+  s_31e8faaae0edf2::t_8f524987e3eaf5 95
+  s_31e8faaae0edf2::t_cd6d8ef940f474 71,74
+  s_31e8faaae0edf2::t_b133a6de38e343 1-45,47-70,72-73,76-92,94,96-166
+  s_31e8faaae0edf2::t_e205a7385f7b44 46
+scripts/render-agent-template.sh
+  s_31e8faaae0edf2::t_00ce63f3f6ae30 37
+scripts/compile-verify-context.sh
+  s_31e8faaae0edf2::t_dd03f583c83451 130-133
+  s_31e8faaae0edf2::t_1fdd1162dc28ec 1-9,11-129,134-796
+  s_31e8faaae0edf2::t_5e3cfdb59e9350 10
+scripts/validate-summary.sh
+  s_31e8faaae0edf2::t_4c2de9ce05e440 1-106
+tests/worktree-boundary.bats
+  s_31e8faaae0edf2::t_d12798a9402ab6 1-65,67-77,79-83,86-113,115-118,120-121,123-130,132-133,135-137,139,141-145,147-149,151,153-156,159-161,163,165-168,171-172,174,176,178-179,182-184,186,188,190-191,193-194,196-199,201-210,212-214,216,218-222,224-226,228,230-234,237-239,241,243-246,249-250,252,254,256-257,260-262,264,266,268-269,271-272,274-277,279-338
+  s_31e8faaae0edf2::t_b06199af8b9d56 134,138,140,146,150,152,157-158,162,164,169-170,173,175,177,180-181,185,187,189,192,195,200,211,215,217,223,227,229,235-236,240,242,247-248,251,253,255,258-259,263,265,267,270,273,278
+  s_31e8faaae0edf2::t_97cb96c077e733 66,78,84-85
+  s_31e8faaae0edf2::t_fe4d617b93362f 114,119,122,131
+scripts/state-updater.sh
+  s_31e8faaae0edf2::t_8eb442ff7ce359 1-102
+templates/agent-roles/qa-author.md.tpl
+  s_31e8faaae0edf2::t_b71ce3da73b1c2 25
+scripts/lib/phase-detect-support.sh
+  s_31e8faaae0edf2::t_badeccb9a68867 1-441
+config/lsp-mappings.json
+  s_31e8faaae0edf2::t_f8c1408e888795 1-313
+scripts/qa-gate.sh
+  s_31e8faaae0edf2::t_8b3b3cdf8f0ba6 28
+  s_31e8faaae0edf2::t_d556acf8e43745 1-27,29-111
+scripts/detect-stack.sh
+  s_31e8faaae0edf2::t_f8c1408e888795 1-182
+references/model-and-role-decision-guide.md
+  s_7469037d661b6e::t_9ff761c1c415b3 1-16,18-35,43-62,64-77
+  s_7469037d661b6e::t_269f15ee3b80e8 38-40
+  s_7469037d661b6e::t_ff152add3e23b6 63
+  s_7469037d661b6e::t_089565d9e3710b 17
+  s_7469037d661b6e::t_1dda05e403c763 36-37,41-42
+scripts/resolve-lsp.sh
+  s_31e8faaae0edf2::t_f8c1408e888795 1-116
+commands/plan.md
+  s_31e8faaae0edf2::t_de2be18843811b 15
+  s_31e8faaae0edf2::t_979de45464bb7a 13
+scripts/lib/lbwc-target-root.sh
+  s_31e8faaae0edf2::t_e46451269f1370 59-60,75-76,78-80,82-102,205-206,224-239
+  s_31e8faaae0edf2::t_da8967c4e34aaa 1-58,61-74,77,81,103-204,207-223,240
+tests/validate-commit.bats
+  s_31e8faaae0edf2::t_92c16dda8cc2c9 1-50
+tests/fixtures/phase-detect-output/unplanned.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+tests/map-staleness.bats
+  s_31e8faaae0edf2::t_2da3d41819112d 1-63
+tests/security-filter.bats
+  s_31e8faaae0edf2::t_c256cffb2997fb 1-58
+scripts/resolve-artifact-path.sh
+  s_31e8faaae0edf2::t_1125d18b89a57b 1-143
+scripts/extract-uat-issues.sh
+  s_31e8faaae0edf2::t_dd030d3bf13fd0 1-181
+tests/context-index.bats
+  s_31e8faaae0edf2::t_32fd5139782aa7 1-138
+references/lbwc-brand-essentials.md
+  s_31e8faaae0edf2::t_5cdb8336815ed1 1-64
+tests/compile-context-skills.bats
+  s_31e8faaae0edf2::t_0e5fe503d49f58 1-100
+tests/fixtures/phase-detect-output/no-planning.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-56
+scripts/tests/deviq-record-core.sh
+  s_31e8faaae0edf2::t_a01b1ef50a9c4c 1-95
+scripts/validate-commit.sh
+  s_31e8faaae0edf2::t_e51f955fd8a101 1-18,20-61
+  s_31e8faaae0edf2::t_6266df3e12b38c 19
+tests/fixtures/phase-detect-output/failed-summary-passing-remediation.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+templates/agent-roles/architect.md.tpl
+  s_31e8faaae0edf2::t_decbe18b63cad6 29,53-54
+  s_31e8faaae0edf2::t_065ba766a73164 19
+  s_31e8faaae0edf2::t_04298a47890aba 25
+  s_31e8faaae0edf2::t_6ae62f9bdc11c0 60
+tests/test_helper.bash
+  s_31e8faaae0edf2::t_51c162c8ac6198 28-52
+  s_31e8faaae0edf2::t_abb94f05f467f0 1-4,6-10,12,14-19,26-27,75
+  s_31e8faaae0edf2::t_e050c1ce1eb95e 5,11,13,20-25,53-56,58-62,64-74
+  s_31e8faaae0edf2::t_8b9276c7dfa77e 57,63
+  s_31e8faaae0edf2::t_3c4f8701906ec5 76-90
+scripts/resolve-phase-state.sh
+  s_31e8faaae0edf2::t_3f97e7bf647f23 1-170
+scripts/bash-guard.sh
+  s_31e8faaae0edf2::t_a7d7f096d24df7 1-96
+scripts/lib/phase-detect-environment-output.sh
+  s_31e8faaae0edf2::t_badeccb9a68867 1-84
+scripts/file-guard.sh
+  s_31e8faaae0edf2::t_70a3dd1019c09e 36
+  s_31e8faaae0edf2::t_23c2807fe29692 1-28,30-35,37-89,91-97
+  s_31e8faaae0edf2::t_964f89d79d2977 29
+  s_31e8faaae0edf2::t_7b90a1847843fd 90
+scripts/lib/qa-result-gate-summary-deviations.sh
+  s_31e8faaae0edf2::t_8c2a0eaeed0101 1-299
+tests/qa-file-guard.bats
+  s_31e8faaae0edf2::t_b077587f2f2568 1-98
+scripts/security-filter.sh
+  s_31e8faaae0edf2::t_392cfa0475feba 1-27,29-37,39-54
+  s_31e8faaae0edf2::t_7d1b7e150a8d56 28
+  s_31e8faaae0edf2::t_338fe5d9c05aaa 38
+tests/session-start.bats
+  s_31e8faaae0edf2::t_0b9d25518ef9bd 1-38
+references/skill-activation.md
+  s_31e8faaae0edf2::t_48008c095f416e 1-12
+scripts/lib/deviq-record.py
+  s_31e8faaae0edf2::t_816fa4771c3c3e 1-45,56-60,63-66,68-77,79-80,84-89,100-113
+  s_31e8faaae0edf2::t_5da0610e172fe0 46-55
+  s_31e8faaae0edf2::t_d5fb1f75452b92 67,78,81-83,90-99
+  s_31e8faaae0edf2::t_87c7c85ac6f9ed 61-62
+hooks/hooks.json
+  s_31e8faaae0edf2::t_860fb5b915d148 131
+  s_31e8faaae0edf2::t_c9d5f5fe8691b8 153
+  s_31e8faaae0edf2::t_4cca7009973e38 155-158
+  s_31e8faaae0edf2::t_bf368898b2e08a 119
+  s_31e8faaae0edf2::t_758224ab7fffd8 104-108
+  s_31e8faaae0edf2::t_7ddbf2f8c0f365 10
+  s_31e8faaae0edf2::t_bf7e2068adb485 49-103,109-110
+  s_31e8faaae0edf2::t_e6d78ecd1ab46d 135-144
+  s_31e8faaae0edf2::t_f8edf36ce9b16e 171-174,207
+  s_31e8faaae0edf2::t_231bf8253d6cd2 154,169-170,175-206,208-217
+scripts/lib/deviq-digest.sh
+  s_31e8faaae0edf2::t_756f61ea18d018 1-49
+scripts/resolve-agent-max-turns.sh
+  s_31e8faaae0edf2::t_775669056b3ed0 26
+  s_9ca1fa1dcf9ec1::t_5a8bc21052d41d 38
+  s_31e8faaae0edf2::t_1b1c6bc4b9b9fb 15,18
+tests/worktree.bats
+  s_31e8faaae0edf2::t_d70b50975bb951 1-255
+tests/README.md
+  s_31e8faaae0edf2::t_65952d8a79d99a 1-18
+config/reasoning-profiles.json
+  s_9ca1fa1dcf9ec1::t_eb475309844867 29-30
+  s_9ca1fa1dcf9ec1::t_9bf5eacc95a239 44-45
+  h_49622c3802c0ed 7-8,11-12,27,33,35-40,43
+  s_31e8faaae0edf2::t_06284824b8367e 21,23-25
+  s_9ca1fa1dcf9ec1::t_bac63e123768b0 14-15
+  s_31e8faaae0edf2::t_269440128b8816 3-5,18-19
+scripts/ensure-worktree.sh
+  s_31e8faaae0edf2::t_5ebb5ea9cd0159 1-87
+scripts/worktree-merge.sh
+  s_31e8faaae0edf2::t_c576d043d4dd90 1-23
+scripts/lib/qa-result-gate-known-issues.sh
+  s_31e8faaae0edf2::t_8c2a0eaeed0101 1-231
+scripts/summary-utils.sh
+  s_31e8faaae0edf2::t_b958c2dac5b4ca 1-408
+scripts/lib/qa-result-gate-path-evidence.sh
+  s_31e8faaae0edf2::t_8c2a0eaeed0101 1-728
+tests/qa-bash-guard.bats
+  s_31e8faaae0edf2::t_8443f9cd93bf5a 1-90
+tests/fixtures/phase-detect-output/all-done.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+scripts/lib/resolve-uat-round-limit-read-json.awk
+  s_31e8faaae0edf2::t_abc88273b87bb5 1-171
+tests/compile-verify-context.bats
+  s_31e8faaae0edf2::t_bfca31fd276f34 903-907
+  s_31e8faaae0edf2::t_82711b1ad75f5d 1-902,908-3055
+scripts/cache-context.sh
+  s_31e8faaae0edf2::t_c6a14a66d06f85 1-237
+scripts/delta-files.sh
+  s_31e8faaae0edf2::t_8a951c1c63441c 1-97
+templates/PLAN.md
+  s_31e8faaae0edf2::t_86d4cbececb09e 2,7,9-10,13,16,23
+  s_31e8faaae0edf2::t_947ffad3551dc4 15,17-19
+  s_31e8faaae0edf2::t_b48d06b2851a6c 43-46
+  s_31e8faaae0edf2::t_e6e18fe8ace3db 8,14,20,25
+scripts/session-start.sh
+  s_31e8faaae0edf2::t_1ad30683f094a6 1-60
+tests/fixtures/phase-detect-output/setup-case.bash
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-227
+scripts/tests/deviq-digest-gate-core.sh
+  s_31e8faaae0edf2::t_4dba1e82c42765 1-117
+references/scout-live-validation-policy.md
+  s_31e8faaae0edf2::t_b6bf49fb709b7c 1-27
+references/subagent-contracts.md
+  s_31e8faaae0edf2::t_1c130e9d4abecd 1-77
+tests/fixtures/phase-detect-output/milestone-recovery.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-64
+references/handoff-schemas.md
+  s_31e8faaae0edf2::t_4a97a12884a901 1-367
+templates/agent-roles/lead-critic.md.tpl
+  s_31e8faaae0edf2::t_824416fcd8dcbd 1-83
+scripts/worktree-target.sh
+  s_31e8faaae0edf2::t_18f8c108e05708 1-14
+references/lsp-first-policy.md
+  s_31e8faaae0edf2::t_f8b3cd2c99c4e9 1-44
+tests/qa-gate.bats
+  s_31e8faaae0edf2::t_d5ae0328f8a59f 102-103,105,109-119
+  s_31e8faaae0edf2::t_0ee927eec910e3 1-101,104,106-108,120-141
+scripts/lib/phase-detect-milestone-recovery.sh
+  s_31e8faaae0edf2::t_badeccb9a68867 1-305
+scripts/extract-round-issue-ids.awk
+  s_31e8faaae0edf2::t_b958c2dac5b4ca 1-29
+tests/qa-result-gate.bats
+  s_31e8faaae0edf2::t_90184652b34385 1-258
+scripts/resolve-claude-dir.sh
+  s_31e8faaae0edf2::t_f8c1408e888795 1-9
+scripts/worktree-agent-map.sh
+  s_31e8faaae0edf2::t_83be2383ae9cd3 1-46
+scripts/lib/qa-result-gate-fail-classifications.sh
+  s_31e8faaae0edf2::t_8c2a0eaeed0101 1-331
+scripts/post-compact.sh
+  s_31e8faaae0edf2::t_1cdda14110440b 1-75
+templates/agent-roles/ux-oracle.md.tpl
+  s_9ca1fa1dcf9ec1::t_e5e75d0c6fbd4e 1-79
+config/stack-mappings.json
+  s_31e8faaae0edf2::t_f8c1408e888795 1-2,4-288
+  s_31e8faaae0edf2::t_5a5b27eb832d04 3
+references/agent-spawn-protocol.md
+  s_31e8faaae0edf2::t_27f58a4f33e233 7-8
+  s_9ca1fa1dcf9ec1::t_5327d7a31cc889 10
+  s_9ca1fa1dcf9ec1::t_5c30e49172be7f 42-47,49,51-53
+  s_9ca1fa1dcf9ec1::t_8741d4f0dc5e21 48
+  s_9ca1fa1dcf9ec1::t_4acfc723dd6678 50
+scripts/lib/phase-detect-qa-routing.sh
+  s_31e8faaae0edf2::t_badeccb9a68867 1-342
+scripts/resolve-agent-model.sh
+  s_31e8faaae0edf2::t_70c3e1e1c0946e 36,39
+scripts/cache-nuke.sh
+  s_31e8faaae0edf2::t_af3c69de2d25fe 1-37,39-44,47-55,58,60-89
+  s_31e8faaae0edf2::t_96442bfadc9b67 38,45-46,56-57,59
+scripts/deviq-digest-append.sh
+  s_31e8faaae0edf2::t_9e370ce54a1113 1-178
+commands/qa.md
+  s_31e8faaae0edf2::t_696cc4b0495923 14
+templates/agent-roles/scout.md.tpl
+  s_31e8faaae0edf2::t_decbe18b63cad6 44,95,98
+  s_31e8faaae0edf2::t_8572cf2bdb2e51 25
+  s_31e8faaae0edf2::t_7c629e889f6bb1 19
+templates/agent-roles/defaults.json
+  s_9ca1fa1dcf9ec1::t_37181ca3a5e391 156-158
+  s_9ca1fa1dcf9ec1::t_ccc38d5dd16d13 81-90
+  s_31e8faaae0edf2::t_25e5da32d2c469 105-117
+references/dijkstra/DISCIPLINE.md
+  s_31e8faaae0edf2::t_6c24df860fd0ff 1-79
+scripts/compaction-instructions.sh
+  s_31e8faaae0edf2::t_c57cf68a2d70fe 92
+  s_31e8faaae0edf2::t_779e8cf52b2600 1-91,93-113
+scripts/worktree-status.sh
+  s_31e8faaae0edf2::t_6c011d3ea5bf7e 1-77
+scripts/resolve-uat-remediation-round-limit.sh
+  s_31e8faaae0edf2::t_29e43a5427fcc5 1-3,6-73,75-98,112-121,125-188
+  s_31e8faaae0edf2::t_a722bdec6874ff 4-5,74,99-111,122-124
+scripts/verification-freshness.sh
+  s_31e8faaae0edf2::t_f0f2682ed692e1 1-153
+scripts/session-stop.sh
+  s_31e8faaae0edf2::t_c05a7e8e2e10c6 1-39
+tests/context-cache.bats
+  s_31e8faaae0edf2::t_ac3bb955848d28 1-662
+commands/debug.md
+  s_31e8faaae0edf2::t_c6551b9530247b 11
+  s_31e8faaae0edf2::t_73f8ee6f0995af 13
+scripts/lib/phase-detect-active-routing.sh
+  s_31e8faaae0edf2::t_badeccb9a68867 1-349
+config/defaults.json
+  s_31e8faaae0edf2::t_92d3dcda855806 32
+scripts/resolve-agent-reasoning.sh
+  s_31e8faaae0edf2::t_226806199682d6 38,41
+tests/fixtures/phase-detect-output/incomplete.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+scripts/compile-context.sh
+  s_31e8faaae0edf2::t_a474e536eba42f 1-258,260,262-271,273-278,280-285,287-296,298-308,310-340,342-361,363-367,369-373,375-408,410-418,420-421,432-437,442-444,446-449,451,454,456,460-461,463-506,508-515,517-523,525-528,530-534,536-555,557-595
+  s_31e8faaae0edf2::t_963ce0bcaa9f24 516,524,529
+  s_31e8faaae0edf2::t_7d51a3c88260b0 450,507
+  s_31e8faaae0edf2::t_3110ab84f7bc18 556
+  s_31e8faaae0edf2::t_57fe94d67c8474 438-441
+  s_31e8faaae0edf2::t_df031aa8da2420 445,452-453,455,457-459
+  s_31e8faaae0edf2::t_e80250d5b7e16b 535
+  s_31e8faaae0edf2::t_ce7d428b0cfbf6 422-431
+  s_31e8faaae0edf2::t_5e852d9f6a9f48 259,261,272
+  s_31e8faaae0edf2::t_b6ca486ce0733e 341
+  s_31e8faaae0edf2::t_7f38e8fe31ffd4 368
+  s_31e8faaae0edf2::t_ab00e6eb7bccac 279,286,297,309
+  s_31e8faaae0edf2::t_06e4ec3683ee01 362,374
+  s_31e8faaae0edf2::t_840b5cb5acf0bc 462
+  s_31e8faaae0edf2::t_1f32c48c107615 409,419
+scripts/resolve-verification-path.sh
+  s_31e8faaae0edf2::t_b958c2dac5b4ca 1-209
+templates/agent-roles/lead.md.tpl
+  s_31e8faaae0edf2::t_6c1f2a07ec29fa 129
+  s_31e8faaae0edf2::t_48b527a3ebd556 94-95
+  s_31e8faaae0edf2::t_fa5474b7116aa7 19
+  s_31e8faaae0edf2::t_decbe18b63cad6 40,122-123
+  s_31e8faaae0edf2::t_9cb8d971ce6ad7 25
+  s_31e8faaae0edf2::t_0ca26197e1420c 64-74
+scripts/notification-log.sh
+  s_31e8faaae0edf2::t_0e95b0833f0d87 1-25
+scripts/worktree-create.sh
+  s_31e8faaae0edf2::t_863ba8719e58e6 1-50
+scripts/qa-result-gate.sh
+  s_31e8faaae0edf2::t_8c2a0eaeed0101 1-666
+config/destructive-commands.txt
+  s_31e8faaae0edf2::t_00aa3c215c064e 1-77
+tests/fixtures/phase-detect-output/uat-issues.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+scripts/extract-frontmatter-array-items.awk
+  s_31e8faaae0edf2::t_906124adc2ffef 1-69
+tests/phase-detect.bats
+  s_31e8faaae0edf2::t_977a187ee0f077 2854,2860
+  s_31e8faaae0edf2::t_4a7fca472f3520 1-1087,1089-2042,2044-2056,2058-2109,2111-2140,2142-2172,2174-2185,2187-2271,2273-2398,2400-2476,2478-2547,2549-2717,2719-2853,2855-2859,2861-2889,2891-2926,2928-2952,2954-2987,2989-3088,3090-3352,3354-3777
+  s_31e8faaae0edf2::t_3219fb09581b4c 1088,2043,2057,2110,2141,2173,2186,2272,2399,2477,2548,2718,2890,2927,2953,2988,3089,3353
+tests/delta-context.bats
+  s_31e8faaae0edf2::t_3839b1edfed302 1-288
+.claude-plugin/plugin.json
+  s_31e8faaae0edf2::t_4cc617994ffd17 1-10
+scripts/doctor-cleanup.sh
+  s_31e8faaae0edf2::t_60cf8c2b341207 34-71,75,80
+  s_31e8faaae0edf2::t_856c44d4d0f911 222-242,244-245,247-254,257-263
+  s_31e8faaae0edf2::t_4f590fe1648bf4 101-106,108,110-118,120,125-130
+  s_31e8faaae0edf2::t_a58dd64dfef982 1-33,72-74,76-79,81-100,107,109,119,121-124,131-221,243,246,255-256,264-327
+scripts/normalize-prefer-teams.sh
+  s_31e8faaae0edf2::t_644adaf1e50e15 1-39
+tests/fixtures/phase-detect-output/phase-05-remediated.txt
+  s_31e8faaae0edf2::t_95b7d65d1acd87 1-58
+scripts/rename-default-milestone.sh
+  s_31e8faaae0edf2::t_655a3b00e23904 1-109
+skills-bundle/algorithmic-thinking/NOTICE.md
+  s_31e8faaae0edf2::t_bb3a176eee4078 1-31
+skills-bundle/discipline-of-programming-dijkstra/NOTICE.md
+  s_31e8faaae0edf2::t_61d98f8f4aef9d 1-31
+skills-bundle/fluent-python/NOTICE.md
+  s_31e8faaae0edf2::t_0ad4ffddea31f0 1-29
+skills-bundle/interaction-design-cooper-tidwell/NOTICE.md
+  s_31e8faaae0edf2::t_897b921cd59bb2 1-31
+skills-bundle/modern-devops-practices-skill/NOTICE.md
+  s_31e8faaae0edf2::t_c89071384f754b 1-32
+skills-bundle/unit-testing-art-osherove/NOTICE.md
+  s_31e8faaae0edf2::t_baacd1609477d4 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "24a23393b57802a7ec002c5c68168ecb5ee0009f",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_31e8faaae0edf2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dad4594d-7874-460b-9c59-5ec45260cd14",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_7469037d661b6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "660de888-fc37-48cb-8d3e-ae393686e0b6",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_9ca1fa1dcf9ec1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "66e2b775-f7c9-4a4a-89cb-2cc95223ccab",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_9e6d2f414acbf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a270622772aecd2f3",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
