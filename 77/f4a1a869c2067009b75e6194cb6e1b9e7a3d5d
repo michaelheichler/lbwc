@@ -1,0 +1,60 @@
+commands/plan.md
+  s_11542e543d4d3f::t_80918f8ee01f66 15
+commands/uat.md
+  s_11542e543d4d3f::t_a394fd25799d4d 13
+  s_11542e543d4d3f::t_8686de7eda2954 15-16
+scripts/session-start.sh
+  s_11542e543d4d3f::t_53aee0c8acb7ee 53-74
+templates/agent-roles/web-engineer.md.tpl
+  s_11542e543d4d3f::t_880ee50d340fcd 123-126
+config/model-profiles.json
+  s_11542e543d4d3f::t_920488418025b1 37-38
+  s_11542e543d4d3f::t_2c5dfd282a7902 56-57
+  s_11542e543d4d3f::t_bdabc9489359d0 18-19
+templates/agent-roles/debugger.md.tpl
+  s_11542e543d4d3f::t_a483fdf4bdd068 129-132
+templates/agent-roles/python-engineer.md.tpl
+  s_11542e543d4d3f::t_d3b0d6b1859876 121-124
+templates/agent-roles/defaults.json
+  s_11542e543d4d3f::t_3282e169226113 120-127
+templates/agent-roles/test-dev.md.tpl
+  s_11542e543d4d3f::t_5de381084c00c1 81-84
+templates/agent-roles/coding-dijkstra.md.tpl
+  s_11542e543d4d3f::t_b2b8288e141889 112-115
+templates/agent-roles/lead.md.tpl
+  s_11542e543d4d3f::t_ec59be687f7da5 153-156
+tests/session-start.bats
+  s_11542e543d4d3f::t_9450fe6ef5b83b 39-50
+templates/agent-roles/qa.md.tpl
+  s_11542e543d4d3f::t_e5b252bbe9b4cb 204-207
+commands/qa.md
+  s_11542e543d4d3f::t_c403bca1eb55b4 14
+  s_11542e543d4d3f::t_4321250be445e3 11
+templates/agent-roles/deviq.md.tpl
+  s_11542e543d4d3f::t_2c56da41f42ed7 1-79
+config/reasoning-profiles.json
+  s_11542e543d4d3f::t_45ddd283da1270 18-19
+  s_11542e543d4d3f::t_ef97283f15d199 56-57
+  s_11542e543d4d3f::t_acd1933e8fc3b4 37-38
+commands/build.md
+  s_11542e543d4d3f::t_80245ed92e1747 8-11
+  s_11542e543d4d3f::t_aa1780ee9b3288 25-26
+commands/debug.md
+  s_11542e543d4d3f::t_b2126e80bd6784 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "77f4a1a869c2067009b75e6194cb6e1b9e7a3d5d",
+  "prompts": {},
+  "sessions": {
+    "s_11542e543d4d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7a6804c-fc4b-41ae-9bf7-d35199947afe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
