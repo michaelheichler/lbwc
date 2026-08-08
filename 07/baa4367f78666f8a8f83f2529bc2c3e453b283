@@ -1,0 +1,34 @@
+hooks/skill_gate.py
+  s_11542e543d4d3f::t_02ba346a4219c6 93,104-114
+hooks/message_scope_guard.py
+  s_11542e543d4d3f::t_50cec37ff81b44 35-37
+  s_11542e543d4d3f::t_982f8091ea1c5f 5
+scripts/tests/deviq-record-core.sh
+  s_11542e543d4d3f::t_f2c2388413d92c 94-114
+scripts/lib/deviq-record.py
+  s_11542e543d4d3f::t_a102832c782543 92-118,124-127
+  s_11542e543d4d3f::t_0a51cb2290e0de 119-123,128-140,142-145
+  s_11542e543d4d3f::t_cc674fcffbc732 29
+scripts/agent-lifecycle.sh
+  s_11542e543d4d3f::t_9430f3f741cd0e 89,92,94,104,111
+  s_11542e543d4d3f::t_143eca5805374c 69,71,79,81
+hooks/test_message_scope_guard.py
+  s_11542e543d4d3f::t_dbf985d245fd4c 13,21,30,33,40
+  s_11542e543d4d3f::t_0ccefac866a65c 1-12,14-20,22-29,31-32,34-39,41-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "07baa4367f78666f8a8f83f2529bc2c3e453b283",
+  "prompts": {},
+  "sessions": {
+    "s_11542e543d4d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7a6804c-fc4b-41ae-9bf7-d35199947afe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
