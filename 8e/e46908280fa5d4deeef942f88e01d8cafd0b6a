@@ -1,0 +1,510 @@
+references/deviq-corpus/terms/cognitive-complexity.md
+  s_11542e543d4d3f::t_259b994d902a73 1-107
+scripts/deviq-lookup.sh
+  s_11542e543d4d3f::t_7b6d219c3f2522 1-114
+references/deviq-corpus/principles/boy-scout-rule.md
+  s_11542e543d4d3f::t_259b994d902a73 1-34
+references/deviq-corpus/practices/pain-driven-development.md
+  s_11542e543d4d3f::t_259b994d902a73 1-22
+references/deviq-corpus/practices/yolo-architecture.md
+  s_11542e543d4d3f::t_259b994d902a73 1-76
+references/deviq-corpus/principles/stable-dependencies.md
+  s_11542e543d4d3f::t_259b994d902a73 1-21
+references/deviq-corpus/practices/defensive-programming.md
+  s_11542e543d4d3f::t_259b994d902a73 1-18
+references/deviq-corpus/principles/interface-segregation.md
+  s_11542e543d4d3f::t_259b994d902a73 1-75
+references/deviq-corpus/testing/front-end-tests.md
+  s_11542e543d4d3f::t_259b994d902a73 1-30
+references/deviq-corpus/practices/test-driven-development.md
+  s_11542e543d4d3f::t_259b994d902a73 1-27
+references/deviq-corpus/practices/update-the-plan.md
+  s_11542e543d4d3f::t_259b994d902a73 1-16
+references/deviq-corpus/principles/solid.md
+  s_11542e543d4d3f::t_259b994d902a73 1-33
+references/deviq-corpus/practices/parse-dont-validate.md
+  s_11542e543d4d3f::t_259b994d902a73 1-54
+references/deviq-corpus/testing/automated-tests.md
+  s_11542e543d4d3f::t_259b994d902a73 1-77
+scripts/dev/deviq-vendor.sh
+  s_11542e543d4d3f::t_5756ed109522af 1-83
+references/deviq-corpus/principles/dependency-inversion-principle.md
+  s_11542e543d4d3f::t_259b994d902a73 1-38
+references/deviq-corpus/practices/dogfooding.md
+  s_11542e543d4d3f::t_259b994d902a73 1-32
+references/deviq-corpus/practices/whole-team.md
+  s_11542e543d4d3f::t_259b994d902a73 1-14
+references/deviq-corpus/practices/refactoring.md
+  s_11542e543d4d3f::t_259b994d902a73 1-19
+references/deviq-corpus/testing/integration-tests.md
+  s_11542e543d4d3f::t_259b994d902a73 1-79
+references/deviq-corpus/practices/timeboxing.md
+  s_11542e543d4d3f::t_259b994d902a73 1-45
+references/deviq-corpus/principles/inversion-of-control.md
+  s_11542e543d4d3f::t_259b994d902a73 1-126
+references/deviq-corpus/practices/naming-things.md
+  s_11542e543d4d3f::t_259b994d902a73 1-89
+references/deviq-corpus/practices/rubber-duck-debugging.md
+  s_11542e543d4d3f::t_259b994d902a73 1-16
+references/deviq-corpus/terms/technical-debt.md
+  s_11542e543d4d3f::t_259b994d902a73 1-46
+references/deviq-corpus/principles/encapsulation.md
+  s_11542e543d4d3f::t_259b994d902a73 1-77
+references/deviq-corpus/principles/make-illegal-states-unrepresentable.md
+  s_11542e543d4d3f::t_259b994d902a73 1-143
+references/deviq-corpus/practices/shipping-is-a-feature.md
+  s_11542e543d4d3f::t_259b994d902a73 1-18
+references/deviq-corpus/principles/architectural-agility.md
+  s_11542e543d4d3f::t_259b994d902a73 1-27
+references/deviq-corpus/principles/once-and-only-once.md
+  s_11542e543d4d3f::t_259b994d902a73 1-22
+references/deviq-corpus/MANIFEST.json
+  s_11542e543d4d3f::t_259b994d902a73 1-962
+references/deviq-corpus/terms/aggregate-complexity.md
+  s_11542e543d4d3f::t_259b994d902a73 1-80
+references/deviq-corpus/principles/fail-fast.md
+  s_11542e543d4d3f::t_259b994d902a73 1-22
+references/deviq-corpus/tools/version-control.md
+  s_11542e543d4d3f::t_259b994d902a73 1-111
+references/deviq-corpus/practices/dependency-injection.md
+  s_11542e543d4d3f::t_259b994d902a73 1-40
+references/deviq-corpus/index.json
+  s_11542e543d4d3f::t_175c2159c69af0 1-1675
+references/deviq-corpus/testing/unit-tests.md
+  s_11542e543d4d3f::t_259b994d902a73 1-63
+references/deviq-corpus/principles/principle-of-least-astonishment.md
+  s_11542e543d4d3f::t_259b994d902a73 1-41
+references/deviq-corpus/terms/bus-factor.md
+  s_11542e543d4d3f::t_259b994d902a73 1-28
+references/deviq-corpus/principles/open-closed-principle.md
+  s_11542e543d4d3f::t_259b994d902a73 1-34
+references/deviq-corpus/values/communication.md
+  s_11542e543d4d3f::t_259b994d902a73 1-34
+references/deviq-corpus/practices/pair-programming.md
+  s_11542e543d4d3f::t_259b994d902a73 1-24
+references/deviq-corpus/principles/progressive-disclosure.md
+  s_11542e543d4d3f::t_259b994d902a73 1-100
+references/deviq-corpus/terms/cyclomatic-complexity.md
+  s_11542e543d4d3f::t_259b994d902a73 1-81
+references/deviq-corpus/values/feedback.md
+  s_11542e543d4d3f::t_259b994d902a73 1-38
+references/deviq-corpus/practices/single-point-of-enforcement.md
+  s_11542e543d4d3f::t_259b994d902a73 1-118
+references/deviq-corpus/principles/hollywood-principle.md
+  s_11542e543d4d3f::t_259b994d902a73 1-24
+references/deviq-corpus/values/courage.md
+  s_11542e543d4d3f::t_259b994d902a73 1-44
+references/deviq-corpus/testing/testing-pyramid.md
+  s_11542e543d4d3f::t_259b994d902a73 1-32
+references/deviq-corpus/practices/descriptive-error-messages.md
+  s_11542e543d4d3f::t_259b994d902a73 1-32
+references/deviq-corpus/practices/red-green-refactor.md
+  s_11542e543d4d3f::t_259b994d902a73 1-48
+references/deviq-corpus/principles/explicit-dependencies-principle.md
+  s_11542e543d4d3f::t_259b994d902a73 1-219
+tests/deviq-lookup.bats
+  s_11542e543d4d3f::t_92837f7c210e74 1-83
+references/deviq-corpus/principles/persistence-ignorance.md
+  s_11542e543d4d3f::t_259b994d902a73 1-10
+references/deviq-corpus/practices/simple-design.md
+  s_11542e543d4d3f::t_259b994d902a73 1-25
+references/deviq-corpus/testing/arrange-act-assert.md
+  s_11542e543d4d3f::t_259b994d902a73 1-102
+references/deviq-corpus/principles/dont-repeat-yourself.md
+  s_11542e543d4d3f::t_259b994d902a73 1-40
+references/deviq-corpus/values/respect.md
+  s_11542e543d4d3f::t_259b994d902a73 1-36
+references/deviq-corpus/practices/know-where-you-are-going.md
+  s_11542e543d4d3f::t_259b994d902a73 1-26
+references/deviq-corpus/principles/yagni.md
+  s_11542e543d4d3f::t_259b994d902a73 1-44
+references/deviq-corpus/principles/single-responsibility-principle.md
+  s_11542e543d4d3f::t_259b994d902a73 1-56
+references/deviq-corpus/terms/kinds-of-models.md
+  s_11542e543d4d3f::t_259b994d902a73 1-36
+references/deviq-corpus/values/simplicity.md
+  s_11542e543d4d3f::t_259b994d902a73 1-48
+scripts/dev/deviq-index.py
+  s_11542e543d4d3f::t_5b8c72587e568c 41-56,66-68
+  s_11542e543d4d3f::t_83c12be66998ee 79,83-85
+  s_11542e543d4d3f::t_645d17b9278536 1-17,19,21-22,61-65,69-78,80-82,86-103
+  s_11542e543d4d3f::t_1516ab88296461 18,20,23-40,57-60
+references/deviq-corpus/principles/separation-of-concerns.md
+  s_11542e543d4d3f::t_259b994d902a73 1-40
+references/deviq-corpus/principles/keep-it-simple.md
+  s_11542e543d4d3f::t_259b994d902a73 1-32
+references/deviq-corpus/practices/observability.md
+  s_11542e543d4d3f::t_259b994d902a73 1-49
+references/deviq-corpus/practices/read-the-manual.md
+  s_11542e543d4d3f::t_259b994d902a73 1-22
+references/deviq-corpus/practices/whole-team-activity.md
+  s_11542e543d4d3f::t_259b994d902a73 1-28
+references/deviq-corpus/principles/parse-dont-validate.md
+  s_11542e543d4d3f::t_259b994d902a73 1-165
+references/deviq-corpus/terms/cohesion.md
+  s_11542e543d4d3f::t_259b994d902a73 1-63
+references/deviq-corpus/principles/tolerance-for-imperfection.md
+  s_11542e543d4d3f::t_259b994d902a73 1-22
+references/deviq-corpus/principles/tell-dont-ask.md
+  s_11542e543d4d3f::t_259b994d902a73 1-117
+references/deviq-corpus/testing/functional-tests.md
+  s_11542e543d4d3f::t_259b994d902a73 1-73
+references/deviq-corpus/principles/liskov-substitution-principle.md
+  s_11542e543d4d3f::t_259b994d902a73 1-27
+references/deviq-corpus/tools/build-server.md
+  s_11542e543d4d3f::t_259b994d902a73 1-26
+references/deviq-corpus/practices/vertical-slices.md
+  s_11542e543d4d3f::t_259b994d902a73 1-42
+references/deviq-corpus/antipatterns/analysis-paralysis.md
+  s_11542e543d4d3f::t_83c4d57e303501 1-44
+references/deviq-corpus/antipatterns/architecture-by-implication.md
+  s_11542e543d4d3f::t_1d4a81b9d1149c 1-37
+references/deviq-corpus/antipatterns/assumption-driven-programming.md
+  s_11542e543d4d3f::t_2b8d754438b19b 1-26
+references/deviq-corpus/antipatterns/big-ball-of-mud.md
+  s_11542e543d4d3f::t_3f92829ce518ac 1-35
+references/deviq-corpus/antipatterns/big-design-up-front.md
+  s_11542e543d4d3f::t_8fa0c11fd31b22 1-48
+references/deviq-corpus/antipatterns/blob.md
+  s_11542e543d4d3f::t_871a6ca0387f0d 1-20
+references/deviq-corpus/antipatterns/broken-windows.md
+  s_11542e543d4d3f::t_6dab50c1ce50e0 1-16
+references/deviq-corpus/antipatterns/calendar-coder.md
+  s_11542e543d4d3f::t_9fc689b00e6cb5 1-20
+references/deviq-corpus/antipatterns/copy-folder-versioning.md
+  s_11542e543d4d3f::t_2762569bb0f86f 1-16
+references/deviq-corpus/antipatterns/copy-paste-programming.md
+  s_11542e543d4d3f::t_37311098f66d9c 1-30
+references/deviq-corpus/antipatterns/death-by-planning.md
+  s_11542e543d4d3f::t_2878ca754ad9d1 1-20
+references/deviq-corpus/antipatterns/death-march.md
+  s_11542e543d4d3f::t_0e02c9ebf72dea 1-28
+references/deviq-corpus/antipatterns/duct-tape-coder.md
+  s_11542e543d4d3f::t_5356648f687516 1-24
+references/deviq-corpus/antipatterns/exposing-collection-properties.md
+  s_11542e543d4d3f::t_06951c692bbdd7 1-12
+references/deviq-corpus/antipatterns/fast-beats-right.md
+  s_11542e543d4d3f::t_317c2d88270c46 1-16
+references/deviq-corpus/antipatterns/feature-creep.md
+  s_11542e543d4d3f::t_55a06707892196 1-28
+references/deviq-corpus/antipatterns/flags-over-objects.md
+  s_11542e543d4d3f::t_f55bf46f7a4e64 1-24
+references/deviq-corpus/antipatterns/found-on-internet.md
+  s_11542e543d4d3f::t_684efb238ed027 1-16
+references/deviq-corpus/antipatterns/frankencode.md
+  s_11542e543d4d3f::t_21ea2edac5502b 1-16
+references/deviq-corpus/antipatterns/frozen-caveman.md
+  s_11542e543d4d3f::t_1240d7961443bd 1-47
+references/deviq-corpus/antipatterns/golden-hammer.md
+  s_11542e543d4d3f::t_7d1c98e3c3e416 1-26
+references/deviq-corpus/antipatterns/iceberg-class.md
+  s_11542e543d4d3f::t_f545213c5c95e4 1-28
+references/deviq-corpus/antipatterns/last-10percent-trap.md
+  s_11542e543d4d3f::t_565b3f9b3dee98 1-46
+references/deviq-corpus/antipatterns/lois-lane-planning.md
+  s_11542e543d4d3f::t_f6fbb94eab912a 1-16
+references/deviq-corpus/antipatterns/magic-strings.md
+  s_11542e543d4d3f::t_a11cbc815b2703 1-49
+references/deviq-corpus/antipatterns/mushroom-management.md
+  s_11542e543d4d3f::t_2994137a612b7c 1-20
+references/deviq-corpus/antipatterns/not-invented-here.md
+  s_11542e543d4d3f::t_cd8db45809698a 1-14
+references/deviq-corpus/antipatterns/one-thing-to-rule-them-all.md
+  s_11542e543d4d3f::t_a6ef04ba8ce60b 1-34
+references/deviq-corpus/antipatterns/reinventing-the-wheel.md
+  s_11542e543d4d3f::t_711e89ab301e01 1-22
+references/deviq-corpus/antipatterns/service-locator.md
+  s_11542e543d4d3f::t_e4dd43f150e26d 1-43
+references/deviq-corpus/antipatterns/shiny-toy.md
+  s_11542e543d4d3f::t_1724a0ef1ea46f 1-16
+references/deviq-corpus/antipatterns/smoke-and-mirrors.md
+  s_11542e543d4d3f::t_efe0254f94ae7a 1-16
+references/deviq-corpus/antipatterns/spaghetti-code.md
+  s_11542e543d4d3f::t_3aae6a7fc2df18 1-24
+references/deviq-corpus/antipatterns/static-cling.md
+  s_11542e543d4d3f::t_c975003398b2ae 1-119
+references/deviq-corpus/antipatterns/walking-through-a-minefield.md
+  s_11542e543d4d3f::t_6c66aed503de45 1-20
+references/deviq-corpus/antipatterns/waterfall.md
+  s_11542e543d4d3f::t_ede2f9cb4e1a78 1-32
+references/deviq-corpus/antipatterns/witches-brew-architecture.md
+  s_11542e543d4d3f::t_f07e6dc9cf373a 1-52
+references/deviq-corpus/architecture/clean-architecture.md
+  s_11542e543d4d3f::t_833d719e10ab7d 1-66
+references/deviq-corpus/architecture/competing-consumers.md
+  s_11542e543d4d3f::t_3b25bd15dd9920 1-80
+references/deviq-corpus/architecture/event-driven-architecture.md
+  s_11542e543d4d3f::t_c6e8137ce8c793 1-104
+references/deviq-corpus/architecture/layered-architecture.md
+  s_11542e543d4d3f::t_9e3e5a21b31325 1-73
+references/deviq-corpus/architecture/modular-monolith.md
+  s_11542e543d4d3f::t_8d87e06afdd07b 1-116
+references/deviq-corpus/architecture/n-tier-architecture.md
+  s_11542e543d4d3f::t_88014a104f4753 1-66
+references/deviq-corpus/architecture/vertical-slice-architecture.md
+  s_11542e543d4d3f::t_6fd633fedb3bad 1-77
+references/deviq-corpus/architecture/web-queue-worker-architecture.md
+  s_11542e543d4d3f::t_bb636986ef40fe 1-79
+references/deviq-corpus/code-smells/alternative-class-different-interfaces.md
+  s_11542e543d4d3f::t_891563ffb86dd3 1-90
+references/deviq-corpus/code-smells/artificial-coupling.md
+  s_11542e543d4d3f::t_57ee31e9e69063 1-106
+references/deviq-corpus/code-smells/bump-road.md
+  s_11542e543d4d3f::t_af3cda4a2b44fe 1-76
+references/deviq-corpus/code-smells/class-depends-on-subclass.md
+  s_11542e543d4d3f::t_8068a2e6caeb66 1-112
+references/deviq-corpus/code-smells/class-doesnt-do-much.md
+  s_11542e543d4d3f::t_177ca3e1462a1d 1-93
+references/deviq-corpus/code-smells/combinatorial-explosion.md
+  s_11542e543d4d3f::t_e48a4eebd38a48 1-132
+references/deviq-corpus/code-smells/comments.md
+  s_11542e543d4d3f::t_dfa7c5f4851bc8 1-116
+references/deviq-corpus/code-smells/conditional-complexity.md
+  s_11542e543d4d3f::t_eca438316c3db6 1-153
+references/deviq-corpus/code-smells/data-class.md
+  s_11542e543d4d3f::t_06afb32c31fb4a 1-99
+references/deviq-corpus/code-smells/data-clumps.md
+  s_11542e543d4d3f::t_e42c5488093921 1-146
+references/deviq-corpus/code-smells/dead-code.md
+  s_11542e543d4d3f::t_9149878198ad0b 1-91
+references/deviq-corpus/code-smells/divergent-change.md
+  s_11542e543d4d3f::t_57a7ead9e81280 1-96
+references/deviq-corpus/code-smells/duplicate-code.md
+  s_11542e543d4d3f::t_c98faaf8e563ee 1-100
+references/deviq-corpus/code-smells/feature-envy.md
+  s_11542e543d4d3f::t_f512303b03f699 1-107
+references/deviq-corpus/code-smells/hidden-dependencies.md
+  s_11542e543d4d3f::t_dff648dcf9eab9 1-129
+references/deviq-corpus/code-smells/hidden-temporal-coupling.md
+  s_11542e543d4d3f::t_9f18a8f8192adb 1-113
+references/deviq-corpus/code-smells/inappropriate-intimacy.md
+  s_11542e543d4d3f::t_bba2f29cc7481d 1-107
+references/deviq-corpus/code-smells/inconsistency.md
+  s_11542e543d4d3f::t_71a600e5c7146b 1-74
+references/deviq-corpus/code-smells/inconsistent-abstraction-levels.md
+  s_11542e543d4d3f::t_7c6308d50d5800 1-88
+references/deviq-corpus/code-smells/indecent-exposure.md
+  s_11542e543d4d3f::t_5223dc8e0acc45 1-103
+references/deviq-corpus/code-smells/law-of-demeter-violations.md
+  s_11542e543d4d3f::t_034a71c81eda81 1-96
+references/deviq-corpus/code-smells/long-method.md
+  s_11542e543d4d3f::t_cfc97f83cbf207 1-112
+references/deviq-corpus/code-smells/long-parameter-list.md
+  s_11542e543d4d3f::t_adf3cb325fe7e4 1-146
+references/deviq-corpus/code-smells/message-chains.md
+  s_11542e543d4d3f::t_3a5c1e1bc20b4d 1-153
+references/deviq-corpus/code-smells/middle-man.md
+  s_11542e543d4d3f::t_9fd700caf388da 1-89
+references/deviq-corpus/code-smells/obscured-intent.md
+  s_11542e543d4d3f::t_db0f1e7bed17d3 1-89
+references/deviq-corpus/code-smells/oddball-solution.md
+  s_11542e543d4d3f::t_be33106abb5e5a 1-103
+references/deviq-corpus/code-smells/parallel-inheritance-hierarchies.md
+  s_11542e543d4d3f::t_c5549d1ef6eba4 1-109
+references/deviq-corpus/code-smells/poor-names.md
+  s_11542e543d4d3f::t_ef166bf264cc23 1-88
+references/deviq-corpus/code-smells/poorly-written-tests.md
+  s_11542e543d4d3f::t_9e16684cb53716 1-115
+references/deviq-corpus/code-smells/primitive-obsession-code-smell.md
+  s_11542e543d4d3f::t_dbb7e66de15d1e 1-85
+references/deviq-corpus/code-smells/regions.md
+  s_11542e543d4d3f::t_4d70d2329d7e34 1-133
+references/deviq-corpus/code-smells/required-setup-teardown.md
+  s_11542e543d4d3f::t_22150022adb83c 1-138
+references/deviq-corpus/code-smells/shotgun-surgery.md
+  s_11542e543d4d3f::t_4ce97819e53d88 1-85
+references/deviq-corpus/code-smells/speculative-generality.md
+  s_11542e543d4d3f::t_4fb2db88a96e3e 1-86
+references/deviq-corpus/code-smells/switch-statements.md
+  s_11542e543d4d3f::t_f6fd6a89182255 1-126
+references/deviq-corpus/code-smells/temporary-field.md
+  s_11542e543d4d3f::t_e4f5a3bb928cce 1-101
+references/deviq-corpus/code-smells/tramp-data.md
+  s_11542e543d4d3f::t_a3f997e7521233 1-121
+references/deviq-corpus/code-smells/vertical-separation.md
+  s_11542e543d4d3f::t_97b6b712e9806c 1-97
+references/deviq-corpus/design-patterns/abstract-factory-pattern.md
+  s_11542e543d4d3f::t_dd2a0a114c2dce 1-139
+references/deviq-corpus/design-patterns/adapter-design-pattern.md
+  s_11542e543d4d3f::t_9374e4adf539e1 1-69
+references/deviq-corpus/design-patterns/bridge-pattern.md
+  s_11542e543d4d3f::t_ef181c9bb9ab55 1-121
+references/deviq-corpus/design-patterns/builder-pattern.md
+  s_11542e543d4d3f::t_0832eace10504f 1-65
+references/deviq-corpus/design-patterns/chain-of-responsibility-pattern.md
+  s_11542e543d4d3f::t_985aa7f8a2aeb2 1-125
+references/deviq-corpus/design-patterns/command-pattern.md
+  s_11542e543d4d3f::t_6737a8faa7ef84 1-165
+references/deviq-corpus/design-patterns/composite-pattern.md
+  s_11542e543d4d3f::t_424a9a4b14d8a8 1-146
+references/deviq-corpus/design-patterns/cqrs-pattern.md
+  s_11542e543d4d3f::t_7332eff1516647 1-70
+references/deviq-corpus/design-patterns/decorator-pattern.md
+  s_11542e543d4d3f::t_d35d755a3f5968 1-218
+references/deviq-corpus/design-patterns/domain-events-pattern.md
+  s_11542e543d4d3f::t_bfdddaf1c7d478 1-103
+references/deviq-corpus/design-patterns/event-aggregator-pattern.md
+  s_11542e543d4d3f::t_191c134ace8aa3 1-215
+references/deviq-corpus/design-patterns/facade-pattern.md
+  s_11542e543d4d3f::t_3f7c4a40e17c19 1-77
+references/deviq-corpus/design-patterns/factory-method-pattern.md
+  s_11542e543d4d3f::t_f822509763821a 1-92
+references/deviq-corpus/design-patterns/flyweight-pattern.md
+  s_11542e543d4d3f::t_005b8be623b6ed 1-191
+references/deviq-corpus/design-patterns/guard-clause.md
+  s_11542e543d4d3f::t_e84a719de9c5ac 1-129
+references/deviq-corpus/design-patterns/interpreter-pattern.md
+  s_11542e543d4d3f::t_6e66b1a753da63 1-205
+references/deviq-corpus/design-patterns/iterator-pattern.md
+  s_11542e543d4d3f::t_fec2ee56b7ca5a 1-249
+references/deviq-corpus/design-patterns/lazy-load-pattern.md
+  s_11542e543d4d3f::t_e7dc92c6fd5be3 1-95
+references/deviq-corpus/design-patterns/mediator-pattern.md
+  s_11542e543d4d3f::t_c307586a13eb78 1-129
+references/deviq-corpus/design-patterns/memento-pattern.md
+  s_11542e543d4d3f::t_576c919d875594 1-155
+references/deviq-corpus/design-patterns/mvc-pattern.md
+  s_11542e543d4d3f::t_864bd65f7ebb30 1-140
+references/deviq-corpus/design-patterns/mvp-pattern.md
+  s_11542e543d4d3f::t_39dd9c31f150b9 1-180
+references/deviq-corpus/design-patterns/mvvm-pattern.md
+  s_11542e543d4d3f::t_cdae63bc6ed9fd 1-241
+references/deviq-corpus/design-patterns/null-object-pattern.md
+  s_11542e543d4d3f::t_d1c1d94a3b855e 1-83
+references/deviq-corpus/design-patterns/object-mother-pattern.md
+  s_11542e543d4d3f::t_a23758da3155d6 1-40
+references/deviq-corpus/design-patterns/observer-pattern.md
+  s_11542e543d4d3f::t_b7de38b1c3d0de 1-86
+references/deviq-corpus/design-patterns/prototype-pattern.md
+  s_11542e543d4d3f::t_d0b601fefdda7d 1-147
+references/deviq-corpus/design-patterns/proxy-pattern.md
+  s_11542e543d4d3f::t_774756a00c5ffa 1-80
+references/deviq-corpus/design-patterns/repository-pattern.md
+  s_11542e543d4d3f::t_830dd8bd0f72c9 1-139
+references/deviq-corpus/design-patterns/repr-design-pattern.md
+  s_11542e543d4d3f::t_07e4203d875576 1-54
+references/deviq-corpus/design-patterns/rules-engine-pattern.md
+  s_11542e543d4d3f::t_1522bd45b54536 1-118
+references/deviq-corpus/design-patterns/service-locator-pattern.md
+  s_11542e543d4d3f::t_3d614f9450ef09 1-110
+references/deviq-corpus/design-patterns/singleton.md
+  s_11542e543d4d3f::t_a584a34a03ddf5 1-43
+references/deviq-corpus/design-patterns/specification-pattern.md
+  s_11542e543d4d3f::t_d3916b9754b8c7 1-107
+references/deviq-corpus/design-patterns/state-design-pattern.md
+  s_11542e543d4d3f::t_2030395381f994 1-149
+references/deviq-corpus/design-patterns/strangler-fig-pattern.md
+  s_11542e543d4d3f::t_33a4e4c09d677d 1-96
+references/deviq-corpus/design-patterns/strategy-pattern.md
+  s_11542e543d4d3f::t_6de11438f06e84 1-93
+references/deviq-corpus/design-patterns/unit-of-work-pattern.md
+  s_11542e543d4d3f::t_047071628dfc1e 1-123
+references/deviq-corpus/design-patterns/visitor-pattern.md
+  s_11542e543d4d3f::t_790796cbaa3763 1-143
+references/deviq-corpus/domain-driven-design/aggregate-pattern.md
+  s_11542e543d4d3f::t_8a4cd2e7563737 1-77
+references/deviq-corpus/domain-driven-design/anemic-model.md
+  s_11542e543d4d3f::t_4d4dc13949991a 1-28
+references/deviq-corpus/domain-driven-design/anti-corruption-layer.md
+  s_11542e543d4d3f::t_34232776a188fb 1-128
+references/deviq-corpus/domain-driven-design/bounded-context.md
+  s_11542e543d4d3f::t_76e4476bcb3770 1-68
+references/deviq-corpus/domain-driven-design/context-mapping.md
+  s_11542e543d4d3f::t_0812a63e88ab65 1-133
+references/deviq-corpus/domain-driven-design/domain-model.md
+  s_11542e543d4d3f::t_c8753046ad6ae9 1-137
+references/deviq-corpus/domain-driven-design/domain-storytelling.md
+  s_11542e543d4d3f::t_947b36ece5571d 1-61
+references/deviq-corpus/domain-driven-design/domain.md
+  s_11542e543d4d3f::t_57002c497f259d 1-51
+references/deviq-corpus/domain-driven-design/entity.md
+  s_11542e543d4d3f::t_bee4170209205e 1-74
+references/deviq-corpus/domain-driven-design/eventstorming.md
+  s_11542e543d4d3f::t_fbe6ce527711bf 1-78
+references/deviq-corpus/domain-driven-design/shared-kernel.md
+  s_11542e543d4d3f::t_dcab3e651ac010 1-131
+references/deviq-corpus/domain-driven-design/strategic-design.md
+  s_11542e543d4d3f::t_e1b3148d337542 1-73
+references/deviq-corpus/domain-driven-design/subdomain.md
+  s_11542e543d4d3f::t_dc704613f38230 1-82
+references/deviq-corpus/domain-driven-design/tactical-design.md
+  s_11542e543d4d3f::t_9f672199b14ef3 1-61
+references/deviq-corpus/domain-driven-design/ubiquitous-language.md
+  s_11542e543d4d3f::t_8d6b5c5f9fc9a8 1-41
+references/deviq-corpus/domain-driven-design/value-object.md
+  s_11542e543d4d3f::t_5da58ac146c9c1 1-62
+references/deviq-corpus/laws/amaras-law.md
+  s_11542e543d4d3f::t_8eb66c38862da0 1-74
+references/deviq-corpus/laws/amdahls-law.md
+  s_11542e543d4d3f::t_e4e7d9b8e8af9b 1-49
+references/deviq-corpus/laws/andersons-law.md
+  s_11542e543d4d3f::t_25394e26a629ce 1-73
+references/deviq-corpus/laws/brooks-law.md
+  s_11542e543d4d3f::t_58009eb9856a4f 1-71
+references/deviq-corpus/laws/conways-law.md
+  s_11542e543d4d3f::t_fcb7ec39db2a54 1-74
+references/deviq-corpus/laws/cunninghams-law.md
+  s_11542e543d4d3f::t_7dddebd5f74aa0 1-20
+references/deviq-corpus/laws/galls-law.md
+  s_11542e543d4d3f::t_ae6c8f2d9136c5 1-72
+references/deviq-corpus/laws/goodharts-law.md
+  s_11542e543d4d3f::t_ec60a0ee3ed337 1-61
+references/deviq-corpus/laws/hebbs-law.md
+  s_11542e543d4d3f::t_78032fbb68d146 1-57
+references/deviq-corpus/laws/hofstadters-law.md
+  s_11542e543d4d3f::t_62c517db9fe3e3 1-59
+references/deviq-corpus/laws/kerckhoffs-principle.md
+  s_11542e543d4d3f::t_0bfb78ebac74ec 1-61
+references/deviq-corpus/laws/law-of-demeter.md
+  s_11542e543d4d3f::t_f17b5c8fba3c45 1-112
+references/deviq-corpus/laws/law-of-diminishing-returns.md
+  s_11542e543d4d3f::t_c8ea30fea49b5f 1-38
+references/deviq-corpus/laws/laws-software-architecture.md
+  s_11542e543d4d3f::t_0797a2448061e9 1-32
+references/deviq-corpus/laws/linus-law.md
+  s_11542e543d4d3f::t_45a9546bb0afc7 1-40
+references/deviq-corpus/laws/moores-law.md
+  s_11542e543d4d3f::t_b0867154a7d091 1-68
+references/deviq-corpus/laws/murphys-law.md
+  s_11542e543d4d3f::t_38109473747215 1-26
+references/deviq-corpus/laws/postels-law.md
+  s_11542e543d4d3f::t_58420cea6b4ff7 1-41
+references/deviq-corpus/laws/teslers-law.md
+  s_11542e543d4d3f::t_ac1ab0dfad1673 1-122
+references/deviq-corpus/laws/wirths-law.md
+  s_11542e543d4d3f::t_73f782e47c7c5e 1-67
+references/deviq-corpus/practices/50-72-rule.md
+  s_11542e543d4d3f::t_c108da81b512af 1-67
+references/deviq-corpus/practices/authentication.md
+  s_11542e543d4d3f::t_80adc784415293 1-111
+references/deviq-corpus/practices/authorization.md
+  s_11542e543d4d3f::t_2d5f44ba5a30a8 1-59
+references/deviq-corpus/practices/behavior-driven-development.md
+  s_11542e543d4d3f::t_5859ecab1fb64f 1-127
+references/deviq-corpus/practices/code-readability.md
+  s_11542e543d4d3f::t_b57774eafe021c 1-26
+references/deviq-corpus/practices/code-that-fits.md
+  s_11542e543d4d3f::t_2caf4c64d4cf88 1-47
+references/deviq-corpus/practices/collective-code-ownership.md
+  s_11542e543d4d3f::t_658fa53752fd58 1-30
+references/deviq-corpus/practices/common-architectural-vision.md
+  s_11542e543d4d3f::t_43a44a0f1388a6 1-28
+references/deviq-corpus/practices/continuous-integration.md
+  s_11542e543d4d3f::t_52ca70da14aabb 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "8ee46908280fa5d4deeef942f88e01d8cafd0b6a",
+  "prompts": {},
+  "sessions": {
+    "s_11542e543d4d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7a6804c-fc4b-41ae-9bf7-d35199947afe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
