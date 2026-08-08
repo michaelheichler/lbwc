@@ -1,0 +1,37 @@
+ARCHITECTURE.md
+  s_11542e543d4d3f::t_7fa6b646f9623d 186-200
+  s_11542e543d4d3f::t_43c0dcd00ec7d9 104
+  s_11542e543d4d3f::t_4ee48c1b155855 165-166
+  s_11542e543d4d3f::t_1085ee77efe95b 102
+  s_11542e543d4d3f::t_9afa5f065e9880 106
+  s_11542e543d4d3f::t_5a4217862e307e 153
+  s_11542e543d4d3f::t_65b88b1e0a33c1 23
+  s_11542e543d4d3f::t_cf867f55167863 181
+  s_11542e543d4d3f::t_6dcb38b347539a 112
+  s_11542e543d4d3f::t_d00196eb5c6e9a 75
+  s_11542e543d4d3f::t_ea2363d32428f1 116
+  s_11542e543d4d3f::t_e3c41ef7cffebe 130,132-134
+  s_11542e543d4d3f::t_5d0ea0b5aafe42 185
+  s_11542e543d4d3f::t_491aad7ebdd753 55
+  s_11542e543d4d3f::t_7c30c7922c2e6e 98
+  s_11542e543d4d3f::t_606680ae22ff4a 149
+  s_11542e543d4d3f::t_05a7f1807b1216 108,110,114-115,117-118,131,136
+  s_11542e543d4d3f::t_c2339ddbc08024 111
+  s_11542e543d4d3f::t_28174604a66112 113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "603226b4763157671064c34355715051d5a0283e",
+  "prompts": {},
+  "sessions": {
+    "s_11542e543d4d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7a6804c-fc4b-41ae-9bf7-d35199947afe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
