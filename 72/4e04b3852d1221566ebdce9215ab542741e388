@@ -1,0 +1,56 @@
+scripts/deviq-build-gate.sh
+  s_11542e543d4d3f::t_3b00a04a1381df 4-6
+  s_11542e543d4d3f::t_ffd6555796025a 38-47,49
+scripts/tests/deviq-digest-gate-core.sh
+  s_11542e543d4d3f::t_fade89e7d347e2 64
+  s_11542e543d4d3f::t_ae5118c47eefb5 67-77
+scripts/lib/deviq-digest.sh
+  s_11542e543d4d3f::t_25190a48b9a627 47
+  s_11542e543d4d3f::t_09449731844661 4-8
+  s_11542e543d4d3f::t_166bd06e59daf6 37-46,48-51
+tests/deviq-nudge.bats
+  s_11542e543d4d3f::t_c69225b4413109 1-59
+hooks/hooks.json
+  s_11542e543d4d3f::t_bb085658b2452f 109-113
+scripts/deviq-nudge.sh
+  s_11542e543d4d3f::t_36c772f7332fea 1-57
+scripts/tests/deviq-record-core.sh
+  s_11542e543d4d3f::t_d2b0c4063619e1 115-153
+scripts/lib/deviq-open-blocks.jq
+  s_11542e543d4d3f::t_2ab21c1554d6d8 1-4
+scripts/lib/deviq-record.py
+  s_11542e543d4d3f::t_4cf90ad519868c 84,94-126
+  s_11542e543d4d3f::t_4235b79b7d979c 230,237
+  s_11542e543d4d3f::t_aeaf9fb78d5b53 18-20
+  s_11542e543d4d3f::t_1fb71e97286c54 129-156
+  s_11542e543d4d3f::t_1a444ce352ed73 206-221,238-242
+  s_77644476ec2213::t_419d7c987f5f91 127-128
+config/deviq-nudges.json
+  s_11542e543d4d3f::t_8f8ac57994a606 1-117
+tests/deviq-gate.bats
+  s_11542e543d4d3f::t_d6e1dc5722da53 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "724e04b3852d1221566ebdce9215ab542741e388",
+  "prompts": {},
+  "sessions": {
+    "s_11542e543d4d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7a6804c-fc4b-41ae-9bf7-d35199947afe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_77644476ec2213": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec06376a-a327-4c2e-bb4f-e5023406cc04",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
