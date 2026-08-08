@@ -1,0 +1,31 @@
+hooks/test_skill_gate.py
+  s_11542e543d4d3f::t_c0bc0bf90cfe96 90-107
+templates/agent-roles/python-critic.md.tpl
+  s_11542e543d4d3f::t_d8942b9c39df35 43
+templates/agent-roles/python-engineer.md.tpl
+  s_11542e543d4d3f::t_1c9cb694d0c90c 50
+skills-bundle/INDEX.md
+  s_11542e543d4d3f::t_fddb42eb140cde 8
+templates/agent-roles/web-engineer.md.tpl
+  s_11542e543d4d3f::t_54f203250d78ed 53
+hooks/skill_gate.py
+  s_11542e543d4d3f::t_9ac8af4115ff99 139
+skills-bundle/check-lifecycle.sh
+  s_11542e543d4d3f::t_87a4077704d3b8 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "9262fb7fc4589d731a22d2c91302ed7d8412a83e",
+  "prompts": {},
+  "sessions": {
+    "s_11542e543d4d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7a6804c-fc4b-41ae-9bf7-d35199947afe",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
