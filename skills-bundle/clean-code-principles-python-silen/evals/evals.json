@@ -1,0 +1,46 @@
+{
+  "skill_name": "clean-code-principles-python-silen",
+  "notes": "Assertions are added in the QA phase. Many are graded programmatically by running scripts/clean_check.py on the produced Python and asserting it is clean / cleaner than baseline.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "refactor-messy-order-service",
+      "prompt": "Review and refactor this Python class for clean-code problems. Return the improved version and a short list of what you changed and why. File: evals/fixtures/messy_order_service.py",
+      "files": ["evals/fixtures/messy_order_service.py"],
+      "expected_output": "Refactored class: PascalCase class name, type hints throughout, no mutable default argument, encapsulated state (no leaking self.items by reference, copies/immutable view), predicate named is_/has_, specific exception handling (no bare except / except-pass / print), monetary math not floating mutation, single clear responsibility. clean_check should report far fewer findings than the original.",
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "build-salesitem-rest-endpoint",
+      "prompt": "Write a small, production-quality Python module for a 'sales item' REST API with create and get-by-id operations. Include a repository abstraction with one concrete in-memory implementation, request/response models separate from the persistence entity, and proper error handling for not-found. Use FastAPI-style or framework-agnostic controllers, your call. Make it idiomatic and type-safe.",
+      "files": [],
+      "expected_output": "Repository defined as an interface/Protocol with a concrete impl (program-against-interfaces). DTOs separate from entity. Not-found raised as a domain error and mapped to 404. Full type hints. No leaked mutable state. clean_check clean.",
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "review-risky-function",
+      "prompt": "Is there anything wrong with this Python function? Fix it.\n\ndef get_user(cache={}, id=None):\n    try:\n        u = cache[id]\n    except:\n        u = db.query('SELECT * FROM users WHERE id = ' + str(id))\n        cache[id] = u\n    return u",
+      "files": [],
+      "expected_output": "Flags: mutable default arg (cache={}), bare except, SQL injection via string concatenation (parameterize), shadowing builtin id, missing type hints, silent cache of failures. Provides a corrected version with parameterized query, no mutable default, specific exception, type hints.",
+      "assertions": []
+    },
+    {
+      "id": 3,
+      "name": "exception-handling-architecture",
+      "prompt": "I'm writing a Python microservice with controller, service, and repository layers. How should I design exception/error handling across these layers so the API returns clean responses without leaking internals? Show the key Python pieces.",
+      "files": [],
+      "expected_output": "Domain-specific exception hierarchy (base ServiceError + EntityNotFoundError etc.), repository raises domain errors, service lets them propagate or wraps infra errors, controller maps exceptions to HTTP status + safe message, no stack traces leaked in production, logging at the boundary. Type-hinted example code.",
+      "assertions": []
+    },
+    {
+      "id": 4,
+      "name": "write-tests-for-pricing",
+      "prompt": "Write pytest unit tests for this function, covering the important cases:\n\ndef apply_discount(price: float, percent: float) -> float:\n    if percent < 0 or percent > 100:\n        raise ValueError('percent out of range')\n    return round(price * (1 - percent / 100), 2)",
+      "files": [],
+      "expected_output": "Clear test names describing behavior, arrange-act-assert, boundary cases (0, 100, negative, >100 raises), parametrization for the happy path, uses pytest.raises for the error case. clean_check clean.",
+      "assertions": []
+    }
+  ]
+}

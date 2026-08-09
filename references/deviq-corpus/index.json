@@ -1,0 +1,1675 @@
+[
+  {
+    "id": "antipatterns/analysis-paralysis",
+    "category": "antipatterns",
+    "title": "Analysis Paralysis",
+    "description": "There is such a thing as too much planning and analysis. Remember Shipping is a Feature and a good enough plan executed quickly is always better than the perfect plan executed too late.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/architecture-by-implication",
+    "category": "antipatterns",
+    "title": "Architecture by Implication: An Antipattern in Software Design",
+    "description": "The Architecture by Implication (ABI) antipattern is a common issue that arises in software design when developers make design decisions implicitly rather than explicitly, which can lead to a poorly defined and chaotic architecture.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/assumption-driven-programming",
+    "category": "antipatterns",
+    "title": "Assumption Driven Programming",
+    "description": "Explore the pitfalls of Assumption Driven Programming, where developers mistakenly assume that all users share their knowledge and experience. Learn why it's crucial to consider diverse user perspectives for more effective software solutions.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/big-ball-of-mud",
+    "category": "antipatterns",
+    "title": "Big Ball of Mud",
+    "description": "The Big Ball of Mud is an architectural anti-pattern that refers to an architecture that lacks any modular design, and thus becomes just a mass of disorganized code lacking any real structure.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/big-design-up-front",
+    "category": "antipatterns",
+    "title": "Big Design Up Front (BDUF): A Software Development Antipattern",
+    "description": "Big Design Up Front (BDUF) is a software development antipattern that involves creating a comprehensive and detailed design for a software system before starting the actual implementation. While it's essential to have some level of design and planning, the BDUF approach tends to be overly rigid and inflexible, making it difficult to adapt to changing requirements or unforeseen issues.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/blob",
+    "category": "antipatterns",
+    "title": "The Blob",
+    "description": "Uncover the Blob antipattern, a design flaw where a single class grows excessively in size and responsibility, becoming hard to maintain. Understand how to avoid creating code that is too complex to manage.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/broken-windows",
+    "category": "antipatterns",
+    "title": "Broken Windows",
+    "description": "Small problems, left uncorrected, signal a lack of care about the state of things.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/calendar-coder",
+    "category": "antipatterns",
+    "title": "Calendar Coder",
+    "description": "Discover the Calendar Coder antipattern, a practice similar to cargo cult programming. Learn how mimicking coding practices without understanding the context can lead to ineffective software solutions.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/copy-folder-versioning",
+    "category": "antipatterns",
+    "title": "Copy Folder Versioning",
+    "description": "Copy Folder Versioning is a software development anti-pattern in which source code is updated by simply making copies of the folder in which the code currently resides.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/copy-paste-programming",
+    "category": "antipatterns",
+    "title": "Copy Paste Programming",
+    "description": "Learn about the pitfalls of Copy-Paste Programming. While convenient, this approach can lead to duplicated code, inconsistencies, and maintenance challenges. Explore better practices for code reuse and efficiency.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/death-by-planning",
+    "category": "antipatterns",
+    "title": "Death by Planning",
+    "description": "Explore the Death by Planning antipattern, where overemphasis on planning leads to stalled progress and missed deadlines. Learn how to balance planning and execution for successful project management.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/death-march",
+    "category": "antipatterns",
+    "title": "Death March",
+    "description": "Understand the Death March antipattern, where projects are doomed from the start yet push teams to work excessive hours. Learn how to recognize and avoid this destructive project management trap.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/duct-tape-coder",
+    "category": "antipatterns",
+    "title": "Duct Tape Coder",
+    "description": "Meet the Duct Tape Coder, who prioritizes quick fixes over code quality and maintainability. Discover the long-term risks of this approach and why building sustainable software is essential",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/exposing-collection-properties",
+    "category": "antipatterns",
+    "title": "Exposing Collection Properties",
+    "description": "Generally, exposing collection properties from domain Entities is an antipattern, because it leads to an anemic domain model and breaks encapsulation.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/fast-beats-right",
+    "category": "antipatterns",
+    "title": "Fast Beats Right",
+    "description": "Get into the Fast Beats Right antipattern, where speed is prioritized over quality. Learn why rushing development can lead to long-term issues and how to strike a balance between speed and precision.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/feature-creep",
+    "category": "antipatterns",
+    "title": "Feature Creep",
+    "description": "Uncover the risks of Feature Creep, where continuous addition of features leads to bloated and unwieldy software. Learn strategies to manage scope and maintain a focused, user-centric product.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/flags-over-objects",
+    "category": "antipatterns",
+    "title": "Flags Over Objects",
+    "description": "The Flags Over Objects anti-pattern occurs when behavior is written outside of an object by inspecting flags (such as status codes), rather than within the object itself.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/found-on-internet",
+    "category": "antipatterns",
+    "title": "Found on Internet",
+    "description": "Explore the Found on Internet antipattern, where code or solutions are copied directly from online sources without proper evaluation. Learn the importance of understanding and testing code before integration.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/frankencode",
+    "category": "antipatterns",
+    "title": "Frankencode",
+    "description": "Discover the dangers of Frankencode, where disparate code pieces are haphazardly stitched together to create a fragile and unpredictable system. Learn how to avoid this design horror and build robust, maintainable software.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/frozen-caveman",
+    "category": "antipatterns",
+    "title": "Frozen Caveman: A Software Development Antipattern",
+    "description": "Frozen Caveman is a software development antipattern characterized by the unwillingness or inability of a development team to adopt new technologies, methodologies, or practices.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/golden-hammer",
+    "category": "antipatterns",
+    "title": "Golden Hammer",
+    "description": "Uncover the pitfalls of the Golden Hammer antipattern, where developers use their favorite tool or technology for every problem. Understand why relying too heavily on one solution can limit creativity and effectiveness.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/iceberg-class",
+    "category": "antipatterns",
+    "title": "Iceberg Class",
+    "description": "Learn about the Iceberg Class antipattern, where a class has a deceptively simple interface but hides a massive, complex implementation. Discover strategies to keep your classes transparent and manageable.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/last-10percent-trap",
+    "category": "antipatterns",
+    "title": "The Last 10% Trap: A Software Architecture Antipattern",
+    "description": "The Last 10% Trap is a software architecture antipattern in which developers underestimate the complexity and effort required to complete the final stages of a software project. As a result, the project's last 10% of development can take a disproportionately long time to complete.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/lois-lane-planning",
+    "category": "antipatterns",
+    "title": "Lois Lane Planning",
+    "description": "When management or sales overcommits to deliver features of a product with the knowledge that even though the features aren't ready, developers will rise to the occasion to ensure they will be.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/magic-strings",
+    "category": "antipatterns",
+    "title": "Magic Strings",
+    "description": "Magic strings are string values that are specified directly within application code that have an impact on the application's behavior.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/mushroom-management",
+    "category": "antipatterns",
+    "title": "Mushroom Management",
+    "description": "Explore the consequences of Mushroom Management, where developers are kept in the dark and fed misinformation. Understand the importance of transparency and communication for effective project management.\"",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/not-invented-here",
+    "category": "antipatterns",
+    "title": "Not Invented Here",
+    "description": "Understand the Not Invented Here antipattern, where teams reject external solutions in favor of creating their own. Learn how this mindset can waste resources and hinder innovation.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/one-thing-to-rule-them-all",
+    "category": "antipatterns",
+    "title": "One Thing To Rule Them All",
+    "description": "Dive into the One Thing to Rule Them All antipattern, where a single tool or system is used to handle multiple tasks. Discover the risks of this approach and how to avoid overloading your systems.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/reinventing-the-wheel",
+    "category": "antipatterns",
+    "title": "Reinventing the Wheel",
+    "description": "Discover why Reinventing the Wheel is often counterproductive. Learn how leveraging existing solutions can save time and effort, allowing developers to focus on unique, value-adding features.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/service-locator",
+    "category": "antipatterns",
+    "title": "Service Locator Antipattern in Software Development",
+    "description": "The Service Locator is a design pattern (some would argue antipattern) often used in software development to manage dependencies between objects. It acts as a central registry where objects can locate and access their dependencies. However, it is considered an antipattern in certain contexts due to its negative impact on maintainability, testability, and the clarity of the code.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/shiny-toy",
+    "category": "antipatterns",
+    "title": "Shiny Toy",
+    "description": "Explore the Shiny Toy antipattern, where developers chase the latest trends and tools without evaluating their real-world benefits. Learn how to make technology choices based on needs, not hype.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/smoke-and-mirrors",
+    "category": "antipatterns",
+    "title": "Smoke and Mirrors",
+    "description": "Understand the Smoke and Mirrors antipattern, where demos show a facade of functionality that doesn\u2019t exist yet. Learn why honesty and realistic expectations are crucial in software development.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/spaghetti-code",
+    "category": "antipatterns",
+    "title": "Spaghetti Code",
+    "description": "Uncover the tangled mess of Spaghetti Code, where poor structure and lack of organization make the code hard to follow and maintain. Learn techniques to write clean, well-organized code.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/static-cling",
+    "category": "antipatterns",
+    "title": "Static Cling",
+    "description": "Static Cling is a code smell used to describe the undesirable coupling introduced by accessing static (global) functionality, either as variables or methods.",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/walking-through-a-minefield",
+    "category": "antipatterns",
+    "title": "Walking Through a Minefield",
+    "description": "Discover the perils of releasing unfinished software, likened to Walking through a Minefield. Understand why thorough testing is essential to avoid exposing users to bugs and instabilities",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/waterfall",
+    "category": "antipatterns",
+    "title": "Waterfall",
+    "description": "Learn about the limitations of the Waterfall methodology, a rigid, sequential approach to software development. Explore more flexible alternatives that adapt to changing project requirements",
+    "aliases": []
+  },
+  {
+    "id": "antipatterns/witches-brew-architecture",
+    "category": "antipatterns",
+    "title": "Witches' Brew Architecture: A Software Antipattern",
+    "description": "Witches' Brew Architecture is a software antipattern characterized by a chaotic and poorly structured codebase that combines multiple technologies, design patterns, and coding styles in a haphazard and inconsistent manner.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/clean-architecture",
+    "category": "architecture",
+    "title": "Clean Architecture",
+    "description": "Clean Architecture is a software design approach that prioritizes maintainability, testability, and flexibility by organizing code into distinct layers with clear dependencies, ensuring a robust and scalable application structure.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/competing-consumers",
+    "category": "architecture",
+    "title": "Competing Consumers Pattern",
+    "description": "Competing Consumers is an architecture pattern in which a queue is filled with work requests or commands, and one or more consumers pull messages from the queue and process them.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/event-driven-architecture",
+    "category": "architecture",
+    "title": "Event-Driven Architecture",
+    "description": "Discover the power of Event-Driven Architecture (EDA) in building scalable, real-time systems. Boost your knowledge on designing responsive and decoupled software architectures.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/layered-architecture",
+    "category": "architecture",
+    "title": "Layered Architecture",
+    "description": "Layered Architecture organizes software into distinct layers, each with specific responsibilities, where each layer only communicates with adjacent layers.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/modular-monolith",
+    "category": "architecture",
+    "title": "Modular Monolith",
+    "description": "A Modular Monolith is a software architecture that combines the simplicity of monolithic deployment with the organizational benefits of modularity, using well-defined boundaries between modules while maintaining a single deployable unit.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/n-tier-architecture",
+    "category": "architecture",
+    "title": "N-Tier Architecture",
+    "description": "N-Tier Architecture organizes applications into multiple layers\u2014commonly UI, Business Logic, and Data Access\u2014each with distinct responsibilities, and can be deployed across separate physical tiers.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/vertical-slice-architecture",
+    "category": "architecture",
+    "title": "Vertical Slice Architecture",
+    "description": "In Vertical Slice Architecture, we organize the application by features rather than layers.",
+    "aliases": []
+  },
+  {
+    "id": "architecture/web-queue-worker-architecture",
+    "category": "architecture",
+    "title": "Web-Queue-Worker Architecture",
+    "description": "Web-Queue-Worker Architecture separates request handling from background processing by placing durable work items on a queue and processing them asynchronously with worker services.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/alternative-class-different-interfaces",
+    "category": "code-smells",
+    "title": "Alternative Class with Different Interfaces Code Smell",
+    "description": "The Alternative Class with Different Interfaces code smell occurs when two or more classes do the same thing but expose different method names or signatures, preventing them from being used interchangeably.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/artificial-coupling",
+    "category": "code-smells",
+    "title": "Artificial Coupling Code Smell",
+    "description": "Artificial Coupling is a code smell where unrelated concepts are coupled together through shared state, a common base class, or co-location, when no real relationship exists between them.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/bump-road",
+    "category": "code-smells",
+    "title": "Bump Road Code Smell",
+    "description": "The Bump Road code smell occurs when code is unnecessarily difficult to work with due to accumulated friction \u2014 inconsistent patterns, unexpected side effects, and structural choices that make every change harder than it should be.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/class-depends-on-subclass",
+    "category": "code-smells",
+    "title": "Class Depends on Subclass Code Smell",
+    "description": "The Class Depends on Subclass code smell occurs when a base class contains references to, or knowledge of, one or more of its own subclasses \u2014 inverting the expected dependency direction in an inheritance hierarchy.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/class-doesnt-do-much",
+    "category": "code-smells",
+    "title": "Class Doesn't Do Much Code Smell",
+    "description": "The Class Doesn't Do Much code smell, also called a Lazy Class, describes a class that exists in the codebase but contributes so little behavior or responsibility that it does not justify its own existence.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/combinatorial-explosion",
+    "category": "code-smells",
+    "title": "Combinatorial Explosion Code Smell",
+    "description": "The Combinatorial Explosion code smell occurs when a small number of variations in behavior leads to a disproportionately large number of methods, classes, or code paths \u2014 growing multiplicatively rather than additively.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/comments",
+    "category": "code-smells",
+    "title": "Comments Code Smell",
+    "description": "The Comments code smell occurs when comments are used to explain unclear or poorly written code rather than improving the code itself to make it self-explanatory.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/conditional-complexity",
+    "category": "code-smells",
+    "title": "Conditional Complexity Code Smell",
+    "description": "Conditional Complexity is a code smell where business logic is buried in a tangle of nested or duplicated if/else and switch statements that are difficult to read, test, and extend.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/data-class",
+    "category": "code-smells",
+    "title": "Data Class Code Smell",
+    "description": "The Data Class code smell describes a class that holds data but contains no meaningful behavior, acting only as a passive data container.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/data-clumps",
+    "category": "code-smells",
+    "title": "Data Clumps Code Smell",
+    "description": "The Data Clumps code smell occurs when the same group of data items repeatedly appears together across multiple classes or method signatures, signaling that the group deserves its own type.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/dead-code",
+    "category": "code-smells",
+    "title": "Dead Code Code Smell",
+    "description": "The Dead Code code smell refers to code that is never executed, never reached, or no longer serves any purpose in the running application.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/divergent-change",
+    "category": "code-smells",
+    "title": "Divergent Change Code Smell",
+    "description": "Divergent Change is a code smell where a single class is routinely modified for multiple unrelated reasons, indicating that the class has too many responsibilities.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/duplicate-code",
+    "category": "code-smells",
+    "title": "Duplicate Code Code Smell",
+    "description": "Duplicate Code is the presence of identical or near-identical code in more than one location, requiring changes to be made in multiple places when the logic needs to evolve.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/feature-envy",
+    "category": "code-smells",
+    "title": "Feature Envy Code Smell",
+    "description": "Feature Envy is a code smell where a method in one class is more interested in the data or behavior of another class than in its own, suggesting the method belongs in the other class.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/hidden-dependencies",
+    "category": "code-smells",
+    "title": "Hidden Dependencies Code Smell",
+    "description": "Hidden Dependencies is a code smell where a class's required collaborators are not visible in its public interface, making the class's behavior unpredictable from the outside and difficult to test in isolation.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/hidden-temporal-coupling",
+    "category": "code-smells",
+    "title": "Hidden Temporal Coupling Code Smell",
+    "description": "Hidden Temporal Coupling is a code smell where methods must be called in a specific order, but nothing in the code makes that constraint visible or enforced, making incorrect usage easy and failures hard to diagnose.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/inappropriate-intimacy",
+    "category": "code-smells",
+    "title": "Inappropriate Intimacy Code Smell",
+    "description": "Inappropriate Intimacy is a code smell where two classes know too much about each other's internal implementation details, creating excessive coupling and mutual dependency.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/inconsistency",
+    "category": "code-smells",
+    "title": "Inconsistency Code Smell",
+    "description": "The Inconsistency code smell occurs when similar problems are solved in different ways, or when naming, structure, and conventions vary across a codebase without reason.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/inconsistent-abstraction-levels",
+    "category": "code-smells",
+    "title": "Inconsistent Abstraction Levels Code Smell",
+    "description": "Inconsistent Abstraction Levels is a code smell where a function or class mixes high-level policy with low-level implementation detail, making the code harder to read, test, and change.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/indecent-exposure",
+    "category": "code-smells",
+    "title": "Indecent Exposure Code Smell",
+    "description": "Indecent Exposure is a code smell where a class reveals internal implementation details that should be hidden, breaking encapsulation and increasing coupling to its internals.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/law-of-demeter-violations",
+    "category": "code-smells",
+    "title": "Law of Demeter Violations Code Smell",
+    "description": "Law of Demeter Violations occur when code navigates deeply through object graphs to access distant collaborators, creating tight coupling to intermediate structures that may change.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/long-method",
+    "category": "code-smells",
+    "title": "Long Method Code Smell",
+    "description": "The Long Method code smell refers to methods or functions that have grown too large, taking on too many responsibilities and becoming difficult to read, test, and maintain.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/long-parameter-list",
+    "category": "code-smells",
+    "title": "Long Parameter List Code Smell",
+    "description": "The Long Parameter List code smell occurs when a method or function requires too many parameters, making it difficult to call correctly, understand at a glance, and maintain over time.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/message-chains",
+    "category": "code-smells",
+    "title": "Message Chains Code Smell",
+    "description": "Message Chains is a code smell where code navigates a long sequence of object references to reach a distant collaborator, coupling the caller to every object in the chain.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/middle-man",
+    "category": "code-smells",
+    "title": "Middle Man Code Smell",
+    "description": "Middle Man is a code smell where a class does little work of its own and mostly delegates to another class, making it an unnecessary layer of indirection.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/obscured-intent",
+    "category": "code-smells",
+    "title": "Obscured Intent Code Smell",
+    "description": "The Obscured Intent code smell occurs when code is written in a way that hides what it is doing or why, requiring significant effort to decipher its purpose.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/oddball-solution",
+    "category": "code-smells",
+    "title": "Oddball Solution Code Smell",
+    "description": "The Oddball Solution code smell occurs when a problem is solved in multiple different ways throughout a codebase, so that no single, consistent approach is used.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/parallel-inheritance-hierarchies",
+    "category": "code-smells",
+    "title": "Parallel Inheritance Hierarchies Code Smell",
+    "description": "Parallel Inheritance Hierarchies is a code smell where every time you add a subclass to one class hierarchy, you are forced to add a corresponding subclass to a separate, mirrored hierarchy.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/poor-names",
+    "category": "code-smells",
+    "title": "Poor Names Code Smell",
+    "description": "The Poor Names code smell occurs when identifiers \u2014 variables, methods, classes, and parameters \u2014 are named in ways that obscure their purpose, making code harder to read and understand.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/poorly-written-tests",
+    "category": "code-smells",
+    "title": "Poorly Written Tests Code Smell",
+    "description": "Poorly Written Tests is a code smell where the test suite fails to provide reliable feedback \u2014 tests are brittle, hard to understand, or actively misleading about the state of the software.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/primitive-obsession-code-smell",
+    "category": "code-smells",
+    "title": "Primitive Obsession Code Smell",
+    "description": "Primitive Obsession describes code in which the design relies too heavily on primitive types, rather than solution-specific abstractions. It often results in more verbose code with more duplication of logic, since logic cannot be embedded with the primitive types used.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/regions",
+    "category": "code-smells",
+    "title": "Regions Code Smell",
+    "description": "The Regions code smell occurs when code is hidden behind collapsible region directives rather than being organized through proper structure, small classes, and well-named methods.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/required-setup-teardown",
+    "category": "code-smells",
+    "title": "Required Setup/Teardown Code Smell",
+    "description": "The Required Setup/Teardown code smell occurs when callers must remember to execute mandatory setup or cleanup code before and after using a class, rather than having that lifecycle managed automatically.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/shotgun-surgery",
+    "category": "code-smells",
+    "title": "Shotgun Surgery Code Smell",
+    "description": "Shotgun Surgery is a code smell where making a single logical change requires modifying many different classes or files simultaneously, spreading a single concern across the codebase in a fragile and error-prone way.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/speculative-generality",
+    "category": "code-smells",
+    "title": "Speculative Generality Code Smell",
+    "description": "Speculative Generality is the code smell of building abstractions, hooks, or flexibility into code for hypothetical future requirements that may never materialize.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/switch-statements",
+    "category": "code-smells",
+    "title": "Switch Statements Code Smell",
+    "description": "The Switch Statements code smell occurs when switch or if-else chains are used to vary behavior based on an object's type or state, rather than leveraging polymorphism.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/temporary-field",
+    "category": "code-smells",
+    "title": "Temporary Field Code Smell",
+    "description": "The Temporary Field code smell occurs when an object has instance fields that are only set and used in certain circumstances, leaving them uninitialized or meaningless the rest of the time.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/tramp-data",
+    "category": "code-smells",
+    "title": "Tramp Data Code Smell",
+    "description": "Tramp Data is a code smell where data is passed through a chain of methods solely to reach a distant consumer, indicating that the design does not reflect where the data actually belongs.",
+    "aliases": []
+  },
+  {
+    "id": "code-smells/vertical-separation",
+    "category": "code-smells",
+    "title": "Vertical Separation Code Smell",
+    "description": "The Vertical Separation code smell occurs when related code elements are spread far apart vertically within a file, forcing readers to scroll extensively to understand how code fits together.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/abstract-factory-pattern",
+    "category": "design-patterns",
+    "title": "Abstract Factory Design Pattern",
+    "description": "The Abstract Factory Pattern is one of the creational design patterns that allows the creation of families of related or dependent objects without specifying their concrete classes. This pattern is particularly useful when the system needs to be independent of how its objects are created, composed, and represented.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/adapter-design-pattern",
+    "category": "design-patterns",
+    "title": "Adapter Design Pattern",
+    "description": "Learn how the Adapter design pattern helps integrate incompatible interfaces. Discover how it acts as a bridge, allowing different systems to communicate seamlessly and enhancing the flexibility of your software architecture.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/bridge-pattern",
+    "category": "design-patterns",
+    "title": "Bridge Design Pattern",
+    "description": "The Bridge Design Pattern decouples an abstraction from its implementation, allowing both to vary independently. Learn how to use the Bridge pattern in C# to improve flexibility and extensibility in your software design.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/builder-pattern",
+    "category": "design-patterns",
+    "title": "Builder Design Pattern",
+    "description": "The Builder design pattern is a creational pattern, similar to the Factory pattern (Factory Method, Abstract Factory).",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/chain-of-responsibility-pattern",
+    "category": "design-patterns",
+    "title": "Chain of Responsibility Pattern",
+    "description": "The Chain of Responsibility pattern is a behavioral design pattern that allows you to pass requests along a chain of handlers.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/command-pattern",
+    "category": "design-patterns",
+    "title": "Command Design Pattern",
+    "description": "The Command Design Pattern encapsulates a request as an object, allowing you to parameterize clients with different requests, queue or log requests, and support undoable operations. Learn how to implement the Command pattern in C#.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/composite-pattern",
+    "category": "design-patterns",
+    "title": "Composite Design Pattern",
+    "description": "The Composite Design Pattern composes objects into tree structures to represent part-whole hierarchies, letting clients treat individual objects and compositions of objects uniformly. Learn how to implement the Composite pattern in C#.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/cqrs-pattern",
+    "category": "design-patterns",
+    "title": "CQRS - Command Query Responsibility Segregation",
+    "description": "CQRS is a design pattern used in software architecture to address the complexity and performance issues that can arise in systems handling both read (query) and write (command) operations.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/decorator-pattern",
+    "category": "design-patterns",
+    "title": "Decorator Design Pattern",
+    "description": "The Decorator Design Pattern is a structural pattern used to add new functionalities to objects dynamically without altering their structure. This pattern relies on a decorator class which wraps the original class and matches its interface, while providing additional behavior before or after the delegate call to the original class method.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/domain-events-pattern",
+    "category": "design-patterns",
+    "title": "Domain Events Pattern",
+    "description": "Dive deep into the Domain Events pattern. Master the nuances of pre-persistence and post-persistence events to build robust and scalable applications.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/event-aggregator-pattern",
+    "category": "design-patterns",
+    "title": "Event Aggregator Pattern",
+    "description": "Learn how the Event Aggregator design pattern decouples event publishers from subscribers by routing events through a central hub. Discover its benefits, drawbacks, use cases, and C# implementation.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/facade-pattern",
+    "category": "design-patterns",
+    "title": "Facade Pattern",
+    "description": "The Facade Pattern was described in the Gang of Four's Design Patterns book. This pattern allows for a simpler interface to access a subsystem of a complex system.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/factory-method-pattern",
+    "category": "design-patterns",
+    "title": "Factory Method Pattern",
+    "description": "The Factory Method pattern is an object creation pattern from the Design Patterns book. It defines an interface or abstract class for creating an object but leaves the specifics to the implementations.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/flyweight-pattern",
+    "category": "design-patterns",
+    "title": "Flyweight Design Pattern",
+    "description": "The Flyweight Design Pattern uses sharing to efficiently support large numbers of fine-grained objects. Learn how to implement the Flyweight pattern in C# to reduce memory usage when working with many similar objects.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/guard-clause",
+    "category": "design-patterns",
+    "title": "Guard Clause",
+    "description": "Complexity in code makes it harder to understand what the code is doing. The smallest unit of our code tends to be the function or method.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/interpreter-pattern",
+    "category": "design-patterns",
+    "title": "Interpreter Design Pattern",
+    "description": "The Interpreter Design Pattern defines a grammar for a language and provides an interpreter to process sentences in that language. Learn how to implement the Interpreter pattern in C# using abstract syntax trees.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/iterator-pattern",
+    "category": "design-patterns",
+    "title": "Iterator Design Pattern",
+    "description": "The Iterator Design Pattern provides a way to access elements of a collection sequentially without exposing its underlying representation. Learn how the Iterator pattern works in C# through IEnumerable, IEnumerator, and yield return.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/lazy-load-pattern",
+    "category": "design-patterns",
+    "title": "Lazy Load Pattern",
+    "description": "The Lazy Load Pattern defers the initialization of an object or resource until it is actually needed, avoiding unnecessary work and improving application startup performance.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/mediator-pattern",
+    "category": "design-patterns",
+    "title": "Mediator Pattern",
+    "description": "Learn how the Mediator design pattern simplifies complex interactions by centralizing communication between components. Ideal for systems needing loose coupling, this pattern enhances modularity, scalability, and maintainability, making it a go-to for complex applications.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/memento-pattern",
+    "category": "design-patterns",
+    "title": "Memento Pattern",
+    "description": "Like save points in a video game, commits in source control, and checkpoints in a Jupyter Notebook, the Memento Pattern allows you to capture the internal state of an object to be restored later.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/mvc-pattern",
+    "category": "design-patterns",
+    "title": "Model-View-Controller (MVC) Design Pattern",
+    "description": "The Model-View-Controller (MVC) pattern separates an application into three components \u2014 Model, View, and Controller \u2014 to decouple business logic from presentation. Learn how MVC works, how it compares to MVP and MVVM, and why ViewModels often appear inside MVC applications.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/mvp-pattern",
+    "category": "design-patterns",
+    "title": "Model-View-Presenter (MVP) Design Pattern",
+    "description": "The Model-View-Presenter (MVP) pattern separates UI logic from the view by introducing a Presenter that communicates with the View through an interface, making presentation logic fully unit-testable. Learn how MVP works, its two variants, and how it compares to MVC and MVVM.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/mvvm-pattern",
+    "category": "design-patterns",
+    "title": "Model-View-ViewModel (MVVM) Design Pattern",
+    "description": "The Model-View-ViewModel (MVVM) pattern separates UI state and behavior into a ViewModel that the View data-binds to automatically, removing the need for imperative UI update code. Learn how MVVM works in C# with WPF/MAUI examples, and how it compares to MVC and MVP.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/null-object-pattern",
+    "category": "design-patterns",
+    "title": "Null Object Pattern",
+    "description": "The Null Object Pattern was described in the Gang of Four's Design Patterns book. The intent of this pattern is to reduce the need to add checks and special behavior for handling null instances of certain variables that tend to propagate through applications.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/object-mother-pattern",
+    "category": "design-patterns",
+    "title": "Object Mother Pattern",
+    "description": "The Object Mother pattern is used for creating example objects in testing.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/observer-pattern",
+    "category": "design-patterns",
+    "title": "Observer Pattern",
+    "description": "Explore the Observer pattern, a key design pattern that enables loose coupling and dynamic communication between objects in software development. Learn about its benefits, drawbacks, use cases, and implementation.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/prototype-pattern",
+    "category": "design-patterns",
+    "title": "Prototype Design Pattern",
+    "description": "The Prototype Design Pattern creates new objects by copying an existing instance rather than constructing from scratch. Learn when to use it and how to implement deep and shallow cloning in C#.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/proxy-pattern",
+    "category": "design-patterns",
+    "title": "Proxy Pattern",
+    "description": "The Proxy Pattern can be useful for abstracting the access to data objects, providing additional functionality such as lazy loading, access control, or caching.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/repository-pattern",
+    "category": "design-patterns",
+    "title": "Repository Pattern",
+    "description": "Understand the Repository design pattern and its role in software architecture. Learn how it abstracts data access, providing a clean separation between the data layer and business logic for more maintainable and testable applications.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/repr-design-pattern",
+    "category": "design-patterns",
+    "title": "REPR Design Pattern",
+    "description": "The REPR Design Pattern defines web API endpoints as having three components: a Request, an Endpoint, and a Response. It simplifies the frequently-used MVC pattern and is more focused on API development.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/rules-engine-pattern",
+    "category": "design-patterns",
+    "title": "Rules Engine Pattern",
+    "description": "The Rules Engine pattern allows complex business rules to be defined, managed, and applied outside of the main application code.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/service-locator-pattern",
+    "category": "design-patterns",
+    "title": "Service Locator Pattern",
+    "description": "The Service Locator pattern provides a central registry from which objects can retrieve their dependencies at runtime. While it solves some dependency management problems, it is widely considered an antipattern due to serious impacts on testability, maintainability, and code clarity.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/singleton",
+    "category": "design-patterns",
+    "title": "Singleton",
+    "description": "The Singleton design pattern is used to ensure an application never contains more than a single instance of a given type.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/specification-pattern",
+    "category": "design-patterns",
+    "title": "Specification Pattern",
+    "description": "One Domain-Driven-Design solution to\u00a0the problem of where to place querying, sorting, and paging logic is to use a Specification.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/state-design-pattern",
+    "category": "design-patterns",
+    "title": "State Design Pattern",
+    "description": "The State Design Pattern is used to model changes in the status or state of an object by delegating rules for such changes to individual objects representing each possible state.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/strangler-fig-pattern",
+    "category": "design-patterns",
+    "title": "Strangler Fig Design Pattern",
+    "description": "The Strangler Fig pattern allows a legacy system to be gradually migrated by replacing pieces of functionality with new applications.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/strategy-pattern",
+    "category": "design-patterns",
+    "title": "Strategy Design Pattern",
+    "description": "Explore the Strategy design pattern in software development. See how it promotes flexibility by enabling the selection of algorithms at runtime, allowing for more adaptable and maintainable code structures.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/unit-of-work-pattern",
+    "category": "design-patterns",
+    "title": "Unit of Work Pattern",
+    "description": "The Unit of Work Pattern maintains a list of objects affected by a business transaction and coordinates the writing out of changes as a single atomic operation. Learn how to implement it in C# with Entity Framework Core.",
+    "aliases": []
+  },
+  {
+    "id": "design-patterns/visitor-pattern",
+    "category": "design-patterns",
+    "title": "Visitor Design Pattern",
+    "description": "The Visitor Design Pattern lets you define a new operation on elements of an object structure without changing the classes of those elements. Learn how to implement the Visitor pattern in C# with practical examples.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/aggregate-pattern",
+    "category": "domain-driven-design",
+    "title": "Aggregate Pattern",
+    "description": "Aggregates are a design pattern that play a big role in domain-driven development.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/anemic-model",
+    "category": "domain-driven-design",
+    "title": "Anemic Model",
+    "description": "In object-oriented programming, and especially in Domain-Driven Design, objects are said to be anemic if they have state but lack behavior.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/anti-corruption-layer",
+    "category": "domain-driven-design",
+    "title": "Anti-Corruption Layer",
+    "description": "Anti-Corruption Layers (ACLs) are used in domain-driven design (DDD) to allow for interactions with other contexts without adversely impacting the design of the core domain model.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/bounded-context",
+    "category": "domain-driven-design",
+    "title": "Bounded Context",
+    "description": "A bounded context is a concept from Domain-Driven Design that establishes boundary within a domain and contains models related to that context.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/context-mapping",
+    "category": "domain-driven-design",
+    "title": "Context Mapping",
+    "description": "Context Mapping enables seeing how bounded contexts integrate with each other.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/domain",
+    "category": "domain-driven-design",
+    "title": "Domains in DDD",
+    "description": "In Domain-Driven Design (DDD), a domain represents the specific knowledge, activities, and concerns related to a particular business or application context.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/domain-model",
+    "category": "domain-driven-design",
+    "title": "Domain Model in DDD",
+    "description": "A domain model in DDD is a conceptual representation of the core concepts, entities, and relationships within a specific domain.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/domain-storytelling",
+    "category": "domain-driven-design",
+    "title": "Domain Storytelling",
+    "description": "Domain Storytelling allows domain experts to tell the stories, capture the workflows, and illustrate those stories.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/entity",
+    "category": "domain-driven-design",
+    "title": "Entity",
+    "description": "An Entity is an object that has some intrinsic identity, apart from the rest of its state.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/eventstorming",
+    "category": "domain-driven-design",
+    "title": "EventStorming",
+    "description": "EventStorming is a powerful and collaborative workshop-based technique that enables teams to gain a deeper understanding of complex business domains, leading to more effective software development.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/shared-kernel",
+    "category": "domain-driven-design",
+    "title": "Shared Kernel in DDD",
+    "description": "In DDD, a Shared Kernel is a special type of Bounded Context that contains code and data shared across multiple bounded contexts within the same domain.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/strategic-design",
+    "category": "domain-driven-design",
+    "title": "Strategic Design in DDD",
+    "description": "Strategic design is essential for establishing a solid foundation for your domain model in DDD.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/subdomain",
+    "category": "domain-driven-design",
+    "title": "Subdomains in DDD",
+    "description": "In Domain-Driven Design (DDD), a subdomain represents a smaller, well-defined area of knowledge or responsibility within a larger domain.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/tactical-design",
+    "category": "domain-driven-design",
+    "title": "Tactical Design in DDD",
+    "description": "Tactical Design starts with the conceptual domain model from the strategic phase and gets into the low-level implementation details.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/ubiquitous-language",
+    "category": "domain-driven-design",
+    "title": "Ubiquitous Language",
+    "description": "All stakeholders on a software application, from users to product managers to developers, should share the same terminology when discussing the elements of the application.",
+    "aliases": []
+  },
+  {
+    "id": "domain-driven-design/value-object",
+    "category": "domain-driven-design",
+    "title": "Value Object",
+    "description": "A Value Object is an immutable type that is distinguishable only by the state of its properties.",
+    "aliases": []
+  },
+  {
+    "id": "laws/amaras-law",
+    "category": "laws",
+    "title": "Amara's Law: A Quick Guide on Technology Predictions",
+    "description": "We tend to overestimate the effect of a technology in the short run and underestimate the effect in the long run.",
+    "aliases": []
+  },
+  {
+    "id": "laws/amdahls-law",
+    "category": "laws",
+    "title": "Understanding Amdahl's Law: Unlocking the Secrets of Parallel Computing",
+    "description": "Amdahl's Law is a foundational principle that shapes our understanding of parallel computing and its limitations. This article unravels the concept, mathematical equation, and real-world implications of Amdahl's Law. Learn how to maximize the efficiency of your computing systems and make informed decisions when scaling hardware resources.",
+    "aliases": []
+  },
+  {
+    "id": "laws/andersons-law",
+    "category": "laws",
+    "title": "Anderson's Law",
+    "description": "Anderson's Law posits, 'I have yet to see any problem, however complicated, which, when you looked at it in the right way, did not become still more complicated.' This insightful aphorism perfectly encapsulates many scenarios in software development.",
+    "aliases": []
+  },
+  {
+    "id": "laws/brooks-law",
+    "category": "laws",
+    "title": "Brooks's Law: Understanding Its Implications in Software Development",
+    "description": "Adding manpower to a late software project makes it later.",
+    "aliases": []
+  },
+  {
+    "id": "laws/conways-law",
+    "category": "laws",
+    "title": "Conway's Law: Unraveling the Connection Between Software and Organizations",
+    "description": "Organizations which design systems \u2026 are constrained to produce designs which are copies of the communication structures of these organizations.",
+    "aliases": []
+  },
+  {
+    "id": "laws/cunninghams-law",
+    "category": "laws",
+    "title": "Cunningham's Law",
+    "description": "The best way to get the right answer on the Internet is not to ask a question; it's to post the wrong answer.",
+    "aliases": []
+  },
+  {
+    "id": "laws/galls-law",
+    "category": "laws",
+    "title": "Gall's Law for Software Developers",
+    "description": "Gall's Law is an observation about the nature and evolution of complex systems. It's a principle that resonates deeply within the world of software development and system architecture.",
+    "aliases": []
+  },
+  {
+    "id": "laws/goodharts-law",
+    "category": "laws",
+    "title": "Goodhart's Law: When Measures Become Targets",
+    "description": "Explore the pivotal insights of Goodhart's Law and its impact on business, economics, and personal goals. Understand how metrics can lead us astray when they're used as targets, and discover strategies to mitigate these effects for more effective decision-making and goal-setting.",
+    "aliases": []
+  },
+  {
+    "id": "laws/hebbs-law",
+    "category": "laws",
+    "title": "Hebb's Law",
+    "description": "Explore Hebb's Law, the cornerstone of neural network theory, and its profound impact on understanding brain plasticity and learning mechanisms. Perfect for sharing insights into the brain's learning processes.",
+    "aliases": []
+  },
+  {
+    "id": "laws/hofstadters-law",
+    "category": "laws",
+    "title": "Hofstadter's Law",
+    "description": "Discover the intriguing paradox of Hofstadter's Law in software development: 'It always takes longer than you expect, even when you account for Hofstadter's Law.' Dive into how this recursive principle challenges project timelines and explore strategies to navigate its complexities. Perfect for developers and project managers seeking insights into better estimating and managing the unpredictable nature of software projects.",
+    "aliases": []
+  },
+  {
+    "id": "laws/kerckhoffs-principle",
+    "category": "laws",
+    "title": "Kerckhoffs's Principle (or Law) in Software Engineering",
+    "description": "Kerckhoffs's Principle (or Law) is a foundational security concept that emphasizes designing systems that remain secure even when their implementation details are publicly known, focusing only on keeping sensitive data like keys secret. This contrasts with security by obscurity, which relies on hiding system details, a fragile and often risky approach.",
+    "aliases": []
+  },
+  {
+    "id": "laws/law-of-demeter",
+    "category": "laws",
+    "title": "The Law of Demeter",
+    "description": "The Law of Demeter (LoD) is a design guideline aimed at reducing coupling between classes in an object-oriented program. Although the Law of Demeter has a mathematical formulation, in simple terms it advises an object to only interact with its immediate friends and not with 'a friend of a friend.'",
+    "aliases": []
+  },
+  {
+    "id": "laws/law-of-diminishing-returns",
+    "category": "laws",
+    "title": "The Law of Diminishing Returns: An Economic Principle with Applications in Software Development",
+    "description": "The Law of Diminishing Returns is an important concept in economics that states that as more of a single factor of production is added to a production process, while other factors are held constant, the marginal increase in output will eventually decrease.",
+    "aliases": []
+  },
+  {
+    "id": "laws/laws-software-architecture",
+    "category": "laws",
+    "title": "Laws of Software Architecture",
+    "description": "Software architecture is a very broad topic, but even so there are some fundamental laws that all architects should understand.",
+    "aliases": []
+  },
+  {
+    "id": "laws/linus-law",
+    "category": "laws",
+    "title": "Linus's Law: Understanding the Wisdom of Collective Code Review",
+    "description": "Linus's Law posits that 'given enough eyeballs, all bugs are shallow.' Discover how this philosophy shapes open-source development, increases software quality, and enhances cybersecurity. Learn why many believe Linus's Law is the cornerstone of collaborative software engineering.",
+    "aliases": []
+  },
+  {
+    "id": "laws/moores-law",
+    "category": "laws",
+    "title": "Moore's Law",
+    "description": "Moore's Law posits that the number of transistors on a microchip doubles approximately every two years, effectively doubling processing power while reducing relative costs.",
+    "aliases": []
+  },
+  {
+    "id": "laws/murphys-law",
+    "category": "laws",
+    "title": "Murphy's Law",
+    "description": "Anything that can go wrong...",
+    "aliases": []
+  },
+  {
+    "id": "laws/postels-law",
+    "category": "laws",
+    "title": "Postel's Law",
+    "description": "Be liberal in what you accept; be conservative in what you send.",
+    "aliases": []
+  },
+  {
+    "id": "laws/teslers-law",
+    "category": "laws",
+    "title": "Tesler's Law: The Law of Conservation of Complexity",
+    "description": "Every application has an inherent amount of irreducible complexity. The only question is who will have to deal with it \u2014 the user, the developer, or the system.",
+    "aliases": []
+  },
+  {
+    "id": "laws/wirths-law",
+    "category": "laws",
+    "title": "Wirth's Law",
+    "description": "Wirth's Law, proposed by computer scientist Niklaus Wirth, states that 'software is getting slower more rapidly than hardware becomes faster.'",
+    "aliases": []
+  },
+  {
+    "id": "practices/50-72-rule",
+    "category": "practices",
+    "title": "The 50/72 Rule of Git",
+    "description": "A Git convention that allows for better commit messages.",
+    "aliases": []
+  },
+  {
+    "id": "practices/authentication",
+    "category": "practices",
+    "title": "Authentication",
+    "description": "Authentication is the concept of checking that the user is who they claim they are.",
+    "aliases": []
+  },
+  {
+    "id": "practices/authorization",
+    "category": "practices",
+    "title": "Authorization",
+    "description": "Authorization is the concept of checking whether a user has the proper privileges to access something.",
+    "aliases": []
+  },
+  {
+    "id": "practices/behavior-driven-development",
+    "category": "practices",
+    "title": "Behavior Driven Development",
+    "description": "Behavior Driven Development (BDD) is a software development practice that focuses on defining the behavior of a software system in a way that's easy to understand for both technical and non-technical stakeholders.",
+    "aliases": []
+  },
+  {
+    "id": "practices/code-readability",
+    "category": "practices",
+    "title": "Code Readability",
+    "description": "Discover the importance of Code Readability in software development. Learn how writing clear, understandable code enhances collaboration, reduces bugs, and makes maintenance easier for everyone on the team.",
+    "aliases": []
+  },
+  {
+    "id": "practices/code-that-fits",
+    "category": "practices",
+    "title": "Practices from Code That Fits in Your Head",
+    "description": "Code That Fits in Your Head by Mark Seemann includes over two dozen specific practices one can follow to help write better software. A summary of these practices is shown below.",
+    "aliases": []
+  },
+  {
+    "id": "practices/collective-code-ownership",
+    "category": "practices",
+    "title": "Collective Code Ownership",
+    "description": "Explore the practice of Collective Code Ownership, where all team members are responsible for the codebase. Learn how this approach promotes collaboration, quality, and faster issue resolution.",
+    "aliases": []
+  },
+  {
+    "id": "practices/common-architectural-vision",
+    "category": "practices",
+    "title": "Common Architectural Vision",
+    "description": "Well-designed software must have a single, well-defined architecture. Virtually all software, regardless of how well-designed one might find it, starts out with a single architecture.",
+    "aliases": []
+  },
+  {
+    "id": "practices/continuous-integration",
+    "category": "practices",
+    "title": "Continuous Integration",
+    "description": "Continuous Integration is an XP practice that ensures problems with the full system are detected as soon after they are introduced as possible.",
+    "aliases": []
+  },
+  {
+    "id": "practices/defensive-programming",
+    "category": "practices",
+    "title": "Defensive Programming",
+    "description": "Defensive programming is the practice of anticipating problems that may arise in a software system and writing code to keep the system in a good state when such problems occur.",
+    "aliases": []
+  },
+  {
+    "id": "practices/dependency-injection",
+    "category": "practices",
+    "title": "Dependency Injection",
+    "description": "Understand the benefits of Dependency Injection in software development. Learn how it helps create flexible, testable, and maintainable code by managing dependencies effectively.",
+    "aliases": []
+  },
+  {
+    "id": "practices/descriptive-error-messages",
+    "category": "practices",
+    "title": "Descriptive Error Messages",
+    "description": "When something unexpected or exceptional happens in a software application, usually an error message is displayed to the user and/or logged somewhere for a developer to investigate.",
+    "aliases": []
+  },
+  {
+    "id": "practices/dogfooding",
+    "category": "practices",
+    "title": "Dogfooding",
+    "description": "Learn about Dogfooding, the practice of using your own products. Discover how this approach helps identify issues early, improves product quality, and builds empathy with end-users.",
+    "aliases": []
+  },
+  {
+    "id": "practices/know-where-you-are-going",
+    "category": "practices",
+    "title": "Know Where You Are Going",
+    "description": "Explore the principle of 'Know Where You Are Going' in software projects. Understand how setting clear goals and having a vision ensures alignment and guides the development process effectively.",
+    "aliases": []
+  },
+  {
+    "id": "practices/naming-things",
+    "category": "practices",
+    "title": "Naming Things",
+    "description": "Discover why 'Naming Things' is considered one of the hardest problems in software development. Learn strategies for choosing clear, descriptive names that improve code clarity and maintainability.",
+    "aliases": []
+  },
+  {
+    "id": "practices/observability",
+    "category": "practices",
+    "title": "Observability",
+    "description": "Observability is a practice that uses logs, metrics, and traces to monitor and understand system behavior.",
+    "aliases": []
+  },
+  {
+    "id": "practices/pain-driven-development",
+    "category": "practices",
+    "title": "Pain Driven Development",
+    "description": "Pain Driven Development is waiting to apply principles, patterns, and practices to your code until there is some pain caused by the current approach.",
+    "aliases": []
+  },
+  {
+    "id": "practices/pair-programming",
+    "category": "practices",
+    "title": "Pair Programming",
+    "description": "Uncover the benefits of Pair Programming, where two developers work together at one workstation. Learn how this practice improves code quality, enhances learning, and boosts team collaboration.",
+    "aliases": []
+  },
+  {
+    "id": "practices/parse-dont-validate",
+    "category": "practices",
+    "title": "Parse, Don't Validate",
+    "description": "In many software applications, validation is used to determine whether or not a given data structure or object conforms to certain requirements. However, it doesn't (shouldn't) mutate or change the object in question, and thus any further change might invalidate the validation. By contrast, parsing a less-structured object and producing form it a more-structured one is a one-way operation that results in more useful data structures.",
+    "aliases": []
+  },
+  {
+    "id": "practices/read-the-manual",
+    "category": "practices",
+    "title": "Read the Manual",
+    "description": "Explore the importance of the 'Read the Manual' approach. Discover how understanding documentation thoroughly can prevent errors, save time, and improve the effective use of tools and libraries.",
+    "aliases": []
+  },
+  {
+    "id": "practices/red-green-refactor",
+    "category": "practices",
+    "title": "Red, Green, Refactor",
+    "description": "Red, Green, Refactor is a practice used during Test-Driven Development. It reflects the state of a new test failing, making that test pass, and then considering whether the existing solution can be improved through refactoring.",
+    "aliases": []
+  },
+  {
+    "id": "practices/refactoring",
+    "category": "practices",
+    "title": "Refactoring",
+    "description": "As a verb, refactoring means to improve the design of a code without changing what it does. As a noun, it refers to an individual modification to a program that improves its design, without changing what the code does.",
+    "aliases": []
+  },
+  {
+    "id": "practices/rubber-duck-debugging",
+    "category": "practices",
+    "title": "Rubber Duck Debugging",
+    "description": "Sometimes the process of describing a problem, even to an inanimate object, can reveal the solution.",
+    "aliases": []
+  },
+  {
+    "id": "practices/shipping-is-a-feature",
+    "category": "practices",
+    "title": "Shipping Is A Feature",
+    "description": "Learn why 'Shipping is a Feature' is a crucial mindset in software development. Understand the importance of delivering working software and how timely releases drive user satisfaction and business value.",
+    "aliases": []
+  },
+  {
+    "id": "practices/simple-design",
+    "category": "practices",
+    "title": "Simple Design",
+    "description": "Discover the power of Simple Design in software development. Learn how focusing on simplicity helps create flexible, understandable, and maintainable solutions that meet immediate needs without over-engineering.",
+    "aliases": []
+  },
+  {
+    "id": "practices/single-point-of-enforcement",
+    "category": "practices",
+    "title": "Single Point of Enforcement",
+    "description": "We enforce business rules through a Single Point of Enforcement, ensuring that all operations related to order processing go through a gatekeeper function that validates inputs and applies consistent logic.",
+    "aliases": []
+  },
+  {
+    "id": "practices/test-driven-development",
+    "category": "practices",
+    "title": "Test Driven Development",
+    "description": "Test Driven Development, or TDD, also known as Test Driven Design, is a process for writing code using tests to define and then confirm the software's\u00a0behavior.",
+    "aliases": []
+  },
+  {
+    "id": "practices/timeboxing",
+    "category": "practices",
+    "title": "Timeboxing: A Time Management Technique for Improved Productivity",
+    "description": "Timeboxing is a popular time management technique used in various fields, including software development, project management, and personal productivity. The practice involves allocating a fixed period, or \"timebox,\" to a specific task or activity.",
+    "aliases": []
+  },
+  {
+    "id": "practices/update-the-plan",
+    "category": "practices",
+    "title": "Update the Plan",
+    "description": "When you miss a deadline or milestone, don't just blindly shift the planned deadline back by a day.",
+    "aliases": []
+  },
+  {
+    "id": "practices/vertical-slices",
+    "category": "practices",
+    "title": "Vertical Slices",
+    "description": "With vertical slices, only the minimal functionality required for an individual feature or user story is built into each layer.",
+    "aliases": []
+  },
+  {
+    "id": "practices/whole-team",
+    "category": "practices",
+    "title": "Whole Team",
+    "description": "Understand the 'Whole Team' approach, where every team member's skills and insights are leveraged. Discover how this practice improves project outcomes by encouraging inclusivity and shared responsibility.",
+    "aliases": []
+  },
+  {
+    "id": "practices/whole-team-activity",
+    "category": "practices",
+    "title": "Whole Team Activity",
+    "description": "Explore the concept of Whole Team Activity, where everyone on the team collaborates towards common goals. Learn how this practice enhances communication, fosters innovation, and ensures project success.",
+    "aliases": []
+  },
+  {
+    "id": "practices/yolo-architecture",
+    "category": "practices",
+    "title": "YOLO Software Architecture",
+    "description": "YOLO Architecture describes a development style characterized by minimal planning, lack of organization, and an absence of clear architectural principles.",
+    "aliases": []
+  },
+  {
+    "id": "principles/architectural-agility",
+    "category": "principles",
+    "title": "Principle of Architectural Agility",
+    "description": "This principle highlights the importance of designing software architectures that can adapt to changing requirements and conditions.",
+    "aliases": []
+  },
+  {
+    "id": "principles/boy-scout-rule",
+    "category": "principles",
+    "title": "Boy Scout Rule",
+    "description": "The Boy Scout Rule can be summarized as leave your code better than you found it.",
+    "aliases": []
+  },
+  {
+    "id": "principles/dependency-inversion-principle",
+    "category": "principles",
+    "title": "Dependency Inversion Principle",
+    "description": "The Dependency Inversion Principle (DIP) states that high level modules should not depend on low level modules; both should depend on abstractions.",
+    "aliases": []
+  },
+  {
+    "id": "principles/dont-repeat-yourself",
+    "category": "principles",
+    "title": "Don't Repeat Yourself",
+    "description": "Master the Don't Repeat Yourself (DRY) principle in software design. Learn how eliminating redundancy in code and processes can boost maintainability, reduce errors, and enhance productivity.",
+    "aliases": []
+  },
+  {
+    "id": "principles/encapsulation",
+    "category": "principles",
+    "title": "Encapsulation",
+    "description": "Encapsulation refers to the idea that objects should manage their own behavior and state, so that their collaborators need not concern themselves with the object's inner workings.",
+    "aliases": []
+  },
+  {
+    "id": "principles/explicit-dependencies-principle",
+    "category": "principles",
+    "title": "Explicit Dependencies Principle",
+    "description": "The Explicit Dependencies Principle states that methods and classes should explicitly require (typically through method parameters or constructor parameters) any collaborating objects they need in order to function correctly.",
+    "aliases": []
+  },
+  {
+    "id": "principles/fail-fast",
+    "category": "principles",
+    "title": "Fail Fast",
+    "description": "Fail fast suggests that if an error or problem is going to occur, it's best to detect it as early as possible.",
+    "aliases": []
+  },
+  {
+    "id": "principles/hollywood-principle",
+    "category": "principles",
+    "title": "Hollywood Principle",
+    "description": "Explore the Hollywood Principle in software design. Don't call us, we'll call you. Understand how this approach promotes loose coupling and more flexible, scalable software architectures.",
+    "aliases": []
+  },
+  {
+    "id": "principles/interface-segregation",
+    "category": "principles",
+    "title": "Interface Segregation Principle",
+    "description": "The Interface Segregation Principle (ISP) states that clients should not be forced to depend on methods that they do not use.",
+    "aliases": []
+  },
+  {
+    "id": "principles/inversion-of-control",
+    "category": "principles",
+    "title": "Inversion of Control",
+    "description": "Inversion of Control (IoC or IOC) describes a system that follows the Hollywood Principle.",
+    "aliases": []
+  },
+  {
+    "id": "principles/keep-it-simple",
+    "category": "principles",
+    "title": "Keep It Simple",
+    "description": "Discover the power of simplicity with the KISS principle in software design. Learn some ways to keep it simple and have fewer defects.",
+    "aliases": []
+  },
+  {
+    "id": "principles/liskov-substitution-principle",
+    "category": "principles",
+    "title": "Liskov Substitution Principle",
+    "description": "The Liskov Substitution Principle (LSP) states that\u00a0subtypes must be substitutable for their base types.",
+    "aliases": []
+  },
+  {
+    "id": "principles/make-illegal-states-unrepresentable",
+    "category": "principles",
+    "title": "Make Illegal States Unrepresentable",
+    "description": "Make Illegal States Unrepresentable is a design principle that uses the type system to ensure invalid combinations of data cannot be constructed, eliminating whole classes of runtime errors at compile time.",
+    "aliases": []
+  },
+  {
+    "id": "principles/once-and-only-once",
+    "category": "principles",
+    "title": "Once and Only Once",
+    "description": "Adopt the Once and Only Once (OAOO) principle in software design. Understand how ensuring each piece of knowledge has a single, authoritative representation can reduce complexity and improve code quality.",
+    "aliases": []
+  },
+  {
+    "id": "principles/open-closed-principle",
+    "category": "principles",
+    "title": "Open-Closed Principle",
+    "description": "The Open-Closed Principle (OCP) states that software entities (classes, modules, methods, etc.) should be open for extension, but closed for modification.",
+    "aliases": []
+  },
+  {
+    "id": "principles/parse-dont-validate",
+    "category": "principles",
+    "title": "Parse, Don't Validate",
+    "description": "Parse, Don't Validate is a design principle that encourages converting unstructured or unverified input into a structured type that makes illegal states unrepresentable, rather than repeatedly validating raw data at every point of use.",
+    "aliases": []
+  },
+  {
+    "id": "principles/persistence-ignorance",
+    "category": "principles",
+    "title": "Persistence Ignorance",
+    "description": "The principle of Persistence Ignorance (PI) holds that classes modeling the business domain in a software application should not be impacted by how they might be persisted.",
+    "aliases": []
+  },
+  {
+    "id": "principles/principle-of-least-astonishment",
+    "category": "principles",
+    "title": "Principle of Least Astonishment: A Software Design Guideline",
+    "description": "The Principle of Least Astonishment (POLA), also known as the Principle of Least Surprise, is a software design guideline that emphasizes the importance of designing software systems in a way that minimizes confusion and unexpected behavior for users and developers.",
+    "aliases": []
+  },
+  {
+    "id": "principles/progressive-disclosure",
+    "category": "principles",
+    "title": "Progressive Disclosure",
+    "description": "Progressive Disclosure is a design principle that involves revealing information or complexity gradually, rather than all at once. It applies to software architecture, UX design, AI systems, presentations, and more.",
+    "aliases": []
+  },
+  {
+    "id": "principles/separation-of-concerns",
+    "category": "principles",
+    "title": "Separation of Concerns",
+    "description": "Learn about the Separation of Concerns (SoC) principle in software design. Discover how breaking down software into distinct sections with specific responsibilities enhances modularity and maintainability.",
+    "aliases": []
+  },
+  {
+    "id": "principles/single-responsibility-principle",
+    "category": "principles",
+    "title": "Single Responsibility Principle",
+    "description": "The Single Responsibility Principle (SRP) states that a class should have only one reason to change.",
+    "aliases": []
+  },
+  {
+    "id": "principles/solid",
+    "category": "principles",
+    "title": "SOLID",
+    "description": "The SOLID principles of Object Oriented Design include these five principles.",
+    "aliases": []
+  },
+  {
+    "id": "principles/stable-dependencies",
+    "category": "principles",
+    "title": "Stable Dependencies",
+    "description": "The Stable Dependencies Principle states that \"The dependencies between software packages should be in the direction of the stability of the packages. That is, a given package should depend only on more stable packages.\"",
+    "aliases": []
+  },
+  {
+    "id": "principles/tell-dont-ask",
+    "category": "principles",
+    "title": "Tell, Don't Ask",
+    "description": "The Tell, Don't Ask (TDA) principle suggests that it is better to issue an object a command to perform some operation or logic, rather than to query its state and then take some action as a result.",
+    "aliases": []
+  },
+  {
+    "id": "principles/tolerance-for-imperfection",
+    "category": "principles",
+    "title": "Tolerance for Imperfection in Software Architecture",
+    "description": "Don't let perfect be the enemy of good. Software architecture is rarely perfect, but must be designed to support future optionality in the face of unknown future constraints and requirements.",
+    "aliases": []
+  },
+  {
+    "id": "principles/yagni",
+    "category": "principles",
+    "title": "YAGNI",
+    "description": "YAGNI, or \"You Ain't Gonna Need It\" (or \"You Aren't Gonna Need It\"), emerged as one of the key principles of Extreme Programming.",
+    "aliases": []
+  },
+  {
+    "id": "terms/aggregate-complexity",
+    "category": "terms",
+    "title": "Aggregate Complexity",
+    "description": "Aggregate complexity is a code metric introduced by Steve Smith (Ardalis) in 2018 that measures the total complexity of a software application by aggregating the complexity scores of all its methods, providing a system-wide view of complexity health.",
+    "aliases": []
+  },
+  {
+    "id": "terms/bus-factor",
+    "category": "terms",
+    "title": "Bus Factor",
+    "description": "A project's bus factor (or truck factor) is a number equal to the number of team members who, if run over by a bus, would put the project in jeopardy.",
+    "aliases": []
+  },
+  {
+    "id": "terms/cognitive-complexity",
+    "category": "terms",
+    "title": "Cognitive Complexity",
+    "description": "Cognitive complexity is a code metric that measures how difficult a piece of code is to understand, penalizing structural patterns that increase mental effort rather than simply counting decision points.",
+    "aliases": []
+  },
+  {
+    "id": "terms/cohesion",
+    "category": "terms",
+    "title": "Cohesion",
+    "description": "Cohesion refers to how closely related and focused the responsibilities of a single class, module, or function are. High cohesion is desirable and signals that a unit of code has a clear, singular purpose.",
+    "aliases": []
+  },
+  {
+    "id": "terms/cyclomatic-complexity",
+    "category": "terms",
+    "title": "Cyclomatic Complexity",
+    "description": "Cyclomatic complexity is a quantitative measure of the number of linearly independent paths through a piece of code, used as an indicator of testability and maintainability.",
+    "aliases": []
+  },
+  {
+    "id": "terms/kinds-of-models",
+    "category": "terms",
+    "title": "Kinds of Models",
+    "description": "In a Model-View-Controller (MVC) application, the Model is responsible for the application's state and non-UI specific behavior.",
+    "aliases": []
+  },
+  {
+    "id": "terms/technical-debt",
+    "category": "terms",
+    "title": "Technical Debt",
+    "description": "Technical debt is a metaphor for all of the shortcuts, hacks, and poor design choices made for a given software system that compromised its quality, usually in an attempt to meet a deadline.",
+    "aliases": []
+  },
+  {
+    "id": "testing/arrange-act-assert",
+    "category": "testing",
+    "title": "Arrange-Act-Assert",
+    "description": "Arrange-Act-Assert is a pattern for setting up tests.",
+    "aliases": []
+  },
+  {
+    "id": "testing/automated-tests",
+    "category": "testing",
+    "title": "Automated Tests",
+    "description": "Discover the benefits and challenges of automated testing, a crucial practice for maintaining code quality and efficiency in software development.",
+    "aliases": []
+  },
+  {
+    "id": "testing/front-end-tests",
+    "category": "testing",
+    "title": "Front-End Tests",
+    "description": "Learn how front-end tests ensure your application\u2019s user interface performs as expected, providing a seamless user experience across all devices.",
+    "aliases": []
+  },
+  {
+    "id": "testing/functional-tests",
+    "category": "testing",
+    "title": "Functional Tests",
+    "description": "Explore functional tests that validate software features against specified requirements, ensuring that your application works as intended.",
+    "aliases": []
+  },
+  {
+    "id": "testing/integration-tests",
+    "category": "testing",
+    "title": "Integration Tests",
+    "description": "Understand the importance of integration tests in verifying that different modules of your application work together seamlessly.",
+    "aliases": []
+  },
+  {
+    "id": "testing/testing-pyramid",
+    "category": "testing",
+    "title": "The Testing Pyramid",
+    "description": "A guide to the testing pyramid, explaining the optimal distribution of unit, integration, and end-to-end tests in your software project.",
+    "aliases": []
+  },
+  {
+    "id": "testing/unit-tests",
+    "category": "testing",
+    "title": "Unit Tests",
+    "description": "Dive into the world of unit tests, the fastest and most granular way to ensure your code functions correctly at the smallest level.",
+    "aliases": []
+  },
+  {
+    "id": "tools/build-server",
+    "category": "tools",
+    "title": "Build Server",
+    "description": "A build server is a tool that enables Continuous Integration, an excellent practice to follow when developing software.",
+    "aliases": []
+  },
+  {
+    "id": "tools/version-control",
+    "category": "tools",
+    "title": "Version Control",
+    "description": "Version control systems are essential for tracking changes, collaborating seamlessly, and maintaining the integrity of your codebase across teams and time.",
+    "aliases": []
+  },
+  {
+    "id": "values/communication",
+    "category": "values",
+    "title": "Communication",
+    "description": "Effective communication is key to successful software projects. Learn how the Communication value in Extreme Programming fosters collaboration, clarity, and team alignment for better project outcomes.",
+    "aliases": []
+  },
+  {
+    "id": "values/courage",
+    "category": "values",
+    "title": "Courage",
+    "description": "Embrace the value of Courage in Extreme Programming. Discover how taking bold decisions, addressing challenges directly, and welcoming changes can lead to better, more adaptable software solutions.",
+    "aliases": []
+  },
+  {
+    "id": "values/feedback",
+    "category": "values",
+    "title": "Feedback",
+    "description": "Explore the Feedback principle in Extreme Programming. Understand how continuous feedback loops between developers, stakeholders, and customers drive improvement and ensure high-quality software delivery.",
+    "aliases": []
+  },
+  {
+    "id": "values/respect",
+    "category": "values",
+    "title": "Respect",
+    "description": "Respect is at the core of successful teams. Explore how the Respect value in Extreme Programming promotes a positive work environment, where every team member's ideas and contributions are valued.",
+    "aliases": []
+  },
+  {
+    "id": "values/simplicity",
+    "category": "values",
+    "title": "Simplicity",
+    "description": "Discover the value of Simplicity in Extreme Programming. Learn how focusing on simple solutions and avoiding unnecessary complexity can enhance efficiency and improve software development outcomes.",
+    "aliases": []
+  }
+]

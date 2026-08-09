@@ -1,0 +1,8 @@
+badger
+comet
+falcon
+otter
+panda
+raven
+sparrow
+tiger

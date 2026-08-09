@@ -1,0 +1,157 @@
+{
+  "architect": {
+    "description": "Turns requirements into a phased ROADMAP.md, REQUIREMENTS.md, and PROJECT.md. Use for initial project scoping or re-planning after a milestone ships. Not for per-phase task planning. That belongs to lead.",
+    "tools": "Read, Glob, Grep, Write, LSP, Skill, SendMessage",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "maxTurns": 50
+  },
+  "debugger": {
+    "description": "Diagnoses and fixes a single reported bug via reproduce, hypothesize, evidence, diagnose, fix, verify. Use for concrete bug reports, crashes, or test failures needing root-cause investigation. Not for phase planning (lead), verification of completed work (qa), or documentation (docs).",
+    "disallowedTools": "Task, TaskCreate, Bash",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "maxTurns": 40
+  },
+  "coding-dijkstra": {
+    "description": "Use to design, implement, or review an algorithm, a loop, or logic in any language when correctness matters. Works postcondition-first, derives loops from invariants, proves termination with a variant function, and refines stepwise, grounded in A Discipline of Programming and Structured Programming (Dahl, Dijkstra, Hoare). Pairs with the dijkstra-critic teammate, which audits the invariant, the variant, and the guard coverage before the code ships. Applies the Dijkstra correctness discipline (postcondition-first, invariant/variant-derived loops) for algorithms, loops, and tricky logic.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
+    "maxTurns": 50,
+    "pairsWith": "coding-dijkstra-critic"
+  },
+  "coding-dijkstra-critic": {
+    "description": "Critiques a coding-dijkstra teammate's loop or algorithm implementation for invariant, variant, and guard coverage. Use to audit a dijkstra teammate's work before it ships. Not for writing code or planning tasks. That belongs to dev.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "tools": "Read, Grep, Glob, SendMessage, TaskGet, TaskList, TaskUpdate",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "maxTurns": 20,
+    "pairsWith": "coding-dijkstra"
+  },
+  "python-engineer": {
+    "description": "Focused Python engineer. Use to design, implement, refactor, or debug Python. Writes idiomatic modern Python grounded in Fluent Python, picks the right data structure and algorithm from Algorithmic Thinking, and holds to Clean Code and Clean Coder discipline. Pairs with the python-critic teammate, which reviews the work before it ships.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
+    "maxTurns": 50,
+    "pairsWith": "python-critic"
+  },
+  "python-critic": {
+    "description": "Sparring-partner reviewer for Python. Use to challenge and harden a function, refactor, or algorithm choice before it ships. Reviews pythonic idiom (Fluent Python), clean-code and Clean Coder discipline (Silen), algorithmic complexity and data-structure choice (Zingaro). Adversarial in service of stronger code. Ends every review with a binary BLOCK or PASS verdict. Pairs with the python-engineer teammate, whose work it reviews.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "maxTurns": 20,
+    "pairsWith": "python-engineer"
+  },
+  "web-engineer": {
+    "description": "Full-stack web engineer. Use to design, implement, refactor, or debug a UI website, a web app, a frontend, an API, or a backend app. Builds interfaces grounded in About Face and Designing Interfaces (interaction design and UI patterns), holds accessibility and trust-boundary security as non-negotiable, plans the path to production with Modern DevOps, and builds lazy (ponytail). Pairs with the web-code-critic teammate, which reviews the work before it ships.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
+    "maxTurns": 50,
+    "pairsWith": "web-code-critic"
+  },
+  "web-code-critic": {
+    "description": "Adversarial reviewer for web code. Use to audit a screen, a flow, an API, or a full-stack change before it ships, checking interaction design against About Face and Designing Interfaces, accessibility basics, security at trust boundaries (XSS, injection, CSRF, authorization), tests, performance basics, and over-engineering. Blocks work that fails a gate. Ends every review with a binary BLOCK or PASS verdict. Pairs with the web-engineer teammate, whose work it reviews.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "maxTurns": 20,
+    "pairsWith": "web-engineer"
+  },
+  "ux-oracle": {
+    "description": "Consultative UX sparring partner for web-engineer, and for test-dev in a trio. Use for a live, mid-task second opinion on a UX judgment call: does this flow match the user's actual goal, is this the right interaction pattern, what is the simplest layout that does not fight the user. Answers with a specific, cited recommendation grounded in About Face, Designing Interfaces, and The User Experience Team of One, then stops. Never blocks, never gates, produces no artifact. Advisory only, the primary agent weighs the opinion and may act on it or disagree.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "tools": "Read, Grep, Glob, SendMessage, TaskGet, TaskList, TaskUpdate",
+    "disallowedTools": "Task, TaskCreate, Agent, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
+    "maxTurns": 20
+  },
+  "docs": {
+    "description": "Documentation agent for READMEs, changelogs, inline API docs, and guides. Use for standalone documentation tasks and for doc-only plans or tasks a Lead has scoped out of a phase. Documentation changes bundled inside a feature implementation task stay with dev under its plan contract. Read access to the full codebase, write access limited to documentation files only.",
+    "tools": "Read, Grep, Glob, Bash, Write, Edit, LSP, Skill, TaskGet, SendMessage",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "maxTurns": 30
+  },
+  "lead": {
+    "description": "Turns a scoped phase into executable PLAN.md task lists through research, decomposition, and self-review in one compaction-extended session. Use for per-phase task planning once a phase exists in ROADMAP.md and REQUIREMENTS.md. Not for initial project scoping or roadmap creation. That belongs to architect.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "tools": "Read, Glob, Grep, Write, Bash, WebFetch, LSP, Skill, Task, SendMessage",
+    "pairsWith": "lead-critic",
+    "maxTurns": 50
+  },
+  "lead-critic": {
+    "description": "Sparring-partner reviewer for lead's PLAN.md output. Use to challenge and harden a phase's plan set, strategy choice, task estimates, dependencies, craft gates, and validation block, before execution starts. Reviews delivery-strategy fit against lead's own strategy table, disguised point estimates dressed as ranges, acyclic task dependencies free of same-wave file overlap, craft-gate presence on coding tasks, and a filled or honestly skipped validation block. Adversarial in service of a plan that survives execution. Ends every review with a binary GREENLIGHT or BLOCK verdict. Pairs with the lead teammate, whose plans it reviews.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "maxTurns": 20,
+    "pairsWith": "lead"
+  },
+  "qa-author": {
+    "description": "Test author for the red stage of opt-in TDD execution. Writes and commits failing tests from plan must_haves without modifying product code.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, NotebookEdit, Bash",
+    "maxTurns": 30
+  },
+  "qa": {
+    "description": "Validates completed plan or phase work against PLAN.md must_haves and declared deviations using goal-backward checks. Use after Dev or Docs finish a plan or phase, or for standalone debug-session verification. Not for diagnosing root causes of bugs. That belongs to debugger. Read-only derives and reports PASS, FAIL, or PARTIAL verdicts, never edits source or planning files.",
+    "memory": "project",
+    "permissionMode": "plan",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "maxTurns": 20
+  },
+  "scout": {
+    "description": "Research agent for web/doc/codebase scanning and read-only live validation. Use for pre-plan domain research, codebase mapping (/map), and standalone research (/research). Not for planning or task decomposition. That belongs to architect and lead. Writes RESEARCH.md files directly. Never edits existing files.",
+    "memory": "local",
+    "permissionMode": "plan",
+    "disallowedTools": "Edit, NotebookEdit, Task, TaskCreate, Agent",
+    "maxTurns": 30
+  },
+  "test-dev": {
+    "description": "Writes unit tests for every function a paired engineer implements, grounded in The Art of Unit Testing (Osherove, Khorikov). Always spawned as the third member of an engineer plus critic trio via --trio, never solo-paired. The engineer is barred from writing to the test directory. This role owns it.",
+    "memory": "project",
+    "permissionMode": "acceptEdits",
+    "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
+    "maxTurns": 40
+  },
+  "deviq": {
+    "description": "Read-only DevIQ advisor. Use to answer one framed question by grounding it in the DevIQ corpus (references/deviq-corpus/) via scripts/deviq-lookup.sh. Returns a specific recommendation citing 1-3 corpus article ids. Never a verdict, never a block, never writes a file. Spawned solo, not paired.",
+    "tools": "Read, Grep, Glob, Bash, SendMessage",
+    "disallowedTools": "Edit, Write, NotebookEdit, ExitPlanMode, Task, TaskCreate, Agent, AskUserQuestion",
+    "memory": "project",
+    "permissionMode": "plan",
+    "maxTurns": 15
+  },
+  "trios": {
+    "coding-dijkstra": [
+      "coding-dijkstra",
+      "coding-dijkstra-critic",
+      "test-dev"
+    ],
+    "python-engineer": [
+      "python-engineer",
+      "python-critic",
+      "test-dev"
+    ],
+    "web-engineer": [
+      "web-engineer",
+      "web-code-critic",
+      "test-dev"
+    ]
+  },
+  "oracles": {
+    "web-engineer": [
+      "ux-oracle"
+    ]
+  }
+}

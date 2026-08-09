@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "lbwc-marketplace",
+  "description": "LBWC zero-trust orchestration for Claude Code.",
+  "version": "1.0.0",
+  "owner": {
+    "name": "Michael Heichler",
+    "url": "https://github.com/michaelheichler"
+  },
+  "plugins": [
+    {
+      "name": "lbwc",
+      "source": ".",
+      "description": "Plan, build, QA, and UAT orchestration with shell-enforced generated-agent boundaries.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Michael Heichler"
+      },
+      "homepage": "https://github.com/michaelheichler/lbwc",
+      "repository": "https://github.com/michaelheichler/lbwc",
+      "license": "GPL-3.0-only",
+      "keywords": [
+        "claude-code",
+        "orchestration",
+        "zero-trust"
+      ]
+    }
+  ]
+}

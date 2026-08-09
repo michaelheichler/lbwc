@@ -1,0 +1,19 @@
+{
+  "effort": "balanced",
+  "autonomy": "standard",
+  "auto_commit": true,
+  "planning_tracking": "manual",
+  "auto_push": "never",
+  "verification_tier": "standard",
+  "context_compiler": true,
+  "max_tasks_per_plan": 5,
+  "prefer_teams": "auto",
+  "auto_uat": false,
+  "require_phase_discussion": false,
+  "rolling_summary": false,
+  "metrics": false,
+  "caveman_style": "auto",
+  "caveman_commit": false,
+  "caveman_review": false,
+  "max_uat_remediation_rounds": false
+}

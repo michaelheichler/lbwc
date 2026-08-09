@@ -1,0 +1,117 @@
+[
+  {
+    "pattern": "copy[- ]paste|duplicat(e|ed|ing|ion)",
+    "article": "antipatterns/copy-paste-programming",
+    "note": "copied code instead of a shared abstraction"
+  },
+  {
+    "pattern": "duplicate code",
+    "article": "code-smells/duplicate-code",
+    "note": "the same logic repeated in more than one place"
+  },
+  {
+    "pattern": "god (object|class)",
+    "article": "antipatterns/blob",
+    "note": "one class doing too much"
+  },
+  {
+    "pattern": "magic (string|number)",
+    "article": "antipatterns/magic-strings",
+    "note": "unnamed literal embedded in logic"
+  },
+  {
+    "pattern": "premature optimi[sz]ation",
+    "article": "principles/yagni",
+    "note": "optimizing before there is a measured need"
+  },
+  {
+    "pattern": "shotgun surgery",
+    "article": "code-smells/shotgun-surgery",
+    "note": "one change forcing edits across many files"
+  },
+  {
+    "pattern": "big design up front|\\bbduf\\b",
+    "article": "antipatterns/big-design-up-front",
+    "note": "designing everything before writing any code"
+  },
+  {
+    "pattern": "analysis paralysis",
+    "article": "antipatterns/analysis-paralysis",
+    "note": "too much planning, not enough shipping"
+  },
+  {
+    "pattern": "assumption[- ]driven",
+    "article": "antipatterns/assumption-driven-programming",
+    "note": "coding on an unverified assumption about the user or the data"
+  },
+  {
+    "pattern": "golden hammer",
+    "article": "antipatterns/golden-hammer",
+    "note": "using a familiar tool for every problem regardless of fit"
+  },
+  {
+    "pattern": "cargo cult",
+    "article": "antipatterns/found-on-internet",
+    "note": "copying a pattern without understanding why it worked elsewhere"
+  },
+  {
+    "pattern": "feature creep",
+    "article": "antipatterns/feature-creep",
+    "note": "scope quietly growing beyond the original goal"
+  },
+  {
+    "pattern": "primitive obsession",
+    "article": "code-smells/primitive-obsession-code-smell",
+    "note": "using raw strings or numbers where a small type belongs"
+  },
+  {
+    "pattern": "spaghetti( code)?",
+    "article": "antipatterns/spaghetti-code",
+    "note": "tangled control flow with no clear structure"
+  },
+  {
+    "pattern": "not invented here",
+    "article": "antipatterns/not-invented-here",
+    "note": "rebuilding an existing solution rather than adopting it"
+  },
+  {
+    "pattern": "broken window",
+    "article": "antipatterns/broken-windows",
+    "note": "small unfixed problems signaling nobody cares"
+  },
+  {
+    "pattern": "long method",
+    "article": "code-smells/long-method",
+    "note": "a function doing too many things to read at a glance"
+  },
+  {
+    "pattern": "dead code",
+    "article": "code-smells/dead-code",
+    "note": "code that no longer runs but still sits in the tree"
+  },
+  {
+    "pattern": "reinvent(ing|ed)? the wheel",
+    "article": "antipatterns/reinventing-the-wheel",
+    "note": "building from scratch what an existing library already solves"
+  },
+  {
+    "pattern": "big ball of mud",
+    "article": "antipatterns/big-ball-of-mud",
+    "note": "architecture that never had a real structure"
+  },
+  {
+    "pattern": "feature envy",
+    "article": "code-smells/feature-envy",
+    "note": "a method more interested in another object's data than its own"
+  },
+  {
+    "pattern": "switch statement",
+    "article": "code-smells/switch-statements",
+    "note": "a type-check branch that grows every time a case is added"
+  },
+  {
+    "pattern": "long parameter list",
+    "article": "code-smells/long-parameter-list",
+    "note": "a function signature carrying too many arguments"
+  }
+]

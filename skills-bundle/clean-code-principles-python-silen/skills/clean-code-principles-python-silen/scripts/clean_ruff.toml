@@ -1,0 +1,39 @@
+# Opinionated ruff configuration that encodes the principles from
+# "Clean Code: Principles and Patterns, Python Edition" (Petri Silen, 2024).
+#
+# clean_check.py applies this with `--config` so enforcement is deterministic and
+# independent of whatever ruff config a project happens to ship. Copy it into your
+# own repo if you want the same rules in your editor / CI.
+#
+# Rule -> principle mapping (high level):
+#   N    Uniform Naming          ANN  Prefer Statically Typed
+#   UP   Modern Python           B/RUF Avoid bugs / mutable defaults
+#   TRY/BLE  Error & exception handling     S   Security
+#   RET  Function single return  SIM/C4/PERF  Refactoring & data structures
+#   ERA  Avoid comments (no commented-out code)   T20  Observability (logging not print)
+#   SLF  Encapsulation           PLR  SRP / complexity
+
+target-version = "py312"
+line-length = 100
+
+[lint]
+select = [
+    "E", "W", "F", "I", "N", "UP", "ANN", "B", "C4", "SIM", "RET", "PTH",
+    "PERF", "ERA", "ARG", "FBT", "RUF", "S", "DTZ", "T20", "SLF", "BLE",
+    "TRY", "PLR", "PLW", "PLC",
+]
+# Lint *opinions* the book does not teach and that fight readability:
+ignore = ["S101", "EM101", "EM102", "TRY003", "ANN401"]
+
+[lint.per-file-ignores]
+# Tests legitimately assert, use literal expectations, touch private members, and
+# do not need full annotations or keyword-only flags (pytest is the contract).
+"**/test_*.py" = ["S101", "S105", "S106", "PLR2004", "SLF001", "ANN", "ARG", "FBT", "DTZ"]
+"**/*_test.py" = ["S101", "S105", "S106", "PLR2004", "SLF001", "ANN", "ARG", "FBT", "DTZ"]
+"**/tests/**" = ["S101", "S105", "S106", "PLR2004", "SLF001", "ANN", "ARG", "FBT", "DTZ"]
+"**/conftest.py" = ["ANN", "ARG"]
+# Runnable teaching examples print their results from an `if __name__` demo block.
+"**/examples/**" = ["T20", "PLR2004"]
+
+[lint.pydocstyle]
+convention = "pep257"

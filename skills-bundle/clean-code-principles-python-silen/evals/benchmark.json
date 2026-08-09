@@ -1,0 +1,532 @@
+{
+  "metadata": {
+    "skill_name": "clean-code-principles-python-silen",
+    "skill_path": "/home/tux/Development/clean_code_principles_patterns_python/skills/clean-code-principles-python-silen",
+    "evals_run": [
+      "refactor-messy-order-service",
+      "build-salesitem-rest-endpoint",
+      "review-risky-function",
+      "exception-handling-architecture",
+      "write-tests-for-pricing"
+    ],
+    "runs_per_configuration": 1,
+    "executor_model": "claude-opus-4-8[1m]"
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "refactor-messy-order-service",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.833,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 0,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No bare/blind except in the refactor",
+          "passed": true,
+          "evidence": "ruff E722/BLE absent"
+        },
+        {
+          "text": "Full type hints (no ANN findings)",
+          "passed": true,
+          "evidence": "annotations present, ANN clean ([])"
+        },
+        {
+          "text": "Class uses PascalCase",
+          "passed": false,
+          "evidence": "no N801 / lowercase class"
+        },
+        {
+          "text": "No mutable default argument",
+          "passed": true,
+          "evidence": "no mutable default arg detected"
+        },
+        {
+          "text": "Encapsulation respected (no CCP002/CCP003)",
+          "passed": true,
+          "evidence": "no leaky-getter / mutable-param-alias"
+        },
+        {
+          "text": "Checker reports clean (0 errors, 0 warnings)",
+          "passed": true,
+          "evidence": "counts={'error': 0, 'warning': 0, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "refactor-messy-order-service",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.667,
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 6,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No bare/blind except in the refactor",
+          "passed": true,
+          "evidence": "ruff E722/BLE absent"
+        },
+        {
+          "text": "Full type hints (no ANN findings)",
+          "passed": true,
+          "evidence": "annotations present, ANN clean ([])"
+        },
+        {
+          "text": "Class uses PascalCase",
+          "passed": false,
+          "evidence": "no N801 / lowercase class"
+        },
+        {
+          "text": "No mutable default argument",
+          "passed": true,
+          "evidence": "no mutable default arg detected"
+        },
+        {
+          "text": "Encapsulation respected (no CCP002/CCP003)",
+          "passed": true,
+          "evidence": "no leaky-getter / mutable-param-alias"
+        },
+        {
+          "text": "Checker reports clean (0 errors, 0 warnings)",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 6, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "build-salesitem-rest-endpoint",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 0,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Repository is an interface (Protocol/ABC)",
+          "passed": true,
+          "evidence": "interface keyword found"
+        },
+        {
+          "text": "Request/response DTO separate from entity (>=2 model classes)",
+          "passed": true,
+          "evidence": "multiple model classes"
+        },
+        {
+          "text": "Not-found handled (domain error / 404)",
+          "passed": true,
+          "evidence": "not-found handling found"
+        },
+        {
+          "text": "Type hints present (no ANN findings)",
+          "passed": true,
+          "evidence": "annotations present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": true,
+          "evidence": "counts={'error': 0, 'warning': 0, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "build-salesitem-rest-endpoint",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 2,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Repository is an interface (Protocol/ABC)",
+          "passed": true,
+          "evidence": "interface keyword found"
+        },
+        {
+          "text": "Request/response DTO separate from entity (>=2 model classes)",
+          "passed": true,
+          "evidence": "multiple model classes"
+        },
+        {
+          "text": "Not-found handled (domain error / 404)",
+          "passed": true,
+          "evidence": "not-found handling found"
+        },
+        {
+          "text": "Type hints present (no ANN findings)",
+          "passed": true,
+          "evidence": "annotations present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 2, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "review-risky-function",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 0,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Parameterized query (no string-built SQL)",
+          "passed": true,
+          "evidence": "placeholder/params used, no concat"
+        },
+        {
+          "text": "No mutable default argument",
+          "passed": true,
+          "evidence": "no mutable default"
+        },
+        {
+          "text": "No bare except",
+          "passed": true,
+          "evidence": "specific exception"
+        },
+        {
+          "text": "Type hints added",
+          "passed": true,
+          "evidence": "annotations present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": true,
+          "evidence": "counts={'error': 0, 'warning': 0, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "review-risky-function",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.2,
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 1,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Parameterized query (no string-built SQL)",
+          "passed": false,
+          "evidence": "placeholder/params used, no concat"
+        },
+        {
+          "text": "No mutable default argument",
+          "passed": false,
+          "evidence": "no mutable default"
+        },
+        {
+          "text": "No bare except",
+          "passed": false,
+          "evidence": "specific exception"
+        },
+        {
+          "text": "Type hints added",
+          "passed": true,
+          "evidence": "annotations present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 1, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "exception-handling-architecture",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 1,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Domain exception hierarchy (>=2 exception classes)",
+          "passed": true,
+          "evidence": "6 exception classes"
+        },
+        {
+          "text": "Maps exceptions to HTTP status",
+          "passed": true,
+          "evidence": "status mapping found"
+        },
+        {
+          "text": "Layered handling described (controller/service/repository)",
+          "passed": true,
+          "evidence": "all three layers mentioned"
+        },
+        {
+          "text": "Type hints present",
+          "passed": true,
+          "evidence": "annotations present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 1, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "exception-handling-architecture",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 16,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Domain exception hierarchy (>=2 exception classes)",
+          "passed": true,
+          "evidence": "9 exception classes"
+        },
+        {
+          "text": "Maps exceptions to HTTP status",
+          "passed": true,
+          "evidence": "status mapping found"
+        },
+        {
+          "text": "Layered handling described (controller/service/repository)",
+          "passed": true,
+          "evidence": "all three layers mentioned"
+        },
+        {
+          "text": "Type hints present",
+          "passed": true,
+          "evidence": "annotations present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 16, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "write-tests-for-pricing",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 1,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Uses pytest.raises for the error case",
+          "passed": true,
+          "evidence": "pytest.raises found"
+        },
+        {
+          "text": ">=3 test cases or parametrize",
+          "passed": true,
+          "evidence": "8 test fns, parametrize=yes"
+        },
+        {
+          "text": "Covers boundaries (0 and 100)",
+          "passed": true,
+          "evidence": "boundary values present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 1, 'info': 0}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "write-tests-for-pricing",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 3,
+        "failed": 1,
+        "total": 4,
+        "time_seconds": 0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0,
+        "checker_warnings": 2,
+        "checker_errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Uses pytest.raises for the error case",
+          "passed": true,
+          "evidence": "pytest.raises found"
+        },
+        {
+          "text": ">=3 test cases or parametrize",
+          "passed": true,
+          "evidence": "20 test fns, parametrize=yes"
+        },
+        {
+          "text": "Covers boundaries (0 and 100)",
+          "passed": true,
+          "evidence": "boundary values present"
+        },
+        {
+          "text": "Checker reports clean",
+          "passed": false,
+          "evidence": "counts={'error': 0, 'warning': 2, 'info': 0}"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.877,
+        "stddev": 0.104,
+        "min": 0.75,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      },
+      "tokens": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.643,
+        "stddev": 0.227,
+        "min": 0.2,
+        "max": 0.8
+      },
+      "time_seconds": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      },
+      "tokens": {
+        "mean": 0,
+        "stddev": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.234",
+      "time_seconds": "n/a",
+      "tokens": "n/a"
+    }
+  },
+  "notes": [
+    "Strongest checker signal: with-skill code carries 0/0/0/1/1 ruff+AST warnings vs baseline 6/2/1/16/2, the skill's verify-loop drives near-defect-free output.",
+    "review-risky-function: 100% with-skill vs 20% baseline, the skill reliably catches SQL injection, the mutable default arg, and the bare except that baselines miss.",
+    "exception-handling and write-tests tie on pass-rate but with-skill emits far fewer checker warnings (1 vs 16, 1 vs 2), i.e. equal correctness, cleaner code.",
+    "with-skill 'Class uses PascalCase' miss on eval 0 is a GRADING ARTIFACT: the regex matched the old class name quoted in a comment, ruff reports no N801, so classes are correctly PascalCase.",
+    "Two with-skill runs left exactly 1 checker warning: the agent did not re-run the checker on every produced file. This is agent compliance, not a content gap, the SKILL already instructs the verify-loop emphatically.",
+    "Per-run time/token metrics were not captured per-eval (workflow reports aggregate only), pass-rate and checker-warning deltas are the meaningful signals here."
+  ]
+}

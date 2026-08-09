@@ -1,0 +1,604 @@
+[
+  {
+    "id": "no_serializer_fields_all",
+    "chapter": "ch01",
+    "severity": "error",
+    "description": "DRF/serializer Meta sets fields = '__all__', leaking every model field including internal ones to clients.",
+    "detection": "Regex/AST: assignment target named 'fields' with value the string literal '__all__' inside a class named 'Meta' (or any class body)."
+  },
+  {
+    "id": "env_get_with_hardcoded_default",
+    "chapter": "ch01",
+    "severity": "warning",
+    "description": "os.environ.get(name, default) supplies a hardcoded default for a host/port/credential, risking a dev value shipped to prod.",
+    "detection": "AST: Call to os.environ.get (or os.getenv) with 2 positional args where arg0 is a string literal matching /(HOST|PORT|URL|PASSWORD|SECRET|USER|TOKEN)/i and arg1 is a non-empty literal."
+  },
+  {
+    "id": "env_var_used_as_int_without_cast",
+    "chapter": "ch01",
+    "severity": "warning",
+    "description": "A value from os.environ/os.getenv is used in an arithmetic or int context without int() conversion (returns str, crashes later).",
+    "detection": "AST: subscript os.environ['X'] or os.environ.get('X') passed directly to an int-typed parameter or used in a BinOp with an int literal, with no enclosing int() call."
+  },
+  {
+    "id": "db_client_literal_address",
+    "chapter": "ch01",
+    "severity": "warning",
+    "description": "A database/HTTP client is constructed from a string literal connection address instead of configured host/port (blocks Service Substitution).",
+    "detection": "AST: Call whose name matches /(Client|Connection|connect|create_engine)/ with a string-literal arg containing '://' and a literal host:port or 'localhost'."
+  },
+  {
+    "id": "bare_except_in_service",
+    "chapter": "ch01",
+    "severity": "warning",
+    "description": "Bare 'except:' (or 'except Exception: pass') swallows errors, defeating the Observable Services principle.",
+    "detection": "AST: ExceptHandler with type None, or with body consisting solely of Pass / a logging-free pass-through."
+  },
+  {
+    "id": "print_for_diagnostics",
+    "chapter": "ch01",
+    "severity": "info",
+    "description": "print() used for diagnostics inside service/library modules instead of structured logging.",
+    "detection": "AST: Call to builtin print() in a module that is not __main__-guarded demo code (outside an 'if __name__ == \"__main__\"' block)."
+  },
+  {
+    "id": "module_level_mutable_session_state",
+    "chapter": "ch01",
+    "severity": "warning",
+    "description": "Module-level mutable dict/list/set used as per-user/session state, breaking statelessness under multiple replicas.",
+    "detection": "AST: module-level assignment of a dict/list/set literal whose name matches /(session|cart|cache|state|store)s?/i and that is mutated (subscript-store, .append, .add) elsewhere."
+  },
+  {
+    "id": "sequential_independent_awaits",
+    "chapter": "ch01",
+    "severity": "info",
+    "description": "Multiple independent awaited service calls in sequence that could run via asyncio.gather.",
+    "detection": "AST: 3+ consecutive Await statements in one async function whose awaited calls share no data dependency (no name from an earlier await used as an arg to a later one)."
+  },
+  {
+    "id": "dependency_pinned_0x",
+    "chapter": "ch01",
+    "severity": "info",
+    "description": "A production dependency is pinned to a 0.x version whose public API is unstable.",
+    "detection": "Regex over pyproject.toml/requirements: dependency spec matching /[=~><]=?\\s*0\\.\\d/ (e.g. ==0.1.0)."
+  },
+  {
+    "id": "service_name_multiple_responsibilities",
+    "chapter": "ch01",
+    "severity": "info",
+    "description": "A service/package name joins two responsibilities with 'and' (e.g. shopping-cart-and-order-service), violating single responsibility + uniform naming.",
+    "detection": "Regex on package/distribution/deployment name: matches /-and-.*-(service|svc|lib|client)$/."
+  },
+  {
+    "id": "interface_no_i_prefix",
+    "chapter": "ch02",
+    "severity": "warning",
+    "description": "Protocol/ABC class names must not use a Hungarian 'I' prefix (e.g. IShape, IConfigParser).",
+    "detection": "AST: ClassDef whose bases include typing.Protocol or abc.ABC and whose name matches regex ^I[A-Z][a-z]."
+  },
+  {
+    "id": "function_name_contains_and",
+    "chapter": "ch02",
+    "severity": "info",
+    "description": "A function/method name joining tasks with 'and' (do_x_and_y) likely violates single responsibility.",
+    "detection": "AST: FunctionDef/AsyncFunctionDef whose snake_case name matches regex (^|_)and(_|$); exclude allowlist like 'expand','command','random','handle'."
+  },
+  {
+    "id": "boolean_predicate_missing_is_has",
+    "chapter": "ch02",
+    "severity": "info",
+    "description": "A method annotated -> bool whose name is a bare past participle (stopped, started) reads as a conditional; use is_/has_/did_ or a third-person verb.",
+    "detection": "AST: FunctionDef with returns annotation Name 'bool' whose name ends in 'ed' and does not start with is_/has_/can_/should_/did_/was_/were_."
+  },
+  {
+    "id": "pattern_name_in_class_name",
+    "chapter": "ch02",
+    "severity": "info",
+    "description": "Class names should not embed a design-pattern word (Proxy, Singleton, Visitor) per the naming principle.",
+    "detection": "AST: ClassDef whose name matches regex (Proxy|Singleton|Visitor|Decorator|Strategy|Observer|Mediator|Flyweight|Memento)$; allow factory/builder which are conventional."
+  },
+  {
+    "id": "property_returns_mutable_attribute",
+    "chapter": "ch02",
+    "severity": "warning",
+    "description": "A @property must not return a bare list/dict/set attribute (leaks mutable internal state); return a copy or read-only view.",
+    "detection": "AST: FunctionDef decorated with @property whose body is a single Return of an Attribute self.<x> where <x> is assigned a list/dict/set literal or list()/dict()/set()/[]/{} in __init__ without .copy()/tuple()/frozenset() wrapping."
+  },
+  {
+    "id": "service_imports_concrete_infrastructure",
+    "chapter": "ch02",
+    "severity": "warning",
+    "description": "Use-case/service or entity modules should not import concrete infrastructure (sqlalchemy, requests, pymongo); depend on a Protocol.",
+    "detection": "Regex/AST: in files named *Service*.py/*service.py or entities modules, an Import/ImportFrom of sqlalchemy|pymongo|requests|redis|kafka."
+  },
+  {
+    "id": "value_object_should_be_frozen",
+    "chapter": "ch02",
+    "severity": "info",
+    "description": "A dataclass named as a value object (Money, Price, Address, Point) without identity should be frozen.",
+    "detection": "AST: ClassDef decorated with @dataclass lacking frozen=True whose name is in a value-object allowlist or has no 'id'/'*_id' field and only scalar fields."
+  },
+  {
+    "id": "long_match_or_ifelif_over_type_outside_factory",
+    "chapter": "ch02",
+    "severity": "info",
+    "description": "A match-case or if/elif chain (3+ branches) dispatching on a type/enum outside a factory class signals missing polymorphism.",
+    "detection": "AST: Match with >=3 cases, or chained If with >=3 elif, comparing one variable against enum/literal values, in a module/class whose name does not contain 'Factory'."
+  },
+  {
+    "id": "match_without_wildcard_safeguard",
+    "chapter": "ch02",
+    "severity": "warning",
+    "description": "A match over an enum/literal should include a 'case _' that raises, to fail loudly when a new member is added.",
+    "detection": "AST: Match whose cases lack a MatchAs/MatchStar wildcard ('case _') containing a Raise."
+  },
+  {
+    "id": "missing_override_decorator",
+    "chapter": "ch02",
+    "severity": "info",
+    "description": "A method that shadows a same-named method in a base class should carry @typing.override (3.12) to catch typos.",
+    "detection": "AST: in a class with non-Protocol bases, a FunctionDef whose name also exists in a known base class and lacks an 'override' decorator."
+  },
+  {
+    "id": "bare_except_clause",
+    "chapter": "ch03",
+    "severity": "error",
+    "description": "A bare `except:` catches everything including KeyboardInterrupt and system-exit; catch the narrowest error type instead.",
+    "detection": "Python AST: ast.ExceptHandler with type is None."
+  },
+  {
+    "id": "broad_except_outside_boundary",
+    "chapter": "ch03",
+    "severity": "warning",
+    "description": "Catching Exception/BaseException swallows bugs; allowed only in a top-level main/loop handler that logs and exits/continues.",
+    "detection": "Python AST: ast.ExceptHandler whose type is a Name/Attribute resolving to 'Exception' or 'BaseException'; flag unless the handler body contains a sys.exit call or the enclosing function is named 'main'."
+  },
+  {
+    "id": "except_pass_swallow",
+    "chapter": "ch03",
+    "severity": "warning",
+    "description": "`except ...: pass` silently discards an error.",
+    "detection": "Python AST: ast.ExceptHandler whose body is exactly one ast.Pass node."
+  },
+  {
+    "id": "raise_without_from_in_except",
+    "chapter": "ch03",
+    "severity": "warning",
+    "description": "Re-raising inside an except block without `from` loses the cause chain.",
+    "detection": "Python AST: ast.Raise with cause is None located inside an ast.ExceptHandler that binds a name (handler.name is not None)."
+  },
+  {
+    "id": "range_len_indexing",
+    "chapter": "ch03",
+    "severity": "warning",
+    "description": "`for i in range(len(x))` followed by x[i] indexing should be direct iteration or enumerate.",
+    "detection": "Regex/AST: ast.For whose iter is a Call to 'range' with a single arg that is a Call to 'len'."
+  },
+  {
+    "id": "len_minus_one_index",
+    "chapter": "ch03",
+    "severity": "warning",
+    "description": "`x[len(x) - 1]` is an off-by-one trap; use x[-1].",
+    "detection": "Python AST: ast.Subscript whose slice is a BinOp(op=Sub) with left=Call to 'len' and right=Constant 1 where the len argument matches the subscripted value."
+  },
+  {
+    "id": "list_pop_zero_queue",
+    "chapter": "ch03",
+    "severity": "info",
+    "description": "`list.pop(0)` is O(n); use collections.deque.popleft for FIFO.",
+    "detection": "Python AST: ast.Call where func is Attribute attr='pop' and args == [Constant(0)]."
+  },
+  {
+    "id": "legacy_typing_optional",
+    "chapter": "ch03",
+    "severity": "info",
+    "description": "Use `X | None` instead of typing.Optional[X] in new code (3.10+).",
+    "detection": "Python AST: ast.Subscript whose value is Name/Attribute 'Optional'; or import of Optional from typing used in annotations."
+  },
+  {
+    "id": "legacy_typing_containers",
+    "chapter": "ch03",
+    "severity": "info",
+    "description": "Use builtin generics list[...]/dict[...] instead of typing.List/Dict/Set/Tuple.",
+    "detection": "Python AST: Name/Attribute referencing typing.List, typing.Dict, typing.Set, typing.Tuple used as a subscripted annotation."
+  },
+  {
+    "id": "commented_out_code",
+    "chapter": "ch03",
+    "severity": "info",
+    "description": "Commented-out code should be deleted; version control retains history.",
+    "detection": "Regex on comment lines: `#` followed by tokens that parse as Python statements (e.g. matches `^\\s*#\\s*(def |class |return |import |for |if |[A-Za-z_][\\w.]*\\s*=)`)."
+  },
+  {
+    "id": "match_without_default",
+    "chapter": "ch03",
+    "severity": "warning",
+    "description": "A match statement should end with a `case _` (typically raising) so unhandled enum members fail loudly.",
+    "detection": "Python AST: ast.Match whose cases contain no MatchAs/MatchValue wildcard (no case with pattern == ast.MatchAs(pattern=None))."
+  },
+  {
+    "id": "assignment_to_function_argument",
+    "chapter": "ch03",
+    "severity": "info",
+    "description": "Reassigning a function parameter mutates the caller's expectation; introduce a new variable.",
+    "detection": "Python AST: within a FunctionDef, an ast.Assign/AugAssign whose target Name id is one of the function's arg names."
+  },
+  {
+    "id": "test_calls_private_member_of_import",
+    "chapter": "ch04",
+    "severity": "warning",
+    "description": "A test function accesses a name starting with a single underscore on an imported SUT object (e.g. parser._parse_line), indicating a private helper is being tested directly instead of through the public method.",
+    "detection": "AST: in files matching test_*.py, flag ast.Attribute nodes whose .attr starts with '_' and not '__', where the value resolves to a non-self, non-mock local (exclude attributes on names ending in '_mock' or assigned from Mock/create_autospec). Regex fallback: \\b(?!self)\\w+\\._[a-z]\\w*\\s*\\( inside a def test_."
+  },
+  {
+    "id": "test_name_missing_scenario",
+    "chapter": "ch04",
+    "severity": "info",
+    "description": "A pytest test function name lacks a scenario segment: it is just test_<word> with no double-underscore separator and is not parametrized, so a failure name carries no diagnostic detail.",
+    "detection": "AST/regex: in test_*.py, flag FunctionDef whose name matches '^test_[a-z0-9]+$' (no '__') and has no @pytest.mark.parametrize decorator. Also flag names matching '^test_\\d+$' or in {test_works,test_happy,test_ok} unconditionally."
+  },
+  {
+    "id": "patch_third_party_dunder_internals",
+    "chapter": "ch04",
+    "severity": "warning",
+    "description": "A @patch / patch() target points at a dunder or private internal of a third-party module (e.g. 'requests.Response.__new__'), coupling the test to library internals instead of an owned seam.",
+    "detection": "Regex on @patch( and patch( string arguments: flag targets containing '.__' (dunder) or a segment '._' where the leading module is not the local package. Example pattern: patch\\(['\\\"][a-z_]+\\.[A-Za-z_.]*__\\w+__."
+  },
+  {
+    "id": "bare_mock_for_typed_seam",
+    "chapter": "ch04",
+    "severity": "info",
+    "description": "A Mock() is created and assigned as a dependency where create_autospec would enforce the real signature; bare Mock accepts any attribute/method silently.",
+    "detection": "AST: flag ast.Call to Name 'Mock' (imported from unittest.mock) with no spec=/spec_set= keyword, when the result is later passed as a constructor argument to a class under test. Heuristic, emit as info to limit false positives."
+  },
+  {
+    "id": "scenario_stub_uses_assert_false",
+    "chapter": "ch04",
+    "severity": "info",
+    "description": "A scenario placeholder test uses `assert False` / `self.fail()` / `pytest.fail()` as its only statement, which reports as a failure rather than a pending/skipped test.",
+    "detection": "AST: in test_*.py, flag a FunctionDef whose body is a single statement that is `assert False`, a call to self.fail(...), or pytest.fail(...) with no preceding act, and which lacks a @pytest.mark.skip/xfail decorator."
+  },
+  {
+    "id": "duplicated_test_bodies_should_parametrize",
+    "chapter": "ch04",
+    "severity": "info",
+    "description": "Two or more test functions in the same file have structurally identical bodies differing only by literal constants, indicating they should be a single @pytest.mark.parametrize.",
+    "detection": "AST: hash each test FunctionDef body after replacing Constant nodes with a placeholder; flag when >=2 tests in a file share the same normalized hash and none carries @pytest.mark.parametrize."
+  },
+  {
+    "id": "untyped_test_helper_or_fixture",
+    "chapter": "ch04",
+    "severity": "info",
+    "description": "A pytest fixture or test/helper function in a test module lacks a return annotation (tests should meet production type-hint standards).",
+    "detection": "AST: in test_*.py, flag FunctionDef with no .returns annotation when decorated with @pytest.fixture, or whose name starts with 'test_'/'assert_'/'make_'. Exclude functions already returning None implicitly only if annotated '-> None'."
+  },
+  {
+    "id": "excessive_mock_expectations",
+    "chapter": "ch04",
+    "severity": "warning",
+    "description": "A single test function contains more than six mock-call assertions (assert_called*, assert_*_with), signalling the system under test has too many collaborators and should be refactored.",
+    "detection": "AST: per test FunctionDef, count Call nodes whose func is an Attribute with attr in {assert_called, assert_called_once, assert_called_with, assert_called_once_with, assert_any_call, assert_has_calls}; flag when count > 6."
+  },
+  {
+    "id": "jwt_decode_signature_disabled",
+    "chapter": "ch05",
+    "severity": "error",
+    "description": "jwt.decode called with options disabling signature verification.",
+    "detection": "AST: Call to attribute decode where a keyword 'options' is a dict literal containing key 'verify_signature' with constant value False; or keyword verify=False."
+  },
+  {
+    "id": "jwt_algorithm_none",
+    "chapter": "ch05",
+    "severity": "error",
+    "description": "JWT algorithms list includes the insecure 'none' algorithm.",
+    "detection": "AST/regex: a list/argument named 'algorithms' or 'algorithm' whose elements include the string literal 'none' (case-insensitive)."
+  },
+  {
+    "id": "sql_string_built_query",
+    "chapter": "ch05",
+    "severity": "error",
+    "description": "SQL query string assembled via f-string, %, .format(), or + then passed to execute().",
+    "detection": "AST: Call to attribute 'execute'/'executemany' whose first arg is a JoinedStr (f-string), BinOp(+) on str, BinOp(%) on str, or Call to str.format; and the dynamic part is not a constant."
+  },
+  {
+    "id": "subprocess_shell_true",
+    "chapter": "ch05",
+    "severity": "error",
+    "description": "subprocess run/Popen/call invoked with shell=True.",
+    "detection": "AST: Call to subprocess.{run,Popen,call,check_call,check_output} or os.system/os.popen with keyword shell=True (constant True), or any os.system/os.popen call with a non-constant argument."
+  },
+  {
+    "id": "unsafe_deserialization",
+    "chapter": "ch05",
+    "severity": "error",
+    "description": "Unsafe deserializer used on potentially untrusted bytes.",
+    "detection": "AST: Call to pickle.loads/pickle.load, marshal.loads, yaml.load without a 'Loader' keyword set to SafeLoader/CSafeLoader, or builtins eval/exec."
+  },
+  {
+    "id": "weak_password_hash",
+    "chapter": "ch05",
+    "severity": "warning",
+    "description": "Fast general-purpose hash used where a password is hashed.",
+    "detection": "AST: Call to hashlib.md5/sha1/sha256/sha512 or hashlib.new('md5'/'sha1'...) where the hashed argument or surrounding identifier name contains 'password'/'passwd'/'pwd'."
+  },
+  {
+    "id": "hardcoded_secret_assignment",
+    "chapter": "ch05",
+    "severity": "warning",
+    "description": "Secret/key/token assigned a hard-coded string literal.",
+    "detection": "AST/regex: assignment to a name matching (?i)(secret|password|passwd|api_key|apikey|token|private_key) whose value is a non-empty string literal (excluding os.environ access and empty/placeholder-only patterns)."
+  },
+  {
+    "id": "env_secret_default_value",
+    "chapter": "ch05",
+    "severity": "error",
+    "description": "os.environ.get for a secret supplies a hard-coded default value.",
+    "detection": "AST: Call to os.environ.get / os.getenv where first arg matches (?i)(secret|password|token|key) and a second (default) argument is a non-empty string literal."
+  },
+  {
+    "id": "pydantic_model_missing_extra_forbid",
+    "chapter": "ch05",
+    "severity": "info",
+    "description": "Pydantic input model lacks extra='forbid', allowing unknown-field injection.",
+    "detection": "AST: class subclassing BaseModel whose name starts with 'Input' or ends with 'DTO' and whose model_config/Config does not set extra='forbid'."
+  },
+  {
+    "id": "raise_or_log_raw_exception_to_client",
+    "chapter": "ch05",
+    "severity": "warning",
+    "description": "Raw exception text returned in an HTTP response body.",
+    "detection": "AST: a return/JSONResponse/dict whose value embeds str(exc)/repr(exc)/traceback.format_exc() inside an HTTP handler (function decorated with app.{get,post,put,patch,delete})."
+  },
+  {
+    "id": "web_framework_imported_in_core_layer",
+    "chapter": "ch06",
+    "severity": "error",
+    "description": "A module under a service/ or repositories/ path imports a web framework (fastapi, starlette, flask, strawberry, ariadne), violating the web -> core dependency direction.",
+    "detection": "AST: in files whose path contains '/service' or '/repositories' (or '/repository'), flag any Import/ImportFrom whose module root is in {fastapi, starlette, flask, strawberry, ariadne}."
+  },
+  {
+    "id": "httpexception_in_business_logic",
+    "chapter": "ch06",
+    "severity": "error",
+    "description": "Business logic raises a web-framework HTTP exception instead of a domain error, coupling the core to the framework.",
+    "detection": "AST: a Raise node whose exception call id is 'HTTPException' (or attribute ...HTTPException) in a file NOT located under a controllers/ path."
+  },
+  {
+    "id": "sql_built_with_string_formatting",
+    "chapter": "ch06",
+    "severity": "error",
+    "description": "A SQL string passed to cursor/connection execute is built via f-string, .format(), %-formatting, or + concatenation, enabling injection.",
+    "detection": "AST: a Call to a method named execute/executemany/executescript where the first arg is a JoinedStr (f-string), a BinOp with op Mod or Add on a str, or a Call to str.format, and the string contains a SQL keyword (SELECT|INSERT|UPDATE|DELETE|WHERE|ORDER BY)."
+  },
+  {
+    "id": "create_endpoint_missing_201",
+    "chapter": "ch06",
+    "severity": "warning",
+    "description": "A POST route handler that creates a resource does not set status_code=201.",
+    "detection": "AST: a function decorated with @app.post/@router.post (or add_api_route(..., methods=['POST'])) whose decorator kwargs lack status_code=201; warn when the handler returns a value (i.e. produces a body)."
+  },
+  {
+    "id": "delete_endpoint_raises_not_found",
+    "chapter": "ch06",
+    "severity": "warning",
+    "description": "A DELETE handler raises EntityNotFoundError / a 404, breaking idempotency.",
+    "detection": "AST: within a function decorated @app.delete/@router.delete, a Raise of EntityNotFoundError or an ApiError constructed with status_code 404."
+  },
+  {
+    "id": "unbounded_str_or_list_dto_field",
+    "chapter": "ch06",
+    "severity": "warning",
+    "description": "A pydantic BaseModel field typed str or list lacks a max_length/max_items constraint, leaving an unbounded payload (DoS) surface.",
+    "detection": "AST: in a class inheriting BaseModel, an AnnAssign whose annotation is `str` or `list[...]` whose value is not a Field(...) carrying max_length (or max_items)."
+  },
+  {
+    "id": "stack_trace_returned_without_env_guard",
+    "chapter": "ch06",
+    "severity": "error",
+    "description": "A response/error envelope includes a traceback that is not gated on a non-production environment check.",
+    "detection": "Regex/AST: a dict literal or JSONResponse content containing key 'stackTrace' (or a call to traceback.format_exc/format_exception) where the enclosing function/expression has no reference to os.environ.get('ENV')/a production check."
+  },
+  {
+    "id": "shared_request_response_dto_optional_id",
+    "chapter": "ch06",
+    "severity": "info",
+    "description": "A single DTO is used for both input and output, signalled by a server-assigned field (id/created*) typed as Optional/with a None default.",
+    "detection": "AST: a BaseModel subclass with a field named 'id' (or matching created.*/createdAt.*) whose annotation is `X | None` or `Optional[X]` or has a default of None, AND the class is referenced both as a request body type and a response_model."
+  },
+  {
+    "id": "sql_string_interpolation",
+    "chapter": "ch07",
+    "severity": "error",
+    "description": "A SQL string is built with an f-string, %, .format(), or + concatenation, enabling SQL injection.",
+    "detection": "AST: a Call to cursor.execute/connection.execute/session.execute whose first argument is a JoinedStr (f-string), a BinOp(Mod/Add) on a str, or a Call to str.format, where the string literal matches /\\b(SELECT|INSERT|UPDATE|DELETE|WHERE|FROM)\\b/i. Also regex flag string literals matching SQL keywords adjacent to {} or + var."
+  },
+  {
+    "id": "commit_per_write_in_loop",
+    "chapter": "ch07",
+    "severity": "warning",
+    "description": "session.commit() is called inside a for/while loop, breaking the one-transaction-per-operation rule.",
+    "detection": "AST: a Call to an attribute named 'commit' whose ancestor chain includes a For or While node within the same function body."
+  },
+  {
+    "id": "create_engine_in_function_call_site",
+    "chapter": "ch07",
+    "severity": "warning",
+    "description": "create_engine() or connect() is invoked inside a request handler or repository method rather than a module-level/cached singleton.",
+    "detection": "AST: a Call to create_engine/connect located inside a FunctionDef/AsyncFunctionDef that is NOT decorated with lru_cache/cache and is not named like a factory (get_engine/make_engine) at module scope."
+  },
+  {
+    "id": "cache_set_without_ttl",
+    "chapter": "ch07",
+    "severity": "warning",
+    "description": "A Redis-style cache .set()/.setex-less call omits an expiry argument (ex/px/exat/pxat).",
+    "detection": "AST: a Call to an attribute named 'set' on an object whose name contains 'redis'/'cache'/'client' that has no keyword argument in {ex, px, exat, pxat} and fewer than 3 positional args."
+  },
+  {
+    "id": "bare_driver_error_uncaught_in_repository",
+    "chapter": "ch07",
+    "severity": "info",
+    "description": "A repository method performs DB calls but no except clause handles SQLAlchemyError/PyMongoError/DB-API Error, so driver errors leak upward.",
+    "detection": "AST: within a class whose name ends in 'Repository', a method containing a Call to session/cursor/connection methods but no enclosing Try whose handlers reference SQLAlchemyError/PyMongoError/Error."
+  },
+  {
+    "id": "url_parsed_by_split",
+    "chapter": "ch07",
+    "severity": "info",
+    "description": "A database/connection URL is parsed with chained str.split() calls instead of urllib.parse.urlparse.",
+    "detection": "AST: a variable whose name contains 'url'/'database_url' is the receiver of two or more chained .split() Calls; or a .split('@')/.split('//') chain assigned from an os.environ access."
+  },
+  {
+    "id": "relationship_access_in_loop_without_eager_load",
+    "chapter": "ch07",
+    "severity": "info",
+    "description": "An ORM relationship attribute is accessed inside a loop over query results without a selectinload/joinedload option, indicating likely N+1.",
+    "detection": "AST: a For loop iterating over a select(...).scalars()/.all() result where the loop body accesses an attribute on the loop variable that is a declared relationship() and the select has no .options(selectinload/joinedload) call."
+  },
+  {
+    "id": "process_pool_without_main_guard",
+    "chapter": "ch08",
+    "severity": "error",
+    "description": "A ProcessPoolExecutor or multiprocessing.Pool is constructed at module top level (not inside a function or an if __name__ == '__main__' block), risking a spawn re-import loop.",
+    "detection": "AST: find Call nodes to multiprocessing.Pool / ProcessPoolExecutor whose nearest enclosing scope is Module (not FunctionDef) and that are not within an If node testing __name__ == '__main__'."
+  },
+  {
+    "id": "condition_wait_without_predicate",
+    "chapter": "ch08",
+    "severity": "warning",
+    "description": "threading.Condition.wait() is called with no arguments instead of wait_for(predicate), leaving the waiter vulnerable to spurious wakeups and lost notifications.",
+    "detection": "AST: find Call where func is an Attribute with attr == 'wait' and zero positional args, where the receiver is plausibly a Condition (named *cond*, *condition*, *waiter*, *not_empty*, *not_full*)."
+  },
+  {
+    "id": "busy_wait_sleep_loop",
+    "chapter": "ch08",
+    "severity": "warning",
+    "description": "A polling loop of the form `while <cond>: time.sleep(...)` busy-waits on shared state instead of signalling with a Condition/Event/queue.Queue.",
+    "detection": "AST: find While nodes whose body's only/last statement is a Call to time.sleep (or asyncio.sleep) with no notify mechanism in the loop body."
+  },
+  {
+    "id": "thread_for_cpu_bound_pool",
+    "chapter": "ch08",
+    "severity": "info",
+    "description": "ThreadPoolExecutor used with map/submit over a numeric-heavy or clearly CPU-bound callable; threads give no parallelism under the GIL.",
+    "detection": "Heuristic AST/regex: ThreadPoolExecutor used with map over a function whose body contains only arithmetic/math calls and no I/O (no await, open, requests, socket, time.sleep). Flag for human review."
+  },
+  {
+    "id": "raw_thread_target_append_shared",
+    "chapter": "ch08",
+    "severity": "warning",
+    "description": "A worker passed as a Thread/submit target mutates a list/dict defined in an enclosing scope (shared mutable state) instead of returning a value.",
+    "detection": "AST: in a function used as a Thread target or executor.submit callable, detect Attribute calls .append/.add/.update or Subscript assignment on a name bound in an outer (closure) scope."
+  },
+  {
+    "id": "lock_held_across_io",
+    "chapter": "ch08",
+    "severity": "warning",
+    "description": "A blocking I/O or sleep call (requests.*, urlopen, socket.*, open, time.sleep, .execute) appears inside a `with lock:` block, serialising all threads behind that I/O.",
+    "detection": "AST: within a With node whose context manager is a Lock/RLock (name contains 'lock'), find Call nodes to known-blocking I/O functions or time.sleep."
+  },
+  {
+    "id": "unlocked_compound_shared_update",
+    "chapter": "ch08",
+    "severity": "warning",
+    "description": "A read-modify-write on an instance attribute (e.g. self._count += 1 or read-then-store) occurs in a method of a class that owns a Lock but the statement is not inside a `with self._lock:` block.",
+    "detection": "AST: in a class whose __init__ assigns self._lock = Lock()/RLock(), find AugAssign or read+store on a self attribute that is not nested under a With node using that lock."
+  },
+  {
+    "id": "public_func_missing_docstring",
+    "chapter": "ch09",
+    "severity": "warning",
+    "description": "Public (non-underscore) module-level function or method has no docstring, violating the 'write for other people' contract requirement.",
+    "detection": "AST: ast.FunctionDef/AsyncFunctionDef whose name does not start with '_' and ast.get_docstring(node) is None."
+  },
+  {
+    "id": "single_letter_public_param",
+    "chapter": "ch09",
+    "severity": "info",
+    "description": "A public function exposes single-character positional parameter names (e.g. p, r), hurting readability on a shared API.",
+    "detection": "AST: for FunctionDef not starting with '_', flag any arg in args.args/posonlyargs/kwonlyargs whose name length == 1 and name not in {'_'}."
+  },
+  {
+    "id": "untyped_public_signature",
+    "chapter": "ch09",
+    "severity": "warning",
+    "description": "Public function parameter or return lacks a type annotation, leaving the contract underspecified for readers/reviewers.",
+    "detection": "AST: for FunctionDef not starting with '_', flag any non-self/cls arg with arg.annotation is None, or node.returns is None."
+  },
+  {
+    "id": "vendor_sdk_in_logic",
+    "chapter": "ch09",
+    "severity": "warning",
+    "description": "Direct vendor SDK client construction (boto3.client/resource, google.cloud, openai.OpenAI, etc.) appears outside an adapter module, coupling business logic to a vendor and creating technical debt.",
+    "detection": "Regex/AST: call to boto3.client|boto3.resource|google.cloud.*Client|storage.Client in a file whose name does not contain 'adapter'/'store'/'client' and not under an adapters/ directory."
+  },
+  {
+    "id": "long_elif_dispatch_chain",
+    "chapter": "ch09",
+    "severity": "info",
+    "description": "A function uses a long if/elif chain dispatching on a single discriminant value (4+ branches comparing the same variable), a merge-conflict magnet that should be a registry/plugin seam.",
+    "detection": "AST: an If node whose orelse chains into >=4 nested If nodes each comparing the same Name via ==, all inside one function."
+  },
+  {
+    "id": "todo_without_tracker_ref",
+    "chapter": "ch09",
+    "severity": "info",
+    "description": "A TODO/FIXME comment lacks a tracker reference (e.g. TODO(JIRA-123) or an issue URL), making the debt invisible per the agile-visibility rule.",
+    "detection": "Regex on comments: matches (TODO|FIXME)\\b but not (TODO|FIXME)\\([A-Z]+-?\\d+\\) and not followed by an http(s) URL."
+  },
+  {
+    "id": "no_latest_docker_base_image",
+    "chapter": "ch10",
+    "severity": "error",
+    "description": "Dockerfile FROM uses :latest or an untagged base image, breaking reproducibility and scan/deploy parity.",
+    "detection": "Regex on Dockerfile lines matching /^FROM\\s+\\S+(:latest)?(\\s+AS\\s+\\w+)?$/i where the image reference has no tag or the tag is 'latest'."
+  },
+  {
+    "id": "pip_install_in_final_docker_stage",
+    "chapter": "ch10",
+    "severity": "warning",
+    "description": "RUN pip install appears in the final/runtime Docker stage instead of an earlier build stage, bloating the runtime image.",
+    "detection": "Parse Dockerfile stages (FROM ... AS name); flag any 'RUN pip install' that occurs after the last FROM when that stage is the one with CMD/ENTRYPOINT."
+  },
+  {
+    "id": "liveness_probe_checks_dependencies",
+    "chapter": "ch10",
+    "severity": "error",
+    "description": "A liveness health handler awaits/calls a dependency check (db/broker/cache), risking restart storms during dependency outages.",
+    "detection": "AST: in a function whose name matches /liveness|is_?alive/i, flag calls/awaits to identifiers matching /db|database|broker|kafka|redis|ping_|check_dep/i."
+  },
+  {
+    "id": "fstring_in_log_call",
+    "chapter": "ch10",
+    "severity": "warning",
+    "description": "Logging call uses an f-string message instead of structured extra= fields, destroying queryability and forcing eager formatting.",
+    "detection": "AST: call to logging.Logger/logging method (debug/info/warning/error/critical) whose first positional arg is a JoinedStr (f-string) or a BinOp string concatenation."
+  },
+  {
+    "id": "high_cardinality_metric_label",
+    "chapter": "ch10",
+    "severity": "error",
+    "description": "A Prometheus metric .labels(...) call passes an f-string, str(exception), or raw-path/id variable, exploding series cardinality.",
+    "detection": "AST: call to .labels(...) where any arg is a JoinedStr (f-string), a call to str() on an exception variable, or an identifier matching /user_?id|request_?id|path|url|uuid/i."
+  },
+  {
+    "id": "secret_in_metric_or_log_label_literal",
+    "chapter": "ch10",
+    "severity": "error",
+    "description": "A credential is hardcoded as a string literal assigned to a secret-named variable instead of read from env/secretKeyRef.",
+    "detection": "AST: assignment where target name matches /password|secret|token|api_?key|encryption_?key/i and value is a non-empty string Constant (not os.environ/os.getenv)."
+  },
+  {
+    "id": "print_used_for_logging_in_service",
+    "chapter": "ch10",
+    "severity": "info",
+    "description": "print() is used where structured logging is expected in service/handler code, bypassing the log schema and shipper.",
+    "detection": "AST: call to builtin print() at module/handler scope in files importing fastapi/uvicorn/flask, excluding files named *_test.py / under tests/ and __main__ demo blocks."
+  },
+  {
+    "id": "average_latency_gauge",
+    "chapter": "ch10",
+    "severity": "warning",
+    "description": "An average/mean latency is computed in app code and exported via a Gauge instead of observed into a Histogram.",
+    "detection": "AST: a Gauge(...).set()/assignment whose value derives from a variable named /avg|mean|average/ combined with /latency|duration/; or a name like /avg_latency/ passed to Gauge.set."
+  }
+]

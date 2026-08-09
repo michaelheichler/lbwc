@@ -1,0 +1,22 @@
+[
+  {"query": "can you take a look at my order_service.py? it's gotten messy and i want to clean it up before i open the PR", "should_trigger": true},
+  {"query": "write a python class for managing user subscriptions with create / cancel / renew operations, make it production quality and type safe", "should_trigger": true},
+  {"query": "review this function for issues:\n\ndef get_user(cache={}, id=None):\n    try:\n        return cache[id]\n    except:\n        u = db.query('SELECT * FROM users WHERE id=' + str(id)); cache[id]=u; return u", "should_trigger": true},
+  {"query": "i'm building a FastAPI inventory service, how should I split controllers, services and repositories so the domain doesn't depend on the web framework?", "should_trigger": true},
+  {"query": "what's the cleanest way to handle errors across the layers of my python microservice so I don't leak stack traces to the client?", "should_trigger": true},
+  {"query": "my SalesItemService class has like 15 methods and does everything, how do I break it up?", "should_trigger": true},
+  {"query": "should I use inheritance or composition for my PaymentProcessor variants in python?", "should_trigger": true},
+  {"query": "add type hints and fix the naming in this module, the variables are all called data, tmp, result", "should_trigger": true},
+  {"query": "refactor this python so it's more maintainable:\n\nclass cart:\n  def __init__(self, items=[]): self.items=items\n  def getItems(self): return self.items", "should_trigger": true},
+  {"query": "write pytest tests for my discount calculation function, cover the edge cases properly", "should_trigger": true},
+  {"query": "explain how python generators and the yield keyword work under the hood", "should_trigger": false},
+  {"query": "write a fibonacci function in javascript", "should_trigger": false},
+  {"query": "help me clean up my downloads folder, there are way too many old files in there", "should_trigger": false},
+  {"query": "review my rust service for memory-safety and borrow-checker issues", "should_trigger": false},
+  {"query": "what's the best ORM library for a Node.js + Postgres project?", "should_trigger": false},
+  {"query": "write a SQL query that finds duplicate email addresses in the users table", "should_trigger": false},
+  {"query": "what python version should I install on ubuntu 24.04 and how do I set up pyenv?", "should_trigger": false},
+  {"query": "how do async generators differ from regular generators in python asyncio?", "should_trigger": false},
+  {"query": "design a logo and a landing page for my local python meetup group", "should_trigger": false},
+  {"query": "my pytest suite takes 9 minutes to run in CI, how do I make the test runner itself faster?", "should_trigger": false}
+]

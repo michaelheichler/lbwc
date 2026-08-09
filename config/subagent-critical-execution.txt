@@ -1,0 +1,20 @@
+# Generated subagent policy.
+# Each rule starts with a pipe.
+# No local override exists.
+
+# Nested runtimes.
+|(^|[^[:alnum:]_.-])(claude|codex|aider|cursor-agent|opencode)([^[:alnum:]_.-]|$)
+
+# Package mutation.
+|(^|[^[:alnum:]_.-])(npm|pnpm|yarn|bun)[[:space:]]+(install|add|publish|uninstall|remove|link|config)([^[:alnum:]_.-]|$)
+|(^|[^[:alnum:]_.-])(pip|pip3|uv|poetry|gem|cargo|go)[[:space:]]+(install|add|publish|uninstall|remove|link|config)([^[:alnum:]_.-]|$)
+|(^|[^[:alnum:]_.-])(brew|port|apt|apt-get|dnf|pacman|apk)([^[:alnum:]_.-]|$)
+
+# Remote transfer and shells.
+|(^|[^[:alnum:]_.-])(curl|wget|ftp|sftp|scp|rsync|ssh|nc|ncat|netcat)([^[:alnum:]_.-]|$)
+
+# Privilege and termination.
+|(^|[^[:alnum:]_.-])(sudo|doas|su|kill|pkill|killall|shutdown|reboot|halt|launchctl|systemctl|service)([^[:alnum:]_.-]|$)
+
+# Lifecycle and policy writers.
+|(^|[^[:alnum:]_.-])([^[:space:]]*/)?(agent-lifecycle|agent-generator|agent-manifest|render-agent-template|task-contract|agent-spawn-guard|file-guard|bash-guard|security-filter|state-updater|subagent-git-guard)\.sh([^[:alnum:]_.-]|$)

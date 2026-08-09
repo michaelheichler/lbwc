@@ -1,0 +1,13 @@
+---
+description: Turbo lane for a known-small fix with DevIQ grounding. No planning ceremony.
+argument-hint: "<known-small fix, target files, or change request>"
+---
+
+Required first step: read `skills-bundle/ponytail/SKILL.md` under the plugin root (`${CLAUDE_PLUGIN_ROOT}`) and apply the ponytail discipline at level full for the whole task.
+
+1. Resolve the target phase from $ARGUMENTS, or the active phase if the fix belongs to one. Read the active phase's `PLAN.md` when it exists. This lane is only for a known-small change: if the fix touches any `must_haves` truth, artifact, or `key_link`, or would spread beyond roughly three files, stop and redirect the user to `/plan <phase>` or `/debug <bug>` instead.
+2. Classify the change before editing. A typo, one config value, or a comment is truly trivial and the orchestrator makes it directly. Anything else is non-trivial and gets the routed engineer pair: Python files go to `python-engineer`, web or HTTP files go to `web-engineer`, everything else goes to `coding-dijkstra`, always with `--pair`.
+3. Before fixing, run `scripts/deviq-lookup.sh <key terms>`. When the fix sits inside a planned phase, also run `scripts/lib/deviq-digest.sh --phase <phase>`. Prepend both outputs to a non-trivial worker brief. The brief must name exact files, the requested change, and the verification check. Issue a `/fix` command contract named `fix-{slug}` with `--team pair`, the selected engineer role, the exact brief, and one `--write-allowance` per file. Pass the same values plus the contract path and task id to the generator. Advance the contract to `dispatched`, then spawn the pair per `@references/agent-spawn-protocol.md`.
+4. The orchestrator owns the fix commit. A spawned engineer pair never runs git. For a trivial fix, make the change, inspect the diff, and verify it directly. For a non-trivial fix, wait for the pair and its critic verdict, then inspect the changed files and verify the requested behavior before committing.
+5. Record one fix decision after verification: `python scripts/lib/deviq-record.py decision --phase <phase-or-session-id> --role fix --field summary="..." --field rationale="..."`. If the fix resolves an open DevIQ block, append a second record with `python scripts/lib/deviq-record.py decision --phase <phase-or-session-id> --role fix --field id=<id> --field status=resolved`, using the block's recorded id and never retyping its trigger.
+6. Report the change, verification, commit hash, and whether the user should continue with `/qa <phase>` or return to `/plan`/`/debug` because the scope guard stopped the lane.
