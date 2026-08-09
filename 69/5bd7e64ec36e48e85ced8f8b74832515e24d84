@@ -1,0 +1,28 @@
+tests/agent-generator.bats
+  s_ac3d33c3f84725::t_db4c56abb84ab6 73-91
+  s_ac3d33c3f84725::t_f5632a5d72706f 92
+scripts/agent-generator.sh
+  s_ac3d33c3f84725::t_80c91a75db0181 98-103,116-119,121,141-144,270,273,304
+  s_ac3d33c3f84725::t_0a3e557552a475 126-128,138-140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "695bd7e64ec36e48e85ced8f8b74832515e24d84",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_ac3d33c3f84725": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "67a70b30-1d84-484f-8d64-0549f6fdaf2a",
+        "model": "kimi-k3"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
