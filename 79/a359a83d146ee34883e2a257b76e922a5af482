@@ -1,0 +1,117 @@
+hooks/test_scope_guard.py
+  s_60628ef33f8b8a::t_18f52c3da30283 5-10,32-35,55
+scripts/hook-wrapper.sh
+  s_60628ef33f8b8a::t_9d6338a7452844 4-7
+  s_60628ef33f8b8a::t_18f52c3da30283 24
+  s_60628ef33f8b8a::t_cb35709bb98162 23
+scripts/session-start.sh
+  s_60628ef33f8b8a::t_25495e2bad6fda 16,22-23,43-45,52-54,88
+scripts/worktree-cleanup.sh
+  s_60628ef33f8b8a::t_8e4fae9a7cc3fa 68-69
+  s_60628ef33f8b8a::t_46c7a84ea2ba25 29,38-39
+  s_60628ef33f8b8a::t_58dbe5b56fc5e5 21-27,30,34-36,40-67,70,77-78
+  s_60628ef33f8b8a::t_b57292101db09d 4-7,11-14,28,31-33,37,71-76
+tests/remediation-round.bats
+  s_60628ef33f8b8a::t_275d7aa7348075 152-183
+hooks/test_pretool_hook_errors.py
+  s_60628ef33f8b8a::t_474b961bc89abb 51-70
+  s_60628ef33f8b8a::t_27b98dc6165dc1 39-50
+  s_60628ef33f8b8a::t_4af636bd5b1a75 1-38,71-81
+scripts/doctor-cleanup.sh
+  s_60628ef33f8b8a::t_e5c37121cf5e6c 96-97
+  s_60628ef33f8b8a::t_a48eef7031af5f 241-249,266,274,279,283
+  s_60628ef33f8b8a::t_58dbe5b56fc5e5 9-17,91-93,95,164-168,237,250-255,257
+  s_60628ef33f8b8a::t_e85b493ded6b96 89-90,94,100-103,105,112,175-178,187
+tests/qa-file-guard.bats
+  s_60628ef33f8b8a::t_bffe92e0a8582c 202-211
+hooks/message_scope_guard.py
+  s_60628ef33f8b8a::t_18f52c3da30283 4-10,25-28,50
+scripts/phase-detect.sh
+  s_60628ef33f8b8a::t_25495e2bad6fda 5,12-13,18-19,24-25,30,36-39
+docs/RELIABILITY.md
+  s_60628ef33f8b8a::t_8ff1bb0c67a483 1-31,33-38
+  s_60628ef33f8b8a::t_22381f9cc9b199 32
+docs/IMPROVE-CODE-QUALITY-PLAN.md
+  s_60628ef33f8b8a::t_8ff1bb0c67a483 43-49,51
+  s_60628ef33f8b8a::t_22381f9cc9b199 16,50,57,64
+scripts/file-guard.sh
+  s_60628ef33f8b8a::t_9012f6562f5446 6-9
+scripts/tests/deviq-record-core.sh
+  s_60628ef33f8b8a::t_f6f4ae3258a392 134-138,140-144
+  s_60628ef33f8b8a::t_0ffcf8616b8a43 109-123,125-133,139,145-147
+  s_60628ef33f8b8a::t_71f23d9b51ec79 80-108
+  s_60628ef33f8b8a::t_33700c7a28c7b5 124
+scripts/qa-remediation-state.sh
+  s_60628ef33f8b8a::t_25495e2bad6fda 44,50-87,92,100-104
+scripts/session-stop.sh
+  s_60628ef33f8b8a::t_58dbe5b56fc5e5 29
+tests/qa-agent-spawn-guard.bats
+  s_60628ef33f8b8a::t_bffe92e0a8582c 1-23
+scripts/agent-spawn-guard.sh
+  s_60628ef33f8b8a::t_9012f6562f5446 4-7
+scripts/lib/deviq-record.py
+  s_60628ef33f8b8a::t_883cf422b71466 254
+  s_60628ef33f8b8a::t_86342b4c7d1d51 11,22-29,69-76,79-87,101,253,255
+  s_60628ef33f8b8a::t_425b86575dd118 8,77-78,88-94
+  s_60628ef33f8b8a::t_8e8bc4bf1d3f5a 95-96
+tests/session-start.bats
+  s_60628ef33f8b8a::t_5e941c11cd88b3 103-120
+  s_60628ef33f8b8a::t_275d7aa7348075 21-28,74-102
+tests/worktree-boundary.bats
+  s_60628ef33f8b8a::t_da5d7ca4015c44 315-336,441-453
+  s_60628ef33f8b8a::t_04c7cfe21765a6 291
+  s_60628ef33f8b8a::t_22da06bc9ed8f9 303-314,337-347,359-380,454-475
+  s_60628ef33f8b8a::t_7199fcdd27363f 381-392,430-440
+  s_60628ef33f8b8a::t_46dcf8ad8ef530 348-358
+scripts/deviq-digest-append.sh
+  s_60628ef33f8b8a::t_cf117b7df3142c 9-12,14-18,41
+  s_60628ef33f8b8a::t_86342b4c7d1d51 45,50-66,72,78-105,140-159,161,163,187-188,194-195,208-219
+  s_60628ef33f8b8a::t_5df9a085b5dd92 70,73,75-77,106,160,162
+scripts/agent-lifecycle.sh
+  s_60628ef33f8b8a::t_25495e2bad6fda 4-9,11-12,59-75,92,102,129,137,139-140,225,266
+  s_60628ef33f8b8a::t_b77a19245ffb71 111,114-115,117-118,120
+  s_60628ef33f8b8a::t_2b402d25496bf8 138
+tests/hook-wrapper.bats
+  s_60628ef33f8b8a::t_37c6f329e1243b 5-10
+  s_60628ef33f8b8a::t_4af636bd5b1a75 1-4,11-23
+tests/phase-detect.bats
+  s_60628ef33f8b8a::t_275d7aa7348075 1087-1103
+tests/agent-lifecycle.bats
+  s_60628ef33f8b8a::t_275d7aa7348075 1-33
+  s_60628ef33f8b8a::t_84b670dadca3ee 34-43
+docs/TECH-DEBT.md
+  s_60628ef33f8b8a::t_8ff1bb0c67a483 15-16
+  s_60628ef33f8b8a::t_22381f9cc9b199 7
+hooks/skill_gate.py
+  s_60628ef33f8b8a::t_414b05f967c5ec 37,40-41
+  s_60628ef33f8b8a::t_2b9c8393119c5d 38-39
+  s_60628ef33f8b8a::t_18f52c3da30283 29-36,42-53,186-189,213
+ARCHITECTURE.md
+  s_60628ef33f8b8a::t_8ff1bb0c67a483 153-164,173,195
+  s_60628ef33f8b8a::t_22381f9cc9b199 165-166
+docs/TESTING.md
+  s_60628ef33f8b8a::t_8ff1bb0c67a483 16-25
+  s_60628ef33f8b8a::t_22381f9cc9b199 5,13,15,26,30,32
+tests/worktree.bats
+  s_60628ef33f8b8a::t_da5d7ca4015c44 87-96
+  s_60628ef33f8b8a::t_2ca1c3fa88d9ec 113,119-120,123,130-132
+tests/deviq-digest-append.bats
+  s_60628ef33f8b8a::t_f763838b88464d 1-32,44-65
+  s_60628ef33f8b8a::t_36412423ebdf8e 33-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "79a359a83d146ee34883e2a257b76e922a5af482",
+  "prompts": {},
+  "sessions": {
+    "s_60628ef33f8b8a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe638-8674-77a0-af20-2288259e81d4",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
