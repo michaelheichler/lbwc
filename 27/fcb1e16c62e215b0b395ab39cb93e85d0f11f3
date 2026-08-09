@@ -1,0 +1,32 @@
+docs/TESTING.md
+  s_ac3d33c3f84725::t_6d415d8e78467f 18
+  s_ac3d33c3f84725::t_50e66aef785bea 1-17,19-36
+docs/IMPROVE-CODE-QUALITY-PLAN.md
+  s_ac3d33c3f84725::t_b346e1f68011ef 1-8,10-12,15,19-21,26,32-33
+  s_ac3d33c3f84725::t_ee15925642e0b7 9
+  s_ac3d33c3f84725::t_9c009ad675442c 13-14,16-18,22,24-25,28,31
+  s_ac3d33c3f84725::t_e4b9406a42cd74 23,27,29-30,34-36
+docs/TECH-DEBT.md
+  s_ac3d33c3f84725::t_ff685350c1606b 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "27fcb1e16c62e215b0b395ab39cb93e85d0f11f3",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_ac3d33c3f84725": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "67a70b30-1d84-484f-8d64-0549f6fdaf2a",
+        "model": "kimi-k3"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
