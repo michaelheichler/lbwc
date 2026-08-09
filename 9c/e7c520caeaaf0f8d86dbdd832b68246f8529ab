@@ -1,0 +1,37 @@
+.claude-plugin/plugin.json
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 3,9-15
+ARCHITECTURE.md
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 13-14
+docs/TESTING.md
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 76
+docs/INSTALL.md
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 1-30
+VERSION
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 1
+tests/marketplace.bats
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 1-21
+tests/version-release.bats
+  s_60628ef33f8b8a::t_daa5dc28476342 13,41-50,80-81
+scripts/version-bump.sh
+  s_60628ef33f8b8a::t_daa5dc28476342 8,48,56-61,67,72,77,80-83,86
+CHANGELOG.md
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 5-11
+.claude-plugin/marketplace.json
+  s_60628ef33f8b8a::t_f61b89ddb9fd69 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "9ce7c520caeaaf0f8d86dbdd832b68246f8529ab",
+  "prompts": {},
+  "sessions": {
+    "s_60628ef33f8b8a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe638-8674-77a0-af20-2288259e81d4",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
