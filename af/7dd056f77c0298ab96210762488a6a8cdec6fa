@@ -1,0 +1,435 @@
+references/discussion-engine.md
+  s_7c725c58960e1a::t_29f9c7765063e4 1-95
+skills-bundle/ux-team-of-one/assets/templates/stakeholder-interview-guide.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-63
+templates/agent-roles/deviq.md.tpl
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 25,40,47
+templates/agent-roles/lead.md.tpl
+  s_7c725c58960e1a::t_5757b1b6b96731 66
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 122
+  s_60628ef33f8b8a::t_15788022564adb 129
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 46,78,95-96
+skills-bundle/ponytail/references/ch09.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-50
+scripts/lib/qa-gate-decision.sh
+  s_60628ef33f8b8a::t_4a7bd4dcbcbe41 1-8,14-22
+  s_60628ef33f8b8a::t_b4d031896e2b3a 9-13
+skills-bundle/ux-team-of-one/references/ch03-building-support.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-133
+docs/TESTING.md
+  s_60628ef33f8b8a::t_0d978a955733bb 10,13
+  s_60628ef33f8b8a::t_9ed4e6534201bc 19,24,29-30
+  s_60628ef33f8b8a::t_7a9834d563b5d9 36-37,39-41
+  s_60628ef33f8b8a::t_2d87b7fba8c14b 20-21,38
+docs/TECH-DEBT.md
+  s_60628ef33f8b8a::t_0d978a955733bb 7,30
+  s_60628ef33f8b8a::t_9ed4e6534201bc 38-39
+  s_60628ef33f8b8a::t_fd555ce62c7898 28
+  s_60628ef33f8b8a::t_2d87b7fba8c14b 9,31
+skills-bundle/ux-team-of-one/references/ch07-testing-validation-methods.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-252
+commands/map.md
+  h_49622c3802c0ed 20,26,29,33,43,64,73,93,103
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+  s_7c725c58960e1a::t_875b67d655f175 1-5,7-19,21-25,27-28,30-32,34-42,44-63,66-72,74-92,94-102,104-112
+  s_ac3d33c3f84725::t_3c06794e748782 65
+skills-bundle/ux-team-of-one/references/ch02-getting-started.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-172
+commands/research.md
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+skills-bundle/ux-team-of-one/assets/templates/heuristic-markup.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-48
+ARCHITECTURE.md
+  s_60628ef33f8b8a::t_9ed4e6534201bc 26,47,112-114,117,127-148
+  s_7c725c58960e1a::t_cf9b1820449215 70,74,100
+  s_60628ef33f8b8a::t_3ffc8561d8ba6c 36,118
+  s_60628ef33f8b8a::t_3a84a009fdc0bc 110-111,123
+  h_49622c3802c0ed 42,48
+  s_60628ef33f8b8a::t_ddaaea8426e553 106
+  s_ac3d33c3f84725::t_ee66cb77cc864f 9
+  s_60628ef33f8b8a::t_334a94906483b4 154,158,163,172,269
+  s_7c725c58960e1a::t_f1a5e3b3d90169 251-254,268
+  s_7c725c58960e1a::t_4e8de84672dcf7 24
+  s_ac3d33c3f84725::t_3c06794e748782 92,217
+  s_7c725c58960e1a::t_90d59822ade24c 72
+  s_7c725c58960e1a::t_71f13d6a0473fe 277
+  s_60628ef33f8b8a::t_e7a7d1f1ef7366 3,69
+  s_60628ef33f8b8a::t_39436e5617a284 13,15,17,19-22,50-56,191-213,255-267
+  s_7c725c58960e1a::t_564b426b176df7 63
+  s_60628ef33f8b8a::t_6178611a4c7d0a 14,16,18
+  s_60628ef33f8b8a::t_91881725eb5704 109
+  s_60628ef33f8b8a::t_fab34ff207eac1 270
+  s_3f106e8f216157::t_0c7edbe53c2bff 23,25,61,81,220
+skills-bundle/ux-team-of-one/references/ch01-ux-101.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-127
+skills-bundle/ponytail/references/ch01.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-47
+skills-bundle/ponytail/references/README.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-18
+scripts/qa-remediation-state.sh
+  s_60628ef33f8b8a::t_4f3b375b73f4db 9-10,116,170,188
+  s_60628ef33f8b8a::t_3425848d367b9d 7-8,13,36-38,40,42-63,90-97,103,111-115,117-122,136-169,171-187,189-192,194-198,208,211,219,226,228-229,233-235,237-239,241,249
+  s_7c725c58960e1a::t_7faffb55c2f23e 1-6,11-12,14-35,39,41,64-89,98-102,104-110,123-135,193,199-207,209-210,212-218,220-225,227,230-232,236,240,242-248
+templates/agent-roles/ux-oracle.md.tpl
+  s_ac3d33c3f84725::t_a4a9cd79906060 42
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 27
+  s_ac3d33c3f84725::t_4619edf7eea307 45,47-48
+  s_ac3d33c3f84725::t_30f0f096a52d35 50,56
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 31
+  s_ac3d33c3f84725::t_a2613a17902e01 19,23,35-41,43
+  s_9103609c3bd9b9::t_87899bcb04cfe8 44
+tests/phase-detect-output-contract.bats
+  s_60628ef33f8b8a::t_801837646f7353 85
+  s_60628ef33f8b8a::t_3e4ca3e4c2b9d4 73-83
+commands/vibe.md
+  s_60628ef33f8b8a::t_fb9cdc2d2b630a 13-16,23,25
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+  s_7c725c58960e1a::t_c4a6728900ac99 20-21
+  s_7c725c58960e1a::t_272fb0cee1235e 17
+tests/zero-trust-contract.bats
+  s_60628ef33f8b8a::t_47a4fc82c47430 52-66
+  s_60628ef33f8b8a::t_577245e12426a7 1-24
+  s_60628ef33f8b8a::t_0eb517f35afc4e 83-86
+  s_60628ef33f8b8a::t_43e3cd1388b558 73
+  s_60628ef33f8b8a::t_f8cc584698e220 25-51,67-72,74-82,87-90
+tests/agent-generator.bats
+  s_60628ef33f8b8a::t_815a8cdbee203e 45-48,50,52,54-58
+  s_60628ef33f8b8a::t_a68380ee53a4c9 49,51,53
+tests/write-verification.bats
+  s_60628ef33f8b8a::t_8f4ffd3d96b459 57-90,103-131,155-158,164-165,198-216
+  s_60628ef33f8b8a::t_5f338891641912 133-154
+  s_60628ef33f8b8a::t_9b57b0bf960693 44
+  s_60628ef33f8b8a::t_9f2e2ba633dc33 166-197
+  s_60628ef33f8b8a::t_03a130a439cef4 1-43,45-56,91-102,132,159-163,217
+scripts/write-verification.sh
+  s_60628ef33f8b8a::t_2c9b7ffa749b49 337
+  s_60628ef33f8b8a::t_ed71dc9e04af40 22-23,27-52,61-68,72-74,76-89,91-95
+  s_60628ef33f8b8a::t_36b5738bb6515a 1-21,24-26,53-60,69-71,75,90,96-182,191,194,208-211,213-215,218-220,222-225,236-237,246,249-251,253,256-260,262-263,265,280,307-308,310-311,313,317-336,338-555
+  s_60628ef33f8b8a::t_fef62ce5dc9a95 183-190,192-193,195-207,212,216-217,221,226-235,238-245,247-248,252,254-255,261,264,266-279,281-306,309,312,314-316
+hooks/hooks.json
+  s_7c725c58960e1a::t_451b173717e90c 93-97
+  s_ac3d33c3f84725::t_3c06794e748782 31
+  s_7c725c58960e1a::t_5c2e4c409462a8 92
+  s_7c725c58960e1a::t_77eeec571125fe 98-100
+  h_49622c3802c0ed 101
+skills-bundle/ux-team-of-one/references/ch05-research-methods.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-245
+skills-bundle/ponytail/references/ch07.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-50
+templates/agent-roles/qa-author.md.tpl
+  s_60628ef33f8b8a::t_432fb71325762f 41-42,46,48,73
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 19
+tests/phase-detect.bats
+  s_60628ef33f8b8a::t_8f4413911b2654 1227
+  s_60628ef33f8b8a::t_ee05804c77a74a 775,791,822,845-847,850,873-875,2150,2178
+  s_60628ef33f8b8a::t_42d58f5ea8c8bc 1223
+  s_60628ef33f8b8a::t_3e4ca3e4c2b9d4 1203,1209-1211,1222,1224-1226,1228
+  s_60628ef33f8b8a::t_5ac1f50bcf8262 3483,3512-3513,3515,3665-3667,3778-3781
+  s_60628ef33f8b8a::t_ad7e5fe129e3bd 1088,2053,2067,2120,2151,2183,2196,2282,2409,2487,2558,2728,2900,2937,2963,2998,3099,3363
+  s_60628ef33f8b8a::t_101fd32c6624a0 1229-1230
+scripts/file-guard.sh
+  s_60628ef33f8b8a::t_1a394d04a53bc8 3,26-30,39-49,89,91-96,99,109-112,149,152-164,169-173,176-177
+  s_60628ef33f8b8a::t_5ca5edd3483a12 97-98
+  s_60628ef33f8b8a::t_88e88c1ca6ba42 165-168
+  s_60628ef33f8b8a::t_2493bfdb1febf8 50-62,64,67-88,90,100-108,174-175
+  s_60628ef33f8b8a::t_7669298791daae 63,65-66
+  s_60628ef33f8b8a::t_d3848267d6d73b 178
+templates/agent-roles/architect.md.tpl
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 53
+  s_7c725c58960e1a::t_3d0b2751071a9b 31
+  h_49622c3802c0ed 54,60
+  s_60628ef33f8b8a::t_28ba9dbdc107ef 52
+skills-bundle/ux-team-of-one/assets/templates/project-brief.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-49
+skills-bundle/ponytail/references/ch04.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-41
+docs/IMPROVE-CODE-QUALITY-PLAN.md
+  s_60628ef33f8b8a::t_0d978a955733bb 14,28,38
+  s_60628ef33f8b8a::t_fd555ce62c7898 22,24
+  s_60628ef33f8b8a::t_9ed4e6534201bc 26-27
+skills-bundle/ux-team-of-one/references/ch08-evangelism-methods.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-160
+templates/agent-roles/coding-dijkstra.md.tpl
+  s_60628ef33f8b8a::t_8e2e35bc580dc0 27
+  s_ac3d33c3f84725::t_a2613a17902e01 19,29,37,81
+  s_ac3d33c3f84725::t_a4a9cd79906060 44
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 33
+  s_ac3d33c3f84725::t_30f0f096a52d35 51,62
+scripts/lib/phase-detect-support.sh
+  s_60628ef33f8b8a::t_3425848d367b9d 129
+skills-bundle/ux-team-of-one/assets/templates/comparative-assessment.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-36
+references/agent-spawn-protocol.md
+  s_ac3d33c3f84725::t_06b1f579dfa26c 19-20
+  h_49622c3802c0ed 36
+  s_60628ef33f8b8a::t_34f9a86c359d21 22-24
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 37,39-40
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 38
+commands/qa.md
+  s_60628ef33f8b8a::t_5b038c13375680 13
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+  s_60628ef33f8b8a::t_00ab72ba226b7b 14-16,19
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 2
+  s_7c725c58960e1a::t_c4a6728900ac99 17-18
+scripts/track-known-issues.sh
+  s_7c725c58960e1a::t_321e5347ed26f7 156-158,170,172,174-176,180-185
+  s_7c725c58960e1a::t_7ea240ad70a07f 1-117,148-155,159-169,171,173,177-179,186-195
+  s_7c725c58960e1a::t_d5c671633c6032 118-147
+commands/uat.md
+  s_7c725c58960e1a::t_c4a6728900ac99 14
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+scripts/dev/deviq-vendor.sh
+  s_ac3d33c3f84725::t_3c06794e748782 10
+hooks/test_skill_gate.py
+  s_ac3d33c3f84725::t_0aaeca5b53f91c 90,93-95,97
+skills-bundle/ux-team-of-one/assets/templates/design-brief.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-47
+commands/build.md
+  s_60628ef33f8b8a::t_7bdd6174278df6 10-12
+  s_60628ef33f8b8a::t_5ce363e3a3c33b 8-9,17-23,29-35,37-43
+  s_7c725c58960e1a::t_c4a6728900ac99 14
+  s_7c725c58960e1a::t_5757b1b6b96731 36
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+hooks/context_usage.py
+  s_7c725c58960e1a::t_dcc73a3483be9e 1-81
+scripts/session-start.sh
+  s_7c725c58960e1a::t_272fb0cee1235e 56-58
+templates/agent-roles/test-dev.md.tpl
+  s_60628ef33f8b8a::t_8e2e35bc580dc0 25
+  s_ac3d33c3f84725::t_a4a9cd79906060 42
+  s_ac3d33c3f84725::t_a2613a17902e01 19,21,27,35-41,43,56,85
+  s_ac3d33c3f84725::t_ab959e9a5d6ad1 49
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 31
+skills-bundle/ux-team-of-one/references/ch10-whats-next.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-111
+skills-bundle/ux-team-of-one/references/ch06-design-methods.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-206
+skills-bundle/ponytail/SKILL.md
+  s_7c725c58960e1a::t_cee8f0214e0262 1-130
+tests/verify-state-consistency.bats
+  s_7c725c58960e1a::t_9b59a399f5c19b 1-61
+tests/context-usage.bats
+  s_7c725c58960e1a::t_a105b87351f9ab 1-107
+skills-bundle/ponytail/LICENSE
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-21
+templates/agent-roles/python-engineer.md.tpl
+  s_ac3d33c3f84725::t_30f0f096a52d35 53,60,62
+  s_60628ef33f8b8a::t_15788022564adb 71
+  s_ac3d33c3f84725::t_0d44a8166e8a9d 61
+  s_ac3d33c3f84725::t_a4a9cd79906060 44
+  s_60628ef33f8b8a::t_8e2e35bc580dc0 27
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 33
+commands/init.md
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+tests/session-start.bats
+  s_7c725c58960e1a::t_f374fcebab2ba3 51-65
+skills-bundle/INDEX.md
+  s_ac3d33c3f84725::t_55bc81b8af5bfe 13
+  s_7c725c58960e1a::t_8789aa92637fe8 11
+templates/agent-roles/docs.md.tpl
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 43,61,63,67,81,94
+  s_7c725c58960e1a::t_5653908e87b9f2 33
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 29
+  s_7c725c58960e1a::t_0822de6a02be64 65,79
+commands/plan.md
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+tests/remediation-round.bats
+  s_60628ef33f8b8a::t_7a409e5682a495 83-93
+  s_7c725c58960e1a::t_aa7c1c55069dc5 37
+  s_7c725c58960e1a::t_f6fb3d111f0d82 1-5,7-13,17-19,26-36,38-52,54-82,94-95,97-104,150-156
+  s_60628ef33f8b8a::t_ee05804c77a74a 6,96,105-149
+  s_60628ef33f8b8a::t_4f3b375b73f4db 20-25,53,186
+  s_60628ef33f8b8a::t_8a9569d0cc350d 14-16
+  s_7c725c58960e1a::t_dfbe4f1de41642 157-185,187-205
+references/caveman-commit.md
+  s_7c725c58960e1a::t_b23ad0833d35b5 1-53
+skills-bundle/ponytail/references/ch08.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-45
+templates/agent-roles/lead-critic.md.tpl
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 19,21,23,25,29,31,55-56
+  s_ac3d33c3f84725::t_8e0319a6d4374f 64
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 35
+skills-bundle/ux-team-of-one/assets/templates/usability-test-plan.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-46
+skills-bundle/ponytail/references/ch06.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-38
+templates/agent-roles/qa.md.tpl
+  h_49622c3802c0ed 28
+  s_7c725c58960e1a::t_5653908e87b9f2 35
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 20,70,130,132-133,136,138,140,142,155,170,173-174
+commands/docs.md
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 11,14
+  s_7c725c58960e1a::t_5904b19dc9d8e5 1-5,7-10,12-13
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+.gitignore
+  s_7c725c58960e1a::t_408bb9a3434f53 6
+skills-bundle/ux-team-of-one/assets/templates/ux-questionnaire.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-53
+templates/agent-roles/web-code-critic.md.tpl
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 35
+  s_60628ef33f8b8a::t_8e2e35bc580dc0 29
+  s_ac3d33c3f84725::t_5fe24290a37771 39-45,47
+  s_ac3d33c3f84725::t_a4a9cd79906060 46
+  s_ac3d33c3f84725::t_30f0f096a52d35 54,67
+  s_ac3d33c3f84725::t_8e0319a6d4374f 91
+skills-bundle/ux-team-of-one/assets/templates/task-flow.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-42
+skills-bundle/ponytail/references/ch03.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-47
+skills-bundle/ux-team-of-one/references/ch09-growing-yourself-career.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-206
+skills-bundle/ponytail/references/ch02.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-47
+scripts/verify-state-consistency.sh
+  s_7c725c58960e1a::t_9b59a399f5c19b 1-69,71-92,94-131
+  s_7c725c58960e1a::t_6a87a2b8bd9563 70,93
+scripts/lib/map-tiers.sh
+  s_7c725c58960e1a::t_bafe8f3c211ce2 1-56
+templates/agent-roles/debugger.md.tpl
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 31
+  s_60628ef33f8b8a::t_432fb71325762f 44,46,86
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 102
+  h_49622c3802c0ed 109
+  s_7c725c58960e1a::t_c67dda6501503c 39
+templates/agent-roles/scout.md.tpl
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 21
+  s_60628ef33f8b8a::t_a8b7396cc4cc5b 41,92,95
+  s_7c725c58960e1a::t_3d0b2751071a9b 89
+commands/discuss.md
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+  s_7c725c58960e1a::t_0a32a5f42fa94d 1-5,7-16,18,20-36
+  s_ac3d33c3f84725::t_3c06794e748782 17,19
+references/caveman-language.md
+  s_7c725c58960e1a::t_379451a269ce56 1-61
+tests/qa-gate.bats
+  s_60628ef33f8b8a::t_f267cbde55be65 94-113,148-170,222
+  s_60628ef33f8b8a::t_34e7527b8ec6e2 87-93,114-147
+  s_60628ef33f8b8a::t_c2489b204af583 27,43
+  s_60628ef33f8b8a::t_69339ed225545f 171
+  s_60628ef33f8b8a::t_eb288e0ba186d1 172,174-201
+  s_60628ef33f8b8a::t_7c808f38eb43c7 173
+tests/map-tiers.bats
+  s_7c725c58960e1a::t_0ab1ff232020ca 1-92
+templates/agent-roles/web-engineer.md.tpl
+  s_60628ef33f8b8a::t_8e2e35bc580dc0 27
+  s_60628ef33f8b8a::t_15788022564adb 70
+  s_ac3d33c3f84725::t_45dc726ada53b9 59-60
+  s_ac3d33c3f84725::t_a4a9cd79906060 44
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 33
+  s_ac3d33c3f84725::t_30f0f096a52d35 52
+commands/fix.md
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+  s_7c725c58960e1a::t_a7a9437c60cd26 8
+  s_7c725c58960e1a::t_ebd166e814e2a3 1-5,7,9,11-13
+  s_ac3d33c3f84725::t_3c06794e748782 10
+skills-bundle/ux-team-of-one/assets/templates/black-hat-session.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-43
+templates/agent-roles/coding-dijkstra-critic.md.tpl
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 31
+  s_60628ef33f8b8a::t_801837646f7353 81
+  s_ac3d33c3f84725::t_a2613a17902e01 19,23,27,35-41,43
+  s_ac3d33c3f84725::t_a4a9cd79906060 42
+  h_49622c3802c0ed 82
+  s_ac3d33c3f84725::t_30f0f096a52d35 49,56
+commands/debug.md
+  s_ac3d33c3f84725::t_5821b6c8605164 6
+references/caveman-review.md
+  s_7c725c58960e1a::t_39e45d984edb8e 1-48
+config/settings.json
+  s_7c725c58960e1a::t_451b173717e90c 15
+scripts/remediation-round.sh
+  s_60628ef33f8b8a::t_c6fa03f96b4fa6 12-14,56-57,65-67,70-71,84-87,89-90
+  s_60628ef33f8b8a::t_3425848d367b9d 21-23,25-26,28-31,50
+  s_7c725c58960e1a::t_e19804f055e91d 1-11,15-20,32-36,39-49,51-55,58-64,68-69,72-83,88,91-93,104-112
+  s_60628ef33f8b8a::t_55680335f90853 94-103
+  s_60628ef33f8b8a::t_4f3b375b73f4db 24,27
+  s_7c725c58960e1a::t_6d2af5327a11f2 37-38
+templates/agent-roles/python-critic.md.tpl
+  s_ac3d33c3f84725::t_5fe24290a37771 39-45,47
+  s_60628ef33f8b8a::t_8e2e35bc580dc0 29
+  s_60628ef33f8b8a::t_49ba0c1ac122b1 35
+  s_ac3d33c3f84725::t_0d44a8166e8a9d 69
+  s_ac3d33c3f84725::t_a4a9cd79906060 46
+  s_ac3d33c3f84725::t_30f0f096a52d35 55,68,70,72
+  s_ac3d33c3f84725::t_8e0319a6d4374f 88
+skills-bundle/ux-team-of-one/SKILL.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-101
+tests/qa-file-guard.bats
+  s_60628ef33f8b8a::t_1fea8820f0935b 106,108-118,123-128,140,143-148
+  s_60628ef33f8b8a::t_66e47e612c6faf 7,12,119-122,141-142
+  s_60628ef33f8b8a::t_815a8cdbee203e 27-28,40-41,48-49,56-57,64-65,72-86,88-94,98-105,174
+  s_60628ef33f8b8a::t_1b5fc3005d75e2 129-134,136-139
+  s_60628ef33f8b8a::t_119bf5b943578f 135
+  s_60628ef33f8b8a::t_9ddf64cca792d1 107
+scripts/agent-generator.sh
+  s_60628ef33f8b8a::t_0711757d1f3dc6 259-266,281,289-290,331,339,341-345,353,373-375,382-383
+  s_60628ef33f8b8a::t_89074183669da1 15-17,42,70-73,94-114,123-125
+  s_60628ef33f8b8a::t_61035770bfd1d0 126
+skills-bundle/ux-team-of-one/assets/templates/user-archetype.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-47
+.markdownlint.json
+  s_ac3d33c3f84725::t_ee15925642e0b7 2-3
+  s_ac3d33c3f84725::t_63dc8a341b0df1 1,4
+scripts/qa-gate.sh
+  s_60628ef33f8b8a::t_4a7bd4dcbcbe41 25,36-37,67-68,78-79,81-86,88,90,92-95,98,101-102
+  s_60628ef33f8b8a::t_84bdf79a6ebf9c 71,91
+skills-bundle/ponytail/references/97-things.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-21
+skills-bundle/ponytail/references/ch05.md
+  s_7c725c58960e1a::t_68f34d3dbdb00c 1-48
+skills-bundle/ux-team-of-one/references/ch04-planning-discovery-methods.md
+  s_ac3d33c3f84725::t_a65d9b32606313 1-159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "af7dd056f77c0298ab96210762488a6a8cdec6fa",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_3f106e8f216157": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe684-b00e-7732-a62c-1794f029a6b8",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_60628ef33f8b8a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe638-8674-77a0-af20-2288259e81d4",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_7c725c58960e1a": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "04312a12-4f44-4a16-9547-3e7d6d580816",
+        "model": "gpt-4o-mini-2024-07-18"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_9103609c3bd9b9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa9ec-0537-7842-a5c9-31edab487497",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_ac3d33c3f84725": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "67a70b30-1d84-484f-8d64-0549f6fdaf2a",
+        "model": "kimi-k3"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
