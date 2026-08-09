@@ -1,0 +1,26 @@
+docs/TECH-DEBT.md
+  s_ac3d33c3f84725::t_85fe4ceccb28fb 9-10,19-25,29-31
+docs/IMPROVE-CODE-QUALITY-PLAN.md
+  s_ac3d33c3f84725::t_66886c491d0e00 11,34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d196c49ebc6366991b9b4029422cd228f5d8e325",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_ac3d33c3f84725": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "67a70b30-1d84-484f-8d64-0549f6fdaf2a",
+        "model": "kimi-k3"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
