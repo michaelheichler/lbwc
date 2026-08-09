@@ -1,0 +1,26 @@
+docs/IMPROVE-CODE-QUALITY-PLAN.md
+  s_60628ef33f8b8a::t_e579882ac875a0 18,65,74,83
+ARCHITECTURE.md
+  s_60628ef33f8b8a::t_e172889124ec44 3,270
+  s_60628ef33f8b8a::t_96878dd6651f8b 169
+docs/TESTING.md
+  s_60628ef33f8b8a::t_e579882ac875a0 27
+docs/RELIABILITY.md
+  s_60628ef33f8b8a::t_4b1b274408267e 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1273f5663c53c54533500038297fa73e9d08870a",
+  "prompts": {},
+  "sessions": {
+    "s_60628ef33f8b8a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe638-8674-77a0-af20-2288259e81d4",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
