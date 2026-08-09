@@ -1,0 +1,77 @@
+docs/TESTING.md
+  s_60628ef33f8b8a::t_37a031b8c8303a 13-15,31
+  s_60628ef33f8b8a::t_dd0b8e0c96e5ca 16-21,29-30,33,39
+scripts/bash-guard.sh
+  s_60628ef33f8b8a::t_388e0fa45f13bc 77-89,95-98
+  s_60628ef33f8b8a::t_8c2e9bd2924254 99
+scripts/agent-generator.sh
+  s_60628ef33f8b8a::t_374cd243c8ca7b 16-17,43-44,76-82,315,320-328,397,406-407,415,435,437-438,445
+  s_60628ef33f8b8a::t_7dda36c41859bb 250-257,277-281,286-288,291-292,294
+  s_60628ef33f8b8a::t_47e0ba3d4e1b54 258-276,282-285,289-290,293,316-319
+  s_60628ef33f8b8a::t_2b4193dae0f073 295
+hooks/hooks.json
+  s_60628ef33f8b8a::t_388e0fa45f13bc 61,234
+tests/agent-generator.bats
+  s_60628ef33f8b8a::t_d508d5a9e4667f 79-92
+  s_60628ef33f8b8a::t_15394bceec886e 67-78
+scripts/write-verification.sh
+  s_60628ef33f8b8a::t_cc0d59a5777c73 154-171,174-180
+  s_60628ef33f8b8a::t_75da0be315c409 172-173
+  s_60628ef33f8b8a::t_75b08940eb7ece 435-436,438-439,455,459-460,462,466-467
+scripts/extract-frontmatter-array-items.awk
+  s_60628ef33f8b8a::t_c13ef1e4d4b5d7 8,11-15,44-47
+commands/build.md
+  s_60628ef33f8b8a::t_bc206990bdf68e 31,35-36
+templates/agent-roles/defaults.json
+  s_60628ef33f8b8a::t_651d3781806f7e 11,20,37,54,103,124
+tests/frontmatter-array-parser.bats
+  s_60628ef33f8b8a::t_116a6704e96246 1-6,8-52,69
+  s_60628ef33f8b8a::t_e0e69dcaee4155 7,53-68
+scripts/lib/qa-result-gate-path-evidence.sh
+  s_60628ef33f8b8a::t_c13ef1e4d4b5d7 3-4,10
+references/agent-spawn-protocol.md
+  s_60628ef33f8b8a::t_bc206990bdf68e 3,24,29-30,45
+scripts/verification-freshness.sh
+  s_60628ef33f8b8a::t_34c0160f45a92c 20,36-38
+tests/write-verification.bats
+  s_60628ef33f8b8a::t_c98fb33c365ee1 146-190
+  s_60628ef33f8b8a::t_fdac623b8f6fb9 100-145
+docs/TECH-DEBT.md
+  s_60628ef33f8b8a::t_37a031b8c8303a 7
+  s_60628ef33f8b8a::t_ee27da20224791 12-14,45-47
+tests/qa-bash-guard.bats
+  s_60628ef33f8b8a::t_8426266185bdbc 84-90
+  s_60628ef33f8b8a::t_985888878c4f75 91-92,97-99
+  s_60628ef33f8b8a::t_de76e123c3267e 93-96
+tests/qa-file-guard.bats
+  s_60628ef33f8b8a::t_8426266185bdbc 22-26,90-105
+  s_60628ef33f8b8a::t_c9e62b48808716 106
+ARCHITECTURE.md
+  s_60628ef33f8b8a::t_37a031b8c8303a 129
+  s_60628ef33f8b8a::t_ee27da20224791 65,74,113-114,118,121,127,147
+  s_60628ef33f8b8a::t_ba0876fcbaccbd 128
+scripts/summary-utils.sh
+  s_60628ef33f8b8a::t_c13ef1e4d4b5d7 5-6,144
+docs/IMPROVE-CODE-QUALITY-PLAN.md
+  s_60628ef33f8b8a::t_ee27da20224791 39-40
+  s_60628ef33f8b8a::t_37a031b8c8303a 15,41,47,53
+  s_60628ef33f8b8a::t_d8b4b369598e85 22-23,28-30,33-35
+  s_60628ef33f8b8a::t_52fd0819c808cd 24-25
+  s_60628ef33f8b8a::t_dd0b8e0c96e5ca 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "4d2a55c857881ea141e5955cdc5b582c1de4ab51",
+  "prompts": {},
+  "sessions": {
+    "s_60628ef33f8b8a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe638-8674-77a0-af20-2288259e81d4",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
