@@ -1,0 +1,27 @@
+scripts/resolve-agent-settings.sh
+  s_ac3d33c3f84725::t_858a2fe4d8e4b2 167-169
+templates/agent-roles/defaults.json
+  s_ac3d33c3f84725::t_5222e83bf811b6 6-7,13-14,79-80,87-88,103-104,110-111,117-118
+  s_ac3d33c3f84725::t_86be6cc7fe5e53 121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d811eacbb41877caa09c538477693c64f4869e37",
+  "prompts": {},
+  "humans": {
+    "h_49622c3802c0ed": {
+      "author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  },
+  "sessions": {
+    "s_ac3d33c3f84725": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "67a70b30-1d84-484f-8d64-0549f6fdaf2a",
+        "model": "kimi-k3"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
