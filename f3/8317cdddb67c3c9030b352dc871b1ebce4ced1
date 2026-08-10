@@ -1,0 +1,19 @@
+FOLLOW_UP.md
+  s_f8f31715a902e1::t_bd0ba9925cb89b 1-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "f38317cdddb67c3c9030b352dc871b1ebce4ced1",
+  "prompts": {},
+  "sessions": {
+    "s_f8f31715a902e1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fea03-a7af-7040-9946-f7221cc307da",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
