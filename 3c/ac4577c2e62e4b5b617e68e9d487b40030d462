@@ -1,0 +1,100 @@
+commands/plan.md
+  s_1435467b546181::t_80536372935954 16-17
+  s_2d731a9c2f9847::t_070e70d0aaa38a 2-4,6-7,12,14-15,18-24,28-40
+commands/config.md
+  s_1435467b546181::t_1ea47bea9bdb61 22-23
+  s_1435467b546181::t_110385370f1730 61
+commands/debug.md
+  s_1435467b546181::t_8b39f051958fa9 35
+hooks/test_user_question_guard.py
+  s_1435467b546181::t_bd3af6e69388fa 212-214,223-225
+  s_1435467b546181::t_9840d1d58bbd3f 86-88,94-96,100
+  s_1435467b546181::t_c1fca9b346134a 242,248,251-253,255
+commands/report.md
+  s_1435467b546181::t_4ada477b296f07 16-17
+commands/uat.md
+  s_1435467b546181::t_af5a48a66b72ba 16-17
+  s_1435467b546181::t_f56532349ac5be 18-20
+  s_a9818a357eb1ea::t_84e5e53c34b29b 2-4,6-7,12,14,21-36
+commands/models.md
+  s_1435467b546181::t_b14ee7e7ad11b8 14-15
+  s_c58a2f31002b33::t_f9bf74c3f8ae3d 2-7,10-13,16-20,26-27,31,33,45-57
+commands/skills.md
+  s_1435467b546181::t_54198987189706 38-39
+  s_2d731a9c2f9847::t_f5652afa1edfd9 7-11,173-184
+commands/profile.md
+  s_1435467b546181::t_c81f0679374d7f 23-24
+  s_1435467b546181::t_798a036578a203 20-22
+  s_1435467b546181::t_d8b612a4fb1b69 25-27
+  s_a9818a357eb1ea::t_932725716bd708 1-19,28-67
+commands/uninstall.md
+  s_1435467b546181::t_2dd533041718ae 27-28
+  s_a9818a357eb1ea::t_6b895079632ddc 2,5-6,10,20,35,39,47,55,58-59,65-77
+commands/docs.md
+  s_1435467b546181::t_248fb31b2696db 16-17
+  s_c58a2f31002b33::t_e68307685c4337 2-4,6-7,12-15,18-23,31-42
+hooks/test_user_question_native_contract.py
+  s_1435467b546181::t_dd9d4c4bf4b41a 44,46-62,73
+  s_2d731a9c2f9847::t_7f9d6e074eb1ca 1-43,45,63-72,74-84
+hooks/user_question_guard.py
+  s_1435467b546181::t_0b568d3bbb7b7b 543-544,547-552
+  s_1435467b546181::t_2bf4d1f06f78f1 203
+commands/verify.md
+  s_1435467b546181::t_463733b388db66 152-153
+  s_2d731a9c2f9847::t_21f5f2b59fa0f5 2,11,21,28,35,41-42,74,79,104-105,137,149,156,159,165,170,178,186-187,190,205,211,217,232-233,235-236,243,250,255,258,278,308-309,324,334,341,470,505,545,717,720,725,773,775,779,781,783,786,790,793-806
+commands/teach.md
+  s_1435467b546181::t_1a1124694a0822 40-41
+  s_c58a2f31002b33::t_64f8ab87111939 42-43
+hooks/__init__.py
+  s_836ada6f451ae1::t_9055b1763e7713 1
+references/ask-user-question.md
+  s_836ada6f451ae1::t_5fed9a05caed93 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3cac4577c2e62e4b5b617e68e9d487b40030d462",
+  "prompts": {},
+  "sessions": {
+    "s_1435467b546181": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "209822dc-2c44-4767-9b95-b7c02ffb1511",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_2d731a9c2f9847": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a29cd450-3374-480b-8ff8-d07722d2e3f3",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_836ada6f451ae1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5c0216fa-b175-4358-9d70-0a91f7382b12",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_a9818a357eb1ea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a98cd9f48b8299725",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_c58a2f31002b33": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "29947296-faac-43ce-a53e-2e686a357269",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
