@@ -103,9 +103,8 @@ check_deviq() {
 }
 
 check_remediation() {
-  local state_file kind round stage_value round_dir summary_path
+  local state_file round stage_value round_dir summary_path
   while IFS= read -r state_file; do
-    kind=$(basename "$(dirname "$state_file")")
     round=$(grep '^round=' "$state_file" | head -1 | cut -d= -f2 | tr -d '[:space:]')
     stage_value=$(grep '^stage=' "$state_file" | head -1 | cut -d= -f2 | tr -d '[:space:]')
     [[ "$round" =~ ^[0-9]+$ ]] || { drift "remediation" "$state_file has invalid round"; continue; }

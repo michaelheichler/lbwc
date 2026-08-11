@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/
+*.pyc
+.lbwc-planning/
+.claude/
+.agent-discipline.json
+.markdownlint.json
+docs/
+ARCHITECTURE.md
+.serena/
+prompt_filter/
+CLAUDE.md
+AGENTS.md
+FOLLOW_UP.md

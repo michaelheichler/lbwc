@@ -6,8 +6,47 @@ GENERATOR="${SCRIPTS_DIR}/agent-generator.sh"
 export GENERATOR
 
 setup() {
-  setup_temp_dir
-  create_test_config
+  TEST_TEMP_DIR=$(mktemp -d /private/tmp/lbwc-generator.XXXXXX)
+  export TEST_TEMP_DIR
+  export _ORIG_HOME="${HOME:-}"
+  export _ORIG_LBWC_PLANNING_DIR="${LBWC_PLANNING_DIR:-}"
+  export HOME="$TEST_TEMP_DIR"
+  unset LBWC_PLANNING_DIR CLAUDE_SESSION_ID 2>/dev/null || true
+  mkdir -p "$TEST_TEMP_DIR/.lbwc-planning"
+  ROUTE_BINARY="$TEST_TEMP_DIR/claude-generator-fixture"
+  printf '%s\n' '#!/usr/bin/env bash' 'printf "%s\\n" "fixture"' > "$ROUTE_BINARY"
+  chmod +x "$ROUTE_BINARY"
+  ROUTE_SHA=$(shasum -a 256 "$ROUTE_BINARY" | awk '{print $1}')
+  jq -n --arg binary "$ROUTE_BINARY" --arg sha "$ROUTE_SHA" '
+    {
+      schema_version: 1,
+      source: {binary_path: $binary, version: "fixture", sha256: $sha, detected_at: "2035-01-02T03:04:05Z"},
+      models: [
+        {selector: "nova-route", label: "Nova Route", description: "Fixture selector"},
+        {selector: "ember-path", label: "Ember Path", description: "Second fixture selector"}
+      ],
+      reasoning: {
+        scope: "global",
+        accepted_values: ["deliberate", "swift"],
+        model_associations: {"nova-route": ["deliberate"]}
+      }
+    }
+  ' > "$TEST_TEMP_DIR/.lbwc-planning/claude-capabilities.json"
+  jq --slurpfile defaults "$PROJECT_ROOT/templates/agent-roles/defaults.json" '
+    . + {
+      schema_version: 1,
+      routing: {
+        active_profile: "balanced",
+        profiles: {
+          quality: {roles: {}},
+          balanced: {
+            roles: ($defaults[0] | keys | map({key: ., value: {model: "nova-route", reasoning: "deliberate", status: "resolved"}}) | from_entries)
+          },
+          turbo: {roles: {}}
+        }
+      }
+    }
+  ' "$CONFIG_DIR/settings.json" > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
   CONTRACT_SEQUENCE=0
 }
 
@@ -79,6 +118,95 @@ make_contract() {
   [ -f "$TEST_TEMP_DIR/.claude/agents/$name.md" ]
   jq -e --arg name "$name" '.agents | has($name)' \
     "$TEST_TEMP_DIR/.lbwc-planning/.agent-manifest.json" >/dev/null
+}
+
+@test "empty global question overrides still render denial and handoff" {
+  generate docs --job "write a README" --disallowed-tools "" --initial-prompt ""
+  [ "$status" -eq 0 ]
+  local name rendered
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-docs-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  rendered="$TEST_TEMP_DIR/.claude/agents/$name.md"
+  grep -q '^disallowedTools: "AskUserQuestion"$' "$rendered"
+  grep -q 'user_decision_required' "$rendered"
+}
+
+@test "partial question handoff override receives the complete structured contract" {
+  generate docs --job "write a README" --initial-prompt "Return user_decision_required."
+  [ "$status" -eq 0 ]
+  local name rendered
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-docs-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  rendered="$TEST_TEMP_DIR/.claude/agents/$name.md"
+  grep -F '\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"' "$rendered"
+}
+
+@test "pending decision rejects direct transitions without creating runtime state" {
+  run bash -c 'bash "$1" create "$2" session-1 && bash "$1" record-bounded "$2" session-1 Fast' \
+    _ "$SCRIPTS_DIR/pending-decision.sh" "$TEST_TEMP_DIR/.lbwc-planning"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"direct decision transitions are disabled"* ]]
+  [ ! -e "$TEST_TEMP_DIR/.lbwc-planning/.runtime" ]
+}
+
+@test "generated agents preserve the saved selector and reasoning" {
+  jq '
+    .routing.profiles.balanced.roles.architect
+    = {model: "ember-path", reasoning: "swift", status: "resolved"}
+  ' "$TEST_TEMP_DIR/.lbwc-planning/config.json" > "$TEST_TEMP_DIR/.lbwc-planning/config.next"
+  mv "$TEST_TEMP_DIR/.lbwc-planning/config.next" "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+
+  generate architect --job "build a roadmap"
+  [ "$status" -eq 0 ]
+  local name
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-architect-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  jq -e --arg name "$name" '.agents[$name].model == "ember-path" and .agents[$name].effort == "swift"' \
+    "$TEST_TEMP_DIR/.lbwc-planning/.agent-manifest.json" >/dev/null
+  grep -F 'model: "ember-path"' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
+  grep -F 'effort: "swift"' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
+}
+
+@test "generated agents omit default reasoning" {
+  jq '.routing.profiles.balanced.roles.docs.reasoning = null' \
+    "$TEST_TEMP_DIR/.lbwc-planning/config.json" > "$TEST_TEMP_DIR/.lbwc-planning/config.next"
+  mv "$TEST_TEMP_DIR/.lbwc-planning/config.next" "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+
+  generate docs --job "write a README"
+  [ "$status" -eq 0 ]
+  local name
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-docs-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  ! grep -q '^effort:' "$TEST_TEMP_DIR/.claude/agents/$name.md"
+  jq -e --arg name "$name" '.agents[$name].effort == null' \
+    "$TEST_TEMP_DIR/.lbwc-planning/.agent-manifest.json" >/dev/null
+}
+
+@test "generator blocks when the saved binary fingerprint is stale" {
+  printf '%s\n' 'changed' >> "$ROUTE_BINARY"
+
+  generate docs --job "write a README"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"fingerprint differs"* ]]
+  [ ! -d "$TEST_TEMP_DIR/.claude/agents" ]
+}
+
+@test "generation uses saved routes when legacy model catalogs are absent" {
+  local isolated="$TEST_TEMP_DIR/plugin"
+  mkdir -p "$isolated"
+  cp -R "$PROJECT_ROOT/scripts" "$PROJECT_ROOT/templates" "$PROJECT_ROOT/config" "$isolated/"
+  GENERATOR="$isolated/scripts/agent-generator.sh"
+  export GENERATOR
+
+  generate docs --job "write from saved routing authority"
+
+  [ "$status" -eq 0 ]
+  local name
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-docs-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  grep -F 'model: "nova-route"' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
+  grep -F 'effort: "deliberate"' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
 }
 
 @test "task write allowance is registered as an exact repository path" {
@@ -221,8 +349,7 @@ make_contract() {
     [ "$(find "$TEST_TEMP_DIR/.claude/agents" -type f | wc -l | tr -d ' ')" -eq 1 ]
 
     teardown_temp_dir
-    setup_temp_dir
-    create_test_config
+    setup
   done
 }
 
@@ -344,8 +471,7 @@ EOF
   [ -n "$first" ]
 
   teardown_temp_dir
-  setup_temp_dir
-  create_test_config
+  setup
 
   LBWC_AGENT_RANDOM_SEED=42 generate docs --job "second"
   [ "$status" -eq 0 ]

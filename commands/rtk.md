@@ -1,0 +1,209 @@
+---
+name: lbwc:rtk
+category: supporting
+disable-model-invocation: true
+description: Install, update, verify, and manage optional RTK tool-output compression.
+argument-hint: "[status|install|init|verify|update|uninstall]"
+allowed-tools: Read, Bash, AskUserQuestion
+---
+
+# LBWC RTK $ARGUMENTS
+
+## Context
+
+Plugin root:
+```
+!`L="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; echo "$L"`
+```
+
+RTK state:
+```json
+!`R="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; ROOT=""; if [ -f "$R" ]; then ROOT=$(bash "$R" --nonfatal 2>/dev/null); fi; if [ -n "$ROOT" ] && bash "$ROOT/scripts/rtk-manager.sh" status --json 2>/dev/null; then exit 0; fi; echo '{"status_unavailable":true,"summary":"RTK status unavailable","next_action":"install","compatibility":"unknown"}'`
+```
+
+AskUserQuestion reference: @${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md
+
+## Guard
+
+- Store the Plugin root output above as `{plugin-root}`.
+- Do not run RTK install, update, hook activation, or uninstall unless the user explicitly invoked the matching RTK subcommand or confirmed the no-args menu.
+- `/lbwc:rtk install` and no-args install/repair selections are explicit consent for complete setup: binary install, RTK config bootstrap, Claude Code hook activation, and hook verification/fallback.
+- `/lbwc:rtk init` is explicit consent for setup/repair of Claude Code RTK integration for an RTK binary already on PATH. It does not install or update the binary, but may validate the RTK CLI and bootstrap RTK config when missing.
+- Keep separate confirmation for destructive or ambiguous manage flows such as update and uninstall.
+- Default `status` is read-only and offline. Only `status --check-updates`, `install`, or `update` may query GitHub release metadata.
+- Managed setup must not use `sudo`, edit shell profiles, or pipe downloaded scripts into `sh`.
+
+## Behavior
+
+### Step 1: Parse intent
+
+Recognized subcommands: `status`, `install`, `init`, `verify`, `update`, `uninstall`.
+
+If no subcommand is provided, use the RTK state JSON to present one bounded AskUserQuestion:
+
+- header: `RTK setup`
+- question: `What do you want to do?`
+- options: choose 2-4 relevant visible options only:
+  - `Install or repair RTK setup` first when `status_unavailable=true`
+  - `Install RTK and enable Claude hook` first when `rtk_present=false`
+  - `Verify RTK/LBWC coexistence` second when `status_unavailable=true` or `rtk_present=false`
+  - `Update RTK binary` when `update_available=true`
+  - `Enable Claude Code hook` when `rtk_present=true` and `global_hook_present=false`
+  - `Show PATH guidance` when `managed_by_lbwc=true` and `binary_install_state="installed_not_on_path"`
+  - `Verify RTK/LBWC coexistence` when `global_hook_present=true` and `compatibility` is not `verified`
+  - `Uninstall/manage RTK` when `managed_by_lbwc=true` or `global_hook_present=true`
+  - `Exit` when no action is wanted
+
+For bounded AskUserQuestion replies:
+- accept direct option intent that clearly matches a visible choice
+- accept unambiguous visible option-number replies such as `#1`, `option 2`, or `2`
+- accept hybrid replies anchored to a visible option number such as `#2 please`
+- re-ask only when the reply is ambiguous or invalid for the same question
+- do NOT add an extra visible `Other` option
+
+### Step 2: Status
+
+For `/lbwc:rtk status`:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" status --json
+```
+
+For `/lbwc:rtk status --check-updates`:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" status --json --check-updates
+```
+
+Display `summary`, `rtk_version`, `latest_version` when present, `config_state`, `config_path`, `compatibility`, and `next_action`. Do not run `rtk gain` unless the user explicitly asks for stats/metrics.
+
+### Step 3: Install setup or update binary
+
+For `/lbwc:rtk install` or a no-args install/repair selection, first run the dry-run setup preflight and show it verbatim:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" install --dry-run
+```
+
+The install preflight must show compact lines for `Method`, `Will run`, `Writes`, `Fallback`, `Restart`, `Risk`, and `Next step`. State once that the explicit subcommand or selected install/repair option is consent for binary install plus hook setup. Then run exactly one mutating helper command and do not ask a second install question:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" install --yes
+```
+
+If the helper prints a PATH note, show it as optional guidance for future manual `rtk` shell usage. Do not treat off-`PATH` as a setup blocker. The helper must complete setup with the selected binary path or fail clearly.
+
+For `/lbwc:rtk update`, first run the dry-run preflight and show it verbatim:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" update --dry-run
+```
+
+Ask for one explicit update confirmation after the preflight. If confirmed, run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" update --yes
+```
+
+### Step 4: Enable or repair hook
+
+For `/lbwc:rtk init`, run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" init --dry-run
+```
+
+Show the `RTK hook preflight` verbatim. It must mention `rtk init -g --auto-patch`, possible RTK config and Claude Code user config writes, jq fallback patching, restart requirement, and the PreToolUse `updatedInput` risk from Claude Code issue #15897. State once that the explicit `init` subcommand is consent for hook setup/repair, then run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" init --yes
+```
+
+Do not disable, reorder, or weaken LBWC `bash-guard.sh`.
+
+### Step 5: Verify
+
+First inspect deterministic helper state:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" verify --json
+```
+
+If `compatibility="verified"` and `proof_source` is concrete, run the human-readable verifier and report the runtime proof. Keep any `diagnostic_caveat` or `upstream_issue` as diagnostic detail only. A valid proof quiets normal warning noise for this local setup.
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" verify
+```
+
+If RTK is present, `config_state="present"`, the settings hook is active, and compatibility is not verified, run the scoped runtime smoke as separate Claude Code Bash tool calls in this exact order:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" smoke-start
+```
+
+```bash
+ls -la .
+```
+
+```bash
+git status --short
+```
+
+```bash
+git log -n 2 --oneline
+```
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" smoke-finish
+```
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" verify
+```
+
+Reason: separate Claude Code Bash tool calls exercise the RTK PreToolUse `updatedInput` rewrite behavior under test. Nested helper loops, chained commands, or command substitutions can bypass the exact hook path affected by anthropics/claude-code#15897. Example anti-pattern: `bash "{plugin-root}/scripts/rtk-manager.sh" smoke-start && ls -la . && git status --short && git log -n 2 --oneline && bash "{plugin-root}/scripts/rtk-manager.sh" smoke-finish`.
+
+Keep the smoke scoped to those three unprefixed commands. Do not use repo-wide `rtk grep`, `find .`, broad scans, or performance-oriented RTK commands as compatibility proof. Static verification may confirm binary, config state/path, settings hook, RTK docs/artifacts, and LBWC hook presence. Runtime compatibility is PASS only when the helper reports `compatibility=verified` with a validated runtime smoke proof source. Otherwise report `hook_active_unverified` or `risk` and show the manual/runtime-smoke-required message.
+
+### Step 6: Uninstall/manage
+
+For `/lbwc:rtk uninstall`, choose the helper path from RTK state:
+
+- If `managed_by_lbwc=true` and either `global_hook_present=true` or `settings_json_valid=false`, first run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" uninstall --dry-run --deactivate-hook
+```
+
+Ask for one explicit confirmation that names both Claude Code hook deactivation/settings repair risk and LBWC-managed binary removal. If confirmed, run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" uninstall --yes --deactivate-hook
+```
+
+- If `managed_by_lbwc=true` and `global_hook_present=false`, first run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" uninstall --dry-run
+```
+
+Ask for confirmation. If confirmed, run:
+
+```bash
+bash "{plugin-root}/scripts/rtk-manager.sh" uninstall --yes
+```
+
+- For externally managed installs, do not delete the binary. Show package-manager/manual uninstall guidance from the helper output instead.
+
+## Output
+
+Keep output compact:
+
+- current RTK state, including config state/path when present
+- preflight details for mutating operations
+- exact next action
+- compatibility caveat when hook is active but unverified
+
+## Next Up
+
+After status or mutation, show `/lbwc:rtk status` as the verification command and stop.

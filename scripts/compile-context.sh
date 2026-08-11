@@ -208,8 +208,10 @@ try_serve_from_cache() {
   cp "$cached_path" "$output_path" 2>/dev/null || { echo "V3 fallback: cache copy failed for ${ROLE}, compiling fresh" >&2; return 1; }
 
   update_context_index "$cache_hash" "$cached_path" "$ROLE" "$PHASE"
-  if [ "$V3_METRICS_ENABLED" = "true" ] && [ -f "${SCRIPT_DIR}/collect-metrics.sh" ]; then
-    bash "${SCRIPT_DIR}/collect-metrics.sh" cache_hit "$PHASE" "role=${ROLE}" 2>/dev/null || true
+  if [ "$V3_METRICS_ENABLED" = "true" ] && [ -f "${SCRIPT_DIR}/lib/session-telemetry.py" ]; then
+    python3 "${SCRIPT_DIR}/lib/session-telemetry.py" record \
+      --event command --outcome success --phase "$PHASE" --root "$PLANNING_DIR" \
+      >/dev/null 2>&1 || true
   fi
   echo "$output_path"
   return 0
@@ -584,14 +586,12 @@ if [ "$V3_CACHE_ENABLED" = "true" ] && [ -n "$CACHE_HASH" ] && [ "$CACHE_HASH" !
   fi
 fi
 
-if [ "$V3_METRICS_ENABLED" = "true" ] && [ -f "${SCRIPT_DIR}/collect-metrics.sh" ]; then
+if [ "$V3_METRICS_ENABLED" = "true" ] && [ -f "${SCRIPT_DIR}/lib/session-telemetry.py" ]; then
   END_TIME=$(date +%s 2>/dev/null || echo "0")
   DURATION_MS=$(( (END_TIME - ${START_TIME:-0}) * 1000 ))
-  DELTA_COUNT=0
-  if [ "$V3_DELTA_ENABLED" = "true" ] && [ -f "${SCRIPT_DIR}/delta-files.sh" ]; then
-    DELTA_COUNT=$(bash "${SCRIPT_DIR}/delta-files.sh" "$PHASE_DIR" "$PLAN_PATH" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
-  fi
-  bash "${SCRIPT_DIR}/collect-metrics.sh" compile_context "$PHASE" "role=${ROLE}" "duration_ms=${DURATION_MS}" "delta_files=${DELTA_COUNT}" "cache=miss" 2>/dev/null || true
+  python3 "${SCRIPT_DIR}/lib/session-telemetry.py" record \
+    --event command --outcome success --duration-ms "$DURATION_MS" \
+    --phase "$PHASE" --root "$PLANNING_DIR" >/dev/null 2>&1 || true
 fi
 
 echo "${PHASE_DIR}/.context-${ROLE}.md"

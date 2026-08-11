@@ -23,16 +23,22 @@ PHASE_DIR="${2:-}"
 VERIFICATION_FILE="${3:-}"
 
 usage() {
-  echo "usage: track-known-issues.sh <status|sync-verification|resolve|clear> <phase-dir> [verification-file|signature]" >&2
+  echo "usage: track-known-issues.sh <status|sync-summaries|sync-verification|promote-todos|resolve|clear> <phase-dir> [verification-file|signature]" >&2
   exit 1
 }
 
 case "$CMD" in
-  status|clear) [ -n "$PHASE_DIR" ] || usage ;;
+  status|clear|sync-summaries|promote-todos) [ -n "$PHASE_DIR" ] || usage ;;
   sync-verification|resolve) [ -n "$PHASE_DIR" ] && [ -n "$VERIFICATION_FILE" ] || usage ;;
   *) usage ;;
 esac
 
+PHASE_DIR="$(cd "$PHASE_DIR" 2>/dev/null && pwd -P)" || { echo "known_issues_status=missing_phase_dir" >&2; exit 1; }
+case "$PHASE_DIR" in
+  */.lbwc-planning/phases/*) ;;
+  *) echo "known_issues_status=invalid_phase_dir" >&2; exit 1 ;;
+esac
+PLANNING_DIR="$(cd "$PHASE_DIR/../.." && pwd -P)"
 REGISTRY="${PHASE_DIR%/}/known-issues.json"
 
 status_output() {
@@ -98,6 +104,106 @@ if [ "$CMD" = "resolve" ]; then
   ' "$REGISTRY")
   write_registry "$UPDATED"
   status_output present "$(jq '[.issues[] | select((.disposition // "unresolved") == "unresolved")] | length' <<< "$UPDATED")"
+  exit 0
+fi
+
+summary_issues() {
+  python3 - "$PHASE_DIR" <<'PYEOF'
+import json
+import pathlib
+import sys
+
+items = []
+for path in pathlib.Path(sys.argv[1]).glob("**/*-SUMMARY.md"):
+    lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    in_frontmatter = in_issues = False
+    for line in lines:
+        stripped = line.strip()
+        if not in_frontmatter:
+            if stripped == "---":
+                in_frontmatter = True
+            continue
+        if stripped == "---":
+            break
+        if line.startswith("pre_existing_issues:"):
+            in_issues = True
+            continue
+        if in_issues and line[:1].isalpha() and ":" in line:
+            in_issues = False
+        if in_issues and stripped.startswith("- "):
+            try:
+                item = json.loads(stripped[2:].strip().strip("'\""))
+            except json.JSONDecodeError:
+                continue
+            if isinstance(item, dict) and item.get("test") and item.get("error"):
+                items.append({"test": item["test"], "file": item.get("file") or item["test"], "error": item["error"]})
+print(json.dumps(items))
+PYEOF
+}
+
+sync_summaries() {
+  local raw current signed merged item test_name file_path error_message signature
+  registry_valid || [ ! -f "$REGISTRY" ] || { status_output malformed 0; return 1; }
+  raw=$(summary_issues) || return 1
+  current=$(registry_valid && cat "$REGISTRY" || empty_registry)
+  signed='[]'
+  while IFS= read -r item; do
+    test_name=$(jq -r '.test' <<< "$item")
+    file_path=$(jq -r '.file' <<< "$item")
+    error_message=$(jq -r '.error' <<< "$item")
+    signature=$(signature_for "$test_name" "$file_path" "$error_message")
+    signed=$(jq -cn --argjson items "$signed" --argjson item "$item" --arg signature "$signature" '$items + [$item + {signature:$signature, times_seen:1, disposition:"unresolved"}]')
+  done < <(jq -c '.[]' <<< "$raw")
+  merged=$(jq -cn --argjson current "$current" --argjson incoming "$signed" '
+    ($current.issues // []) as $old
+    | [ $incoming[] as $new | ($old[] | select(.signature == $new.signature)) // $new ] as $seen
+    | $seen + [ $old[] | select(.signature as $signature | [$seen[].signature] | index($signature) | not) ]
+    | unique_by(.signature)
+  ')
+  write_registry "$(jq -n --arg phase "$(basename "${PHASE_DIR%/}" | sed 's/^\([0-9]*\).*/\1/')" --argjson issues "$merged" '{schema_version:1, phase:$phase, issues:$issues}')"
+  status_output present "$(jq '[.issues[] | select((.disposition // "unresolved") == "unresolved")] | length' "$REGISTRY")"
+}
+
+promote_todos() {
+  local state_path issues total entries item test_name file_path error_message reference tmp
+  state_path="$PLANNING_DIR/STATE.md"
+  [ -f "$state_path" ] || { echo "promoted_count=0"; echo "already_tracked_count=0"; echo "total_known_issues=0"; echo "promote_status=no_state_file"; return 1; }
+  registry_valid || { echo "promote_status=malformed_registry"; return 1; }
+  grep -q '^## Todos$' "$state_path" || { echo "promote_status=no_todos_section"; return 1; }
+  issues=$(jq -c '[.issues[] | select((.disposition // "unresolved") == "unresolved")]' "$REGISTRY")
+  total=$(jq 'length' <<< "$issues")
+  entries=''
+  local promoted=0 already=0
+  while IFS= read -r item; do
+    test_name=$(jq -r '.test' <<< "$item")
+    file_path=$(jq -r '.file' <<< "$item")
+    error_message=$(jq -r '.error' <<< "$item")
+    reference=$(printf '%s' "${test_name}|${file_path}|${error_message}" | shasum -a 256 | cut -c1-8)
+    if grep -qF "(ref:${reference})" "$state_path"; then already=$((already + 1)); else entries="${entries}- [KNOWN-ISSUE] ${test_name} (${file_path}): ${error_message} (ref:${reference})"$'\n'; promoted=$((promoted + 1)); fi
+  done < <(jq -c '.[]' <<< "$issues")
+  if [ "$promoted" -gt 0 ]; then
+    tmp=$(mktemp "${state_path}.tmp.XXXXXX") || return 1
+    awk -v entries="${entries%$'\n'}" '
+      /^## Todos$/ { in_todos=1; print; next }
+      in_todos && /^## / { if (!added) print entries; in_todos=0; added=1 }
+      in_todos && /^[[:space:]]*None\.?[[:space:]]*$/ { if (!added) print entries; added=1; next }
+      { print }
+      END { if (in_todos && !added) print entries }
+    ' "$state_path" > "$tmp" && mv "$tmp" "$state_path" || { rm -f "$tmp"; return 1; }
+  fi
+  echo "promoted_count=$promoted"
+  echo "already_tracked_count=$already"
+  echo "total_known_issues=$total"
+  echo "promote_status=$([ "$promoted" -gt 0 ] && printf promoted || printf all_tracked)"
+}
+
+if [ "$CMD" = "sync-summaries" ]; then
+  sync_summaries
+  exit 0
+fi
+
+if [ "$CMD" = "promote-todos" ]; then
+  promote_todos
   exit 0
 fi
 

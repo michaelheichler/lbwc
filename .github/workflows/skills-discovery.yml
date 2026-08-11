@@ -1,0 +1,46 @@
+name: Skills discovery
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/skills-discovery.yml
+      - commands/skills.md
+      - scripts/lbwc-skills.sh
+      - tests/lbwc-skills.bats
+  push:
+    paths:
+      - .github/workflows/skills-discovery.yml
+      - commands/skills.md
+      - scripts/lbwc-skills.sh
+      - tests/lbwc-skills.bats
+  workflow_dispatch:
+
+jobs:
+  skills-discovery:
+    name: ${{ matrix.os }} skills discovery
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-15
+          - ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install macOS test dependencies
+        if: runner.os == 'macOS'
+        run: brew install bats-core jq shellcheck
+
+      - name: Install Linux test dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y bats jq shellcheck
+
+      - name: Check shell
+        run: shellcheck -x scripts/lbwc-skills.sh
+
+      - name: Run skills discovery tests
+        run: bats tests/lbwc-skills.bats

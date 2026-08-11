@@ -1,19 +1,34 @@
 ---
-description: Execute a phase's PLAN.md. Routes each task to the matching pair or trio, one commit per task, writes SUMMARY.md.
+name: lbwc:build
+category: lifecycle
+disable-model-invocation: true
+description: Execute a phase PLAN through contract-bound pair or trio agents, one main-session commit per task, and a verified summary.
 argument-hint: "<phase number or name>"
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, SendMessage, LSP
 ---
 
 Required first step: read `skills-bundle/ponytail/SKILL.md` under the plugin root (`${CLAUDE_PLUGIN_ROOT}`) and apply the ponytail discipline at level full for the whole task.
 
+# LBWC Build: $ARGUMENTS
+
+## Context
+
+Resolve the canonical plugin root and run `scripts/phase-detect.sh`. Read the selected root or remediation PLAN, its declared task files and dependencies, relevant terminal summaries, task-contract state, and generated-agent manifest. Follow `references/execute-protocol.md` and `references/agent-spawn-protocol.md`.
+
+## Guard
+
+Require initialized active planning state, `phase_detect_complete=true`, a canonical PLAN, and no detector-selected blocking route that precedes build. The main session owns contracts, planning writes, verification, telemetry, Git, summaries, and user output. Stop on a missing helper, malformed PLAN, stale contract, open exclusive grouping, or undeclared path.
+
 ## Resolve the target phase
 
-   - Use $ARGUMENTS when supplied.
-   - Otherwise use the first non-`complete` phase in ROADMAP.md's Progress table.
-   - Read `.lbwc-planning/phases/{NN}-{slug}/PLAN.md`.
-   - If it does not exist, stop and tell the user to run `/plan <phase>` first.
-   - **Remediation round execution:** if the phase has an active remediation round (`remediation/qa/.qa-remediation-stage` or `remediation/uat/.uat-remediation-stage` with `stage=plan`, checkable via `scripts/remediation-round.sh current <phase-dir> <qa|uat>`), the work list is that round's `R{NN}-PLAN.md` instead of the phase PLAN.md. Run `scripts/remediation-round.sh stage <phase-dir> <kind> execute` before spawning, work the round plan's tasks exactly like a normal plan (steps 2-7 below), write `R{NN}-SUMMARY.md` from `templates/REMEDIATION-SUMMARY.md` instead of SUMMARY.md, then tell the user to run `/qa <phase>` to re-verify the round. The deviq build gate still runs first.
-   - Before spawning any dev/engineer pair or trio for this phase, run `scripts/deviq-build-gate.sh <phase>`. This is the one blocking rule and this is its only call site.
-   - If the gate exits non-zero, build one exact advisory brief from its open blocks. Issue a read-only solo `/build` command contract named `deviq-{phase}`. Generate one solo `deviq` agent with that contract and `--exclusive`. Advance the contract to `dispatched` before spawning. Wait for its manifest entry to become `used` or `expired`, then surface its recommendation instead of spawning anything else.
+- Use $ARGUMENTS when supplied.
+- Otherwise use the first non-`complete` phase in ROADMAP.md's Progress table.
+- Read `.lbwc-planning/phases/{NN}-{slug}/PLAN.md`.
+- If it does not exist, stop and tell the user to run `/plan <phase>` first.
+- **Remediation round execution:** if the phase has an active remediation round (`remediation/qa/.qa-remediation-stage` or `remediation/uat/.uat-remediation-stage` with `stage=plan`, checkable via `scripts/remediation-round.sh current <phase-dir> <qa|uat>`), the work list is that round's `R{NN}-PLAN.md` instead of the phase PLAN.md. Run `scripts/remediation-round.sh stage <phase-dir> <kind> execute` before spawning, work the round plan's tasks exactly like a normal plan (steps 2-7 below), write `R{NN}-SUMMARY.md` from `templates/REMEDIATION-SUMMARY.md` instead of SUMMARY.md, then tell the user to run `/qa <phase>` to re-verify the round. The deviq build gate still runs first.
+- Before spawning any dev/engineer pair or trio for this phase, run `scripts/deviq-build-gate.sh <phase>`. This is the one blocking rule and this is its only call site.
+- If the gate exits non-zero, build one exact advisory brief from its open blocks. Issue a read-only solo `/build` command contract named `deviq-{phase}`. Generate one solo `deviq` agent with that contract and `--exclusive`. Advance the contract to `dispatched` before spawning. Wait for its manifest entry to become `used` or `expired`, then surface its recommendation instead of spawning anything else.
+
 ## Plan waves
 
 Group the plan's `<task>` entries into waves by `depends_on`. Wave 1 has no unmet dependency. Later waves depend only on earlier waves. Preserve PLAN order for tasks within each wave.
@@ -23,14 +38,20 @@ Within a dependency wave, process tasks in PLAN order and admit exactly one task
 ## Select roles
 
 For each task, choose exactly one role to own it:
-   - Python source files in scope: `python-engineer`.
-   - Web, frontend, or HTTP API files in scope: `web-engineer`.
-   - Everything else, or any task whose `verify` step is a correctness argument (an invariant, a termination condition, a proof obligation): `coding-dijkstra`.
-   - If a task's files span more than one of these, pick by the file the `action` step spends the most words on, do not split one task across two roles.
-   - If a task's `files` or `action` are too vague to route with any of the above, stop and report which task, rather than guessing a role for it.
+
+- Python source files in scope: `python-engineer`.
+- Web, frontend, or HTTP API files in scope: `web-engineer`.
+- Everything else, or any task whose `verify` step is a correctness argument (an invariant, a termination condition, a proof obligation): `coding-dijkstra`.
+- If a task's files span more than one of these, pick by the file the `action` step spends the most words on, do not split one task across two roles.
+- If a task's `files` or `action` are too vague to route with any of the above, stop and report which task, rather than guessing a role for it.
+
 ## Select the team shape
 
 For a task with `<strategy>tdd</strategy>`, use a solo `qa-author` red stage followed by `--pair` for the engineer and critic. `qa-author` is the only test owner. For every other task, use `--trio` when its `verify` step calls for new automated test coverage. Otherwise use `--pair`. Do not default to trio, `test-dev` is only for non-TDD tasks needing new tests.
+
+## Implementation discipline
+
+Apply the ponytail discipline read in the required first step to every implementation grouping: keep the scope honest, question work that is not needed, look for an existing helper or pattern, prefer the standard library or native capability before adding a dependency, and choose the smallest implementation that still satisfies the PLAN and verification gates. This discipline reduces needless code; it never permits skipping validation, error handling, security, or explicitly requested work.
 
 ## Main-session task contract and telemetry
 
@@ -56,13 +77,26 @@ Use the matching `failure`, `partial`, or `blocked` outcome when applicable. Wor
 ## Spawn and verify
 
 For one wave, take the next task in PLAN order and generate only its current grouping with `--exclusive`, following `@references/agent-spawn-protocol.md`. For a pair or trio, spawn every member of that one grouping together in the same turn. Derive each member's manifest capability from the task's `files` field. Pass source paths through `--write-allowance` for the engineer and test paths through `--role-write-allowance test-dev:<exact-path>` for a non-TDD trio. Give the engineer the task's `name`, `action`, `verify`, and `done` fields verbatim as its brief. Do not ask an agent to declare or summarize file scope. Run the contract open and generator arguments in the preceding section after role selection and before this invocation.
-   - **TDD red stage:** open the `red` contract before generating solo `qa-author` with `--exclusive`. Pass the same must_haves brief and exact test-path allowances to both calls. Dispatch the contract before spawning. After the tests report and red commit, close its state from observed evidence. Wait until the manifest entry is `used` or `expired`. Then open a separate `implementation` pair contract for the engineer and critic. `test-dev` is not part of a TDD task.
+
+- **TDD red stage:** open the `red` contract before generating solo `qa-author` with `--exclusive`. Pass the same must_haves brief and exact test-path allowances to both calls. Dispatch the contract before spawning. After the tests report and red commit, close its state from observed evidence. Wait until the manifest entry is `used` or `expired`. Then open a separate `implementation` pair contract for the engineer and critic. `test-dev` is not part of a TDD task.
 When a task's pair or trio returns its verdict, observe and record the reports. Advance the contract to `awaiting_review`, then verify the task and advance it to `verified` or to `blocked` or `cancelled` before committing that task's changed files yourself, one commit per task, referencing the task name. Before generating another grouping, read the manifest and wait until every member of the current grouping is `used` or `expired`. A `registered` or `running` member means the grouping is not closed. After each task's verify step, record one `deviq-record.py evidence --phase <phase> --role <engineer-role> --field claim="..." --field check="..." --field result=pass|fail` from the engineer's report. If the paired critic returned BLOCK, also record `deviq-record.py block --phase <phase> --role <critic-role> --field trigger="..." --field consequence="..." --field fix="..." --field status=open`. Continue through the remaining tasks in that wave in PLAN order. Start the next dependency wave only after every task in the current wave is complete. Record command telemetry only after this main-session outcome is observed.
 
 If an engineer deviates from the plan's stated `action`, record that deviation exactly as reported. Do not silently accept it or smooth it over, an unrecorded deviation becomes an unchecked claim `/qa` cannot gate on.
 
 Once every wave is done, write `.lbwc-planning/phases/{NN}-{slug}/SUMMARY.md` from `templates/SUMMARY.md`. Include commit hashes, deviations, and an honest verdict for every `must_haves` truth, artifact, or key link from PLAN.md.
 
-Report the commits made and the SUMMARY.md path. Tell the user to run `/qa <phase>` next.
+Report the commits made and the SUMMARY.md path. Tell the user to run `/lbwc:qa <phase>` next.
 
-`deviq-record.py` prints a stable id for every block or evidence record it writes. Keep that id. Later resolution references `--field id=<id>`. Do not generate a solo `deviq` advisor while a build grouping is `registered` or `running`. If a group is blocked, close it first. Issue a new read-only `/build` command contract for the advisor, then generate it with `--exclusive`. Apply its recommendation only through a newly contracted retry grouping.
+`deviq-record.py` prints a stable id for every block or evidence record it writes. Keep that id. Later resolution references `--field id=<id>`. Do not generate a solo `deviq` advisor while a build grouping is `registered` or `running`. If a group is blocked, close it first. Issue a new read-only `/lbwc:build` command contract for the advisor, then generate it with `--exclusive`. Apply its recommendation only through a newly contracted retry grouping.
+
+## Failure and recovery
+
+A failed contract, generator, worker verdict, verify command, commit, summary validation, or remediation transition blocks the task and its dependents. Preserve accepted predecessor commits and exact contract state. Report the failing task and recovery command. Never create a placeholder summary or bypass exclusive admission.
+
+## Output Format
+
+Show the phase, each task and grouping verdict, main-session commit hashes, deviations, summary path, telemetry status, and any blocker. Use the LBWC phase banner and no ANSI codes.
+
+## Next Up
+
+For a completed build, show `/lbwc:qa <phase>`. For a remediation build, show the same QA command for the active round. For a blocker, show only its exact recovery command, then stop.

@@ -256,3 +256,22 @@ PLAN
   [[ "$output" == *"qa_gate_plans_verified_count=0"* ]]
   [[ "$output" == *"qa_gate_routing=QA_RERUN_REQUIRED"* ]]
 }
+
+@test "UAT remediation scope selects its current round verification" {
+  local round_dir="$PHASE_DIR/remediation/uat/round-01"
+  mkdir -p "$round_dir"
+  printf 'stage=verify\nround=01\nlayout=round-dir\n' > "$PHASE_DIR/remediation/uat/.uat-remediation-stage"
+  cat > "$round_dir/R01-VERIFICATION.md" <<'VERIF'
+---
+phase: 01
+result: PASS
+writer: write-verification.sh
+---
+VERIF
+
+  run bash "$SCRIPT" "$PHASE_DIR"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"qa_gate_scope=uat round=01"* ]]
+  [[ "$output" == *"qa_gate_result=PASS"* ]]
+}

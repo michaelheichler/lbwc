@@ -14,14 +14,11 @@ fail() {
 
 token_for_key() { agent_field_token "$1"; }
 
-PROFILES_PATH="$SCRIPT_DIR/../config/model-profiles.json"
-[ -f "$PROFILES_PATH" ] || fail "model profiles not found: $PROFILES_PATH"
-agent_role_is_valid "$ROLE" "$PROFILES_PATH" || fail "invalid role '$ROLE'"
-
 TEMPLATE="$TEMPLATE_DIR/$ROLE.md.tpl"
 DEFAULTS="$TEMPLATE_DIR/defaults.json"
 [ -f "$TEMPLATE" ] || fail "template not found for role '$ROLE'"
 [ -f "$DEFAULTS" ] || fail "defaults not found"
+jq -e --arg role "$ROLE" 'has($role)' "$DEFAULTS" >/dev/null 2>&1 || fail "invalid role '$ROLE'"
 
 declare -A VALUES=()
 declare -A EMPTY_TOKENS=()
@@ -49,19 +46,34 @@ for assignment in "$@"; do
   fi
 done
 
+question_handoff='Never call AskUserQuestion. If a human decision is required, return {"type":"user_decision_required","question":"clear user question","response_shape":"bounded choices or freeform"} to the main session.'
+disallowed_tools=${VALUES[DISALLOWED_TOOLS]:-}
+compact_disallowed_tools=$(tr -d '[:space:]' <<< "$disallowed_tools")
+if [[ ",$compact_disallowed_tools," != *,AskUserQuestion,* ]]; then
+  if [ -n "$disallowed_tools" ]; then
+    VALUES[DISALLOWED_TOOLS]="$disallowed_tools, AskUserQuestion"
+  else
+    VALUES[DISALLOWED_TOOLS]="AskUserQuestion"
+  fi
+fi
+unset 'EMPTY_TOKENS[DISALLOWED_TOOLS]'
+
+initial_prompt=${VALUES[INITIAL_PROMPT]:-}
+if [[ "$initial_prompt" != *'"type":"user_decision_required","question":"clear user question","response_shape":"bounded choices or freeform"'* ]]; then
+  if [ -n "$initial_prompt" ]; then
+    VALUES[INITIAL_PROMPT]="$initial_prompt"$'\n\n'"$question_handoff"
+  else
+    VALUES[INITIAL_PROMPT]="$question_handoff"
+  fi
+fi
+unset 'EMPTY_TOKENS[INITIAL_PROMPT]'
+
 for required in NAME MODEL DESCRIPTION JOB; do
   [ "${VALUES[$required]+set}" = set ] && [ -n "${VALUES[$required]}" ] || fail "missing required field $required"
 done
 
 rendered=$(cat "$TEMPLATE")
 check_rendered="$rendered"
-# Two-pass substitution so user-supplied values can never re-expand tokens.
-# Pass 1: replace every {{TOKEN}} with a private sentinel. Pass 2 (below): fill
-# each sentinel with the real value. A value containing a literal "{{NAME}}" is
-# inserted verbatim because all {{TOKEN}} markers are already gone. Values are
-# JSON-escaped (except JOB) so embedded quotes cannot break the frontmatter.
-# check_rendered tracks the same passes but masks user content, so the final
-# grep for leftover {{TOKEN}} detects an unfilled slot rather than user text.
 all_tokens=(NAME DESCRIPTION TOOLS DISALLOWED_TOOLS MODEL PERMISSION_MODE MAX_TURNS SKILLS MCP_SERVERS MEMORY BACKGROUND EFFORT ISOLATION COLOR INITIAL_PROMPT JOB)
 for token in "${all_tokens[@]}"; do
   marker="{{$token}}"

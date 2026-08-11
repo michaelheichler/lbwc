@@ -3,10 +3,26 @@ set -uo pipefail
 
 TESTS_DIR=$(cd "$(dirname "$0")" && pwd)
 SCRIPTS_DIR=$(cd "$TESTS_DIR/.." && pwd)
-GENERATOR="$SCRIPTS_DIR/agent-generator.sh"
+PLUGIN_ROOT=$(cd "$SCRIPTS_DIR/.." && pwd)
+WORK_ROOT=$(mktemp -d)
+PLUGIN_FIXTURE="$WORK_ROOT/plugin"
 
+cleanup() {
+  rm -rf "$WORK_ROOT"
+}
+trap cleanup EXIT
+
+mkdir -p "$PLUGIN_FIXTURE"
+cp -R "$PLUGIN_ROOT/scripts" "$PLUGIN_ROOT/templates" "$PLUGIN_ROOT/config" "$PLUGIN_FIXTURE/"
+
+GENERATOR="$PLUGIN_FIXTURE/scripts/agent-generator.sh"
+TASK_CONTRACT="$PLUGIN_FIXTURE/scripts/task-contract.sh"
+ROLE_DEFAULTS="$PLUGIN_FIXTURE/templates/agent-roles/defaults.json"
 PASS=0
 FAIL=0
+CONTRACT_SEQUENCE=0
+RUN_OUTPUT=""
+RUN_RC=0
 
 check() {
   local description="$1" condition="$2"
@@ -19,35 +35,96 @@ check() {
   fi
 }
 
+check_test() {
+  local description="$1"
+  shift
+  if test "$@"; then
+    check "$description" 0
+  else
+    check "$description" 1
+  fi
+}
+
 new_project() {
-  local dir
-  dir=$(mktemp -d)
+  local dir binary sha
+  dir=$(mktemp -d "$WORK_ROOT/project.XXXXXX")
   mkdir -p "$dir/.lbwc-planning"
-  printf '{}\n' > "$dir/.lbwc-planning/config.json"
+  binary="$dir/claude-generator-fixture"
+  printf '%s\n' '#!/usr/bin/env bash' 'printf "%s\\n" "fixture"' > "$binary"
+  chmod +x "$binary"
+  sha=$(shasum -a 256 "$binary" | awk '{print $1}')
+  jq -n --arg binary "$binary" --arg sha "$sha" '
+    {
+      schema_version: 1,
+      source: {binary_path: $binary, version: "fixture", sha256: $sha, detected_at: "2035-01-02T03:04:05Z"},
+      models: [
+        {selector: "nova-route", label: "Nova Route", description: "Fixture selector"},
+        {selector: "ember-path", label: "Ember Path", description: "Second fixture selector"}
+      ],
+      reasoning: {
+        scope: "global",
+        accepted_values: ["deliberate", "swift"],
+        model_associations: {"nova-route": ["deliberate"]}
+      }
+    }
+  ' > "$dir/.lbwc-planning/claude-capabilities.json"
+  jq --slurpfile defaults "$ROLE_DEFAULTS" '
+    . + {
+      schema_version: 1,
+      routing: {
+        active_profile: "balanced",
+        profiles: {
+          quality: {roles: {}},
+          balanced: {
+            roles: ($defaults[0] | keys | map({key: ., value: {model: "nova-route", reasoning: "deliberate", status: "resolved"}}) | from_entries)
+          },
+          turbo: {roles: {}}
+        }
+      }
+    }
+  ' "$PLUGIN_FIXTURE/config/settings.json" > "$dir/.lbwc-planning/config.json"
   printf '%s\n' "$dir"
 }
 
 manifest_of() {
-  cat "$1/.lbwc-planning/.agent-manifest.json" 2>/dev/null || printf '{"agents":{}}'
+  jq -c '.' "$1/.lbwc-planning/.agent-manifest.json" 2>/dev/null || printf '{"agents":{}}\n'
 }
 
-PROJECT_A=$(new_project)
-OUT_A=$(cd "$PROJECT_A" && bash "$GENERATOR" --pair coding-dijkstra --job "add a binary search" --model sonnet 2>&1)
-RC_A=$?
-check "pair mode exits 0" "$RC_A"
+run_generator() {
+  local project="$1" mode="$2" role="$3" job="$4" contract task_id
+  local -a generator_args=()
+  shift 4
+  CONTRACT_SEQUENCE=$((CONTRACT_SEQUENCE + 1))
+  task_id="core-$CONTRACT_SEQUENCE"
+  contract=$(bash "$TASK_CONTRACT" issue "$project" "$task_id" \
+    --command integration-test --role "$role" --team "$mode" --job "$job")
+  case "$mode" in
+    pair) generator_args+=(--pair) ;;
+    trio) generator_args+=(--trio) ;;
+  esac
+  RUN_OUTPUT=$(cd "$project" && LBWC_AGENT_RANDOM_SEED="$CONTRACT_SEQUENCE" \
+    bash "$GENERATOR" "${generator_args[@]}" "$role" --job "$job" \
+      --contract "$contract" --task-id "$(basename "$contract" .json)" "$@" 2>&1)
+  RUN_RC=$?
+}
 
+check_test "legacy model-pricing.json is absent from the integration fixture" ! -e "$PLUGIN_FIXTURE/config/model-pricing.json"
+check_test "legacy model-profiles.json is absent from the integration fixture" ! -e "$PLUGIN_FIXTURE/config/model-profiles.json"
+
+PROJECT_A=$(new_project)
+run_generator "$PROJECT_A" pair coding-dijkstra "add a binary search"
+check "pair mode exits 0 with catalog-backed routing" "$RUN_RC"
 MANIFEST_A=$(manifest_of "$PROJECT_A")
 PAIR_COUNT=$(jq '[.agents[] | select(.pair_id != null)] | group_by(.pair_id) | length' <<< "$MANIFEST_A")
 ONE_GROUP_OF_TWO=$(jq '[.agents[] | select(.pair_id != null)] | group_by(.pair_id) | map(length) | .[0] // 0' <<< "$MANIFEST_A")
 ENGINEER_PRESENT=$(jq '[.agents[] | select(.pair_role == "engineer")] | length' <<< "$MANIFEST_A")
 CRITIC_PRESENT=$(jq '[.agents[] | select(.pair_role == "critic")] | length' <<< "$MANIFEST_A")
-
-[ "$PAIR_COUNT" = "1" ]; check "pair mode creates exactly one pair_id group" "$?"
-[ "$ONE_GROUP_OF_TWO" = "2" ]; check "the pair_id group has both halves" "$?"
-[ "$ENGINEER_PRESENT" = "1" ]; check "one entry is pair_role=engineer" "$?"
-[ "$CRITIC_PRESENT" = "1" ]; check "one entry is pair_role=critic" "$?"
-grep -q '^ENGINEER: SPAWN_READY' <<< "$OUT_A"; check "prints ENGINEER: SPAWN_READY line" "$?"
-grep -q '^CRITIC: SPAWN_READY' <<< "$OUT_A"; check "prints CRITIC: SPAWN_READY line" "$?"
+check_test "pair mode creates exactly one pair_id group" "$PAIR_COUNT" = "1"
+check_test "the pair_id group has both halves" "$ONE_GROUP_OF_TWO" = "2"
+check_test "one entry is pair_role=engineer" "$ENGINEER_PRESENT" = "1"
+check_test "one entry is pair_role=critic" "$CRITIC_PRESENT" = "1"
+grep -q '^ENGINEER: SPAWN_READY' <<< "$RUN_OUTPUT"; check "prints ENGINEER: SPAWN_READY line" "$?"
+grep -q '^CRITIC: SPAWN_READY' <<< "$RUN_OUTPUT"; check "prints CRITIC: SPAWN_READY line" "$?"
 
 PROJECT_B=$(new_project)
 STALE_TS=$(date -u -v-2H +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -d '2 hours ago' +"%Y-%m-%dT%H:%M:%SZ")
@@ -55,16 +132,15 @@ STALE_MANIFEST=$(jq -n --arg ts "$STALE_TS" '
   {agents: (
     ["a","b","c","d"] | map({
       (.): {name: ., role: "lead", project_root: "/tmp", definition_path: "/tmp/x.md",
-            state: "registered", created_at: $ts, model: "claude-sonnet-5", effort: "",
+            state: "registered", created_at: $ts, model: "nova-route", effort: "deliberate",
             max_turns: "", overrides: {}, pair_id: null, pair_role: null}
     }) | add
   )}
 ')
 printf '%s\n' "$STALE_MANIFEST" > "$PROJECT_B/.lbwc-planning/.agent-manifest.json"
-OUT_B=$(cd "$PROJECT_B" && bash "$GENERATOR" lead --job "write a phase plan" 2>&1)
-RC_B=$?
-check "generation succeeds when the only existing entries are stale (>1h) registered ones" "$RC_B"
-grep -q 'SPAWN_READY' <<< "$OUT_B"; check "stale-entry case prints SPAWN_READY" "$?"
+run_generator "$PROJECT_B" solo lead "write a phase plan"
+check "generation succeeds when only stale registered entries exist" "$RUN_RC"
+grep -q 'SPAWN_READY' <<< "$RUN_OUTPUT"; check "stale-entry case prints SPAWN_READY" "$?"
 
 PROJECT_B2=$(new_project)
 FRESH_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -72,50 +148,69 @@ LIVE_MANIFEST=$(jq -n --arg ts "$FRESH_TS" '
   {agents: (
     ["a","b","c","d"] | map({
       (.): {name: ., role: "lead", project_root: "/tmp", definition_path: "/tmp/x.md",
-            state: "running", created_at: $ts, model: "claude-sonnet-5", effort: "",
+            state: "running", created_at: $ts, model: "nova-route", effort: "deliberate",
             max_turns: "", overrides: {}, pair_id: null, pair_role: null}
     }) | add
   )}
 ')
 printf '%s\n' "$LIVE_MANIFEST" > "$PROJECT_B2/.lbwc-planning/.agent-manifest.json"
-OUT_B2=$(cd "$PROJECT_B2" && bash "$GENERATOR" lead --job "write a phase plan" 2>&1)
-RC_B2=$?
-[ "$RC_B2" -ne 0 ]; check "generation is refused when 4 agents are already running" "$?"
-grep -qi 'cap' <<< "$OUT_B2"; check "cap-refusal message mentions the cap" "$?"
+run_generator "$PROJECT_B2" solo lead "write a phase plan"
+check_test "generation is refused when 4 agents are already running" "$RUN_RC" -ne 0
+grep -qi 'cap' <<< "$RUN_OUTPUT"; check "cap-refusal message mentions the cap" "$?"
 
 PROJECT_C=$(new_project)
 BEFORE_FILES=$(find "$PROJECT_C/.claude/agents" -type f 2>/dev/null | wc -l | tr -d ' ')
-OUT_C=$(cd "$PROJECT_C" && bash "$GENERATOR" coding-dijkstra --job "add a sort routine" --model definitely-not-a-registered-model 2>&1)
-RC_C=$?
+run_generator "$PROJECT_C" solo coding-dijkstra "add a sort routine" --model definitely-not-a-registered-model
 AFTER_FILES=$(find "$PROJECT_C/.claude/agents" -type f 2>/dev/null | wc -l | tr -d ' ')
 MANIFEST_C=$(manifest_of "$PROJECT_C")
 AGENT_COUNT_C=$(jq '.agents | length' <<< "$MANIFEST_C")
+check_test "unknown model id exits non-zero" "$RUN_RC" -ne 0
+check_test "unknown model id writes no agent file" "$BEFORE_FILES" = "$AFTER_FILES"
+check_test "unknown model id writes no manifest entry" "$AGENT_COUNT_C" = "0"
+grep -qi 'not present' <<< "$RUN_OUTPUT"; check "error message names the missing catalog selector" "$?"
 
-[ "$RC_C" -ne 0 ]; check "unknown model id exits non-zero" "$?"
-[ "$BEFORE_FILES" = "$AFTER_FILES" ]; check "unknown model id writes no agent file" "$?"
-[ "$AGENT_COUNT_C" = "0" ]; check "unknown model id writes no manifest entry" "$?"
-grep -qi 'unknown model' <<< "$OUT_C"; check "error message names the unknown model" "$?"
-
-for alias in luna sol terra kimi3 elonmusk; do
+for selector in nova-route ember-path; do
   PROJECT_D=$(new_project)
-  OUT_D=$(cd "$PROJECT_D" && bash "$GENERATOR" coding-dijkstra --job "check $alias" --model "$alias" 2>&1)
-  RC_D=$?
-  [ "$RC_D" -eq 0 ]; check "named model '$alias' resolves cleanly" "$?"
+  run_generator "$PROJECT_D" solo docs "check $selector" --model "$selector" --reasoning swift
+  check_test "catalog selector '$selector' resolves cleanly" "$RUN_RC" -eq 0
+  jq -e --arg model "$selector" '.agents[] | .model == $model and .effort == "swift"' \
+    "$PROJECT_D/.lbwc-planning/.agent-manifest.json" >/dev/null
+  check "catalog selector '$selector' preserves exact reasoning" "$?"
 done
 
-PROJECT_E=$(mktemp -d)
-mkdir -p "$PROJECT_E/.lbwc-planning"
-OUT_E=$(cd "$PROJECT_E" && bash "$GENERATOR" docs --job "write a README" 2>&1)
-RC_E=$?
-check "docs spawns solo without a pre-existing config.json" "$RC_E"
-[ ! -f "$PROJECT_E/.lbwc-planning/config.json" ]; check "agent-generator no longer auto-creates config.json" "$?"
+PROJECT_E=$(new_project)
+rm "$PROJECT_E/.lbwc-planning/config.json"
+run_generator "$PROJECT_E" solo docs "write without routing config"
+check_test "generation fails closed without routing config" "$RUN_RC" -ne 0
+check_test "agent-generator does not auto-create config.json" ! -f "$PROJECT_E/.lbwc-planning/config.json"
 
-PROJECT_F=$(mktemp -d)
-mkdir -p "$PROJECT_F/.lbwc-planning"
-OUT_F=$(cd "$PROJECT_F" && bash "$GENERATOR" qa-author --job "write failing tests" 2>&1)
-RC_F=$?
-check "qa-author spawns solo" "$RC_F"
-grep -q 'model: inherit' <<< "$OUT_F"; check "qa-author resolves to the inherit model" "$?"
+PROJECT_F=$(new_project)
+jq '.routing.profiles.balanced.roles.architect = {model: "ember-path", reasoning: "swift", status: "resolved"}' \
+  "$PROJECT_F/.lbwc-planning/config.json" > "$PROJECT_F/.lbwc-planning/config.next"
+mv "$PROJECT_F/.lbwc-planning/config.next" "$PROJECT_F/.lbwc-planning/config.json"
+run_generator "$PROJECT_F" solo architect "preserve exact routing"
+check "catalog-backed generation succeeds for exact route" "$RUN_RC"
+NAME_F=$(jq -r '.agents | keys[0]' "$PROJECT_F/.lbwc-planning/.agent-manifest.json")
+jq -e --arg name "$NAME_F" '.agents[$name].model == "ember-path" and .agents[$name].effort == "swift"' \
+  "$PROJECT_F/.lbwc-planning/.agent-manifest.json" >/dev/null
+check "manifest preserves the exact selector and effort" "$?"
+grep -F 'model: "ember-path"' "$PROJECT_F/.claude/agents/$NAME_F.md" >/dev/null
+check "generated frontmatter preserves the exact selector" "$?"
+grep -F 'effort: "swift"' "$PROJECT_F/.claude/agents/$NAME_F.md" >/dev/null
+check "generated frontmatter preserves the exact effort" "$?"
+
+PROJECT_G=$(new_project)
+jq '.routing.profiles.balanced.roles.docs.reasoning = null' \
+  "$PROJECT_G/.lbwc-planning/config.json" > "$PROJECT_G/.lbwc-planning/config.next"
+mv "$PROJECT_G/.lbwc-planning/config.next" "$PROJECT_G/.lbwc-planning/config.json"
+run_generator "$PROJECT_G" solo docs "omit structural default reasoning"
+check "catalog-backed generation accepts null reasoning" "$RUN_RC"
+NAME_G=$(jq -r '.agents | keys[0]' "$PROJECT_G/.lbwc-planning/.agent-manifest.json")
+! grep -q '^effort:' "$PROJECT_G/.claude/agents/$NAME_G.md"
+check "generated frontmatter omits null effort" "$?"
+jq -e --arg name "$NAME_G" '.agents[$name].effort == null' \
+  "$PROJECT_G/.lbwc-planning/.agent-manifest.json" >/dev/null
+check "manifest stores structural default reasoning as null" "$?"
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

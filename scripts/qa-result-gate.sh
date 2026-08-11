@@ -46,8 +46,9 @@ else
 fi
 
 IN_REMEDIATION="false"
-PLAN_SCOPE_DIR="$PHASE_DIR"  # Default: phase-level plans
-SUMMARY_SCOPE_DIR="$PHASE_DIR"  # Default: phase-level summaries
+REMEDIATION_SCOPE="phase"
+PLAN_SCOPE_DIR="$PHASE_DIR"
+SUMMARY_SCOPE_DIR="$PHASE_DIR"
 if [ -f "$PHASE_DIR/remediation/qa/.qa-remediation-stage" ]; then
   _gate_stage=$(grep '^stage=' "$PHASE_DIR/remediation/qa/.qa-remediation-stage" 2>/dev/null | head -1 | cut -d= -f2 | tr -d '[:space:]' || true)
   _gate_stage="${_gate_stage:-none}"
@@ -81,6 +82,27 @@ if [ -f "$PHASE_DIR/remediation/qa/.qa-remediation-stage" ]; then
   if [ "$VERIF_PATH" = "$_gate_round_verif" ]; then
     PLAN_SCOPE_DIR="$_gate_round_dir"
     SUMMARY_SCOPE_DIR="$_gate_round_dir"
+    REMEDIATION_SCOPE="qa round=$_gate_round"
+  fi
+fi
+
+if [ "$IN_REMEDIATION" = "false" ] && [ -f "$PHASE_DIR/remediation/uat/.uat-remediation-stage" ]; then
+  _gate_stage=$(grep '^stage=' "$PHASE_DIR/remediation/uat/.uat-remediation-stage" 2>/dev/null | head -1 | cut -d= -f2 | tr -d '[:space:]' || true)
+  case "${_gate_stage:-none}" in
+    verify|done) IN_REMEDIATION="true" ;;
+    *) _gate_stage="none" ;;
+  esac
+  _gate_round=$(grep '^round=' "$PHASE_DIR/remediation/uat/.uat-remediation-stage" 2>/dev/null | head -1 | cut -d= -f2 | tr -d '[:space:]' || true)
+  [[ "${_gate_round:-}" =~ ^[0-9]+$ ]] || _gate_round="01"
+  _gate_round=$(printf '%02d' "$((10#${_gate_round}))")
+  _gate_round_dir="$PHASE_DIR/remediation/uat/round-${_gate_round}"
+  _gate_round_verif="${_gate_round_dir}/R${_gate_round}-VERIFICATION.md"
+  if [ "$EXPLICIT_VERIF_NAME" = false ] && [ "$IN_REMEDIATION" = true ]; then
+    VERIF_PATH="$_gate_round_verif"
+    VERIF_NAME=$(basename "$VERIF_PATH")
+    PLAN_SCOPE_DIR="$_gate_round_dir"
+    SUMMARY_SCOPE_DIR="$_gate_round_dir"
+    REMEDIATION_SCOPE="uat round=$_gate_round"
   fi
 fi
 
@@ -495,6 +517,7 @@ fi
 
 echo "qa_gate_writer=${WRITER:-missing}"
 echo "qa_gate_result=${RESULT:-missing}"
+echo "qa_gate_scope=$REMEDIATION_SCOPE"
 echo "qa_gate_fail_count=$FAIL_COUNT"
 echo "qa_gate_deviation_count=$DEVIATION_COUNT"
 echo "qa_gate_known_issue_count=$KNOWN_ISSUES_COUNT"

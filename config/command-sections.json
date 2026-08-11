@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "contract_patterns": {
+    "interaction": "(?im)^## (Shared interaction contract|Init interaction boundary|Main-session boundary|Context|Purpose)$",
+    "guards": "(?im)^## (Guards?|Guard and state)$",
+    "recovery": "(?im)^## (Failure and recovery|Recovery)$|\\b(STOP|Cancel|state unchanged|fail(?:ure|ed|s)?)\\b",
+    "output": "(?im)^## (Output Format|Output style|Display|Output)$",
+    "next_up": "(?im)^## Next Up$|`?Next:`?"
+  },
+  "commands": {
+    "build.md": {
+      "required_headings": [
+        "Context",
+        "Guard",
+        "Resolve the target phase",
+        "Plan waves",
+        "Select roles",
+        "Select the team shape",
+        "Main-session task contract and telemetry",
+        "Spawn and verify",
+        "Failure and recovery",
+        "Output Format",
+        "Next Up"
+      ]
+    },
+    "compress.md": {
+      "required_headings": ["Guard", "Steps"]
+    },
+    "config.md": {
+      "required_headings": ["Context", "Guard", "Behavior", "Settings Reference", "Output Format"]
+    },
+    "debug.md": {
+      "required_headings": ["Context", "Guard", "Resolve selected todo number", "Debug Session Resolution", "Steps"]
+    },
+    "discuss.md": {
+      "required_headings": ["Context", "Guards", "Phase Resolution", "Discussion Mode Resolution", "Execute", "After Discussion"]
+    },
+    "docs.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Failure and recovery", "Output Format", "Next Up"]
+    },
+    "doctor.md": {
+      "required_headings": ["Context", "Checks", "Output Format"]
+    },
+    "fix.md": {
+      "required_headings": ["Context", "Guard", "Steps"]
+    },
+    "help.md": {
+      "required_headings": ["Context", "Behavior"]
+    },
+    "init.md": {
+      "required_headings": ["Shared interaction contract", "Init interaction boundary", "Context", "Guard", "Steps", "Output Format"]
+    },
+    "list-todos.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Output Format"]
+    },
+    "map.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Purpose", "Languages", "Key Technologies", "Overview", "Cross-Cutting Themes", "Output Format"]
+    },
+    "models.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Failure and recovery", "Output Format", "Next Up"]
+    },
+    "pause.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Output Format"]
+    },
+    "plan.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Review and handoff", "Failure and recovery", "Output Format", "Next Up"]
+    },
+    "profile.md": {
+      "required_headings": ["Context", "Guard", "Built-in Profiles", "Behavior", "Output Format"]
+    },
+    "qa.md": {
+      "required_headings": ["Context", "Guard", "Debug Session Routing", "Steps"]
+    },
+    "report.md": {
+      "required_headings": ["Context", "Parse Arguments", "Scope", "Steps"]
+    },
+    "research.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Output Format"]
+    },
+    "resume.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Output Format"]
+    },
+    "rtk.md": {
+      "required_headings": ["Context", "Guard", "Behavior", "Output"]
+    },
+    "skills.md": {
+      "required_headings": [
+        "Context",
+        "Guard",
+        "Step 1: Parse arguments",
+        "Step 2: Display current state",
+        "Step 3: Curated suggestions",
+        "Step 4: Search",
+        "Step 5: Ask for installation consent",
+        "Step 6: Validate the installation handoff",
+        "Output format"
+      ]
+    },
+    "status.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Display", "Failure and recovery", "Next Up"]
+    },
+    "teach.md": {
+      "required_headings": ["Purpose", "Main-session boundary", "Guard and state", "Convention structure", "Display contract", "Add a convention", "Remove a convention", "Refresh from the codebase", "Conflict and redundancy rules", "Convention injection", "Failure and recovery", "Verification", "Output style"]
+    },
+    "todo.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Output Format"]
+    },
+    "uat.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Failure and recovery", "Output Format", "Next Up"]
+    },
+    "uninstall.md": {
+      "required_headings": ["Context", "Steps", "Output Format"]
+    },
+    "update.md": {
+      "required_headings": ["Context", "Steps", "Output Format"]
+    },
+    "verify.md": {
+      "required_headings": ["Context", "Guard", "Debug Session Routing", "Steps"]
+    },
+    "vibe.md": {
+      "required_headings": ["Shared interaction contract", "Context", "Input Parsing", "Modes", "Output Format"]
+    },
+    "whats-new.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Output Format"]
+    }
+  }
+}

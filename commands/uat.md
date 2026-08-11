@@ -1,17 +1,36 @@
 ---
-description: Human checkpoint loop after qa passes. Never delegated to a subagent, one checkpoint at a time.
+name: lbwc:uat
+category: core
+description: Run the full main-session human UAT checkpoint protocol for a phase.
 argument-hint: "<phase number or name>"
+allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion
+disable-model-invocation: true
 ---
 
 Required first step: read `skills-bundle/ponytail/SKILL.md` under the plugin root (`${CLAUDE_PLUGIN_ROOT}`) and apply the ponytail discipline at level full for the whole task.
 
-Never spawn anyone for this command, not even a solo agent. UAT tests require human judgment. Anything a script or an agent could check belongs in `/qa`, not here, if you find yourself wanting to delegate a checkpoint, that checkpoint belongs to `/qa` instead.
+## Context
 
-1. Resolve the target phase from $ARGUMENTS, or the first non-`complete` phase in ROADMAP.md's Progress table if $ARGUMENTS is empty. Read `.lbwc-planning/phases/{NN}-{slug}/VERIFICATION.md`. If its `result` isn't `PASS`, stop and tell the user to run `/qa <phase>` first.
-2. Create or update `.lbwc-planning/phases/{NN}-{slug}/UAT.md` from `templates/UAT.md`. Prefill one `D{NN}` review entry per deviation listed in that phase's SUMMARY.md, each with empty `Result` until the human rules on it. Generate one `P{plan}-T{NN}` checkpoint per plan for anything genuinely requiring a human look (visual output, subjective feel, a judgment call no check can make), skip a checkpoint if the phase has nothing like that.
-3. Walk the checkpoints one at a time via AskUserQuestion: state what to look at and how, wait for the human's `pass`, `skip`, or `issue` before moving to the next one. Never batch multiple checkpoints into one question.
-4. An accepted deviation gets `Result: pass`, `Disposition: accepted-process-exception`, and, only if the human asks for a follow-up, a `Tracking:` line added to `.lbwc-planning/STATE.md`'s Todos. A rejected deviation or a failed checkpoint gets `Result: issue`, that is what blocks UAT, an empty or `pass` or `skip` result never blocks. When a round accepts a previously recorded deviation or resolves an open issue, append a new `deviq-record.py block --phase <phase> --role uat --field id=<id> --field consequence="..." --field fix="..." --field status=resolved` record, where `<id>` is the stable id `deviq-record.py` printed when the original block was recorded, not a retyped `trigger`. Never edit the original open block, the file is append-only and `deviq-build-gate.sh` reads the latest record per id.
-5. Once every checkpoint has a `Result`, set UAT.md's `status`: `complete` if no entry has `Result: issue`, `issues_found` otherwise. On `issues_found`, open a remediation round: run `scripts/remediation-round.sh open <phase-dir> uat` (exit code 3 means the configured round cap is reached, report that and stop). Extract the blocking issues with `scripts/extract-uat-issues.sh <phase-dir>`, write `R{NN}-PLAN.md` from `templates/REMEDIATION-PLAN.md` with one task per blocking issue, and tell the user to run `/build <phase>` to execute the round, then `/qa <phase>` to re-verify it. Issues a round cannot fix in code (a wrong requirement, a changed mind) stay human calls, keep them as UAT findings and say so. On `complete`, tell the user `/vibe` will mark the phase done.
+UAT is a main-session human checkpoint loop. The main session alone owns UAT artifact and state writes, AskUserQuestion calls, remediation routing, telemetry, and output. Never spawn a worker, agent, advisor, or task for UAT.
 
-This command still never spawns anyone, not even a solo `deviq` advisor, that escalation belongs to the pairs and trios `/plan`, `/build`, `/qa`, and `/debug` spawn, and a checkpoint here stays a human call.
-6. After the human checkpoint outcome is observed and UAT.md is updated, the main session records one telemetry event with `session-telemetry.py record --event command --outcome success|partial|blocked --phase <phase>`. Never record telemetry before the human response, and never ask an agent or worker report to write it.
+@${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md
+
+## Guard
+
+Resolve the target phase and follow the autonomy, authoritative verification, freshness, persisted PASS result, and deterministic QA-gate requirements in `@references/execute-uat.md`. Stop when a required helper is unavailable. Do not emulate a required Phase 3 helper or enter UAT from an unsupported remediation route.
+
+## Steps
+
+Follow `@references/execute-uat.md` in full in the main session. Generate only human-judgment checkpoints from the compiled UAT verification context, present one checkpoint at a time through native AskUserQuestion, persist each response before continuing, and use its required remediation and telemetry behavior.
+
+## Failure and recovery
+
+Follow the reference's failure behavior exactly. A missing, stale, non-PASS, or unsupported authoritative verification blocks UAT and routes to the required QA recovery. A missing Phase 3 helper is a blocker, not behavior to recreate. A remediation cap result stops the command. Never replace a required human response with an agent or automatic follow-up.
+
+## Output Format
+
+Use the checkpoint and completion output defined in `@references/execute-uat.md`. Report the UAT path, completed checkpoints, pass, skip, and issue counts, current remediation round when applicable, and the observed telemetry outcome.
+
+## Next Up
+
+On a clean completion, end with `Next Up: /lbwc:vibe`. On issues with a validated remediation plan, end with `Next Up: /lbwc:build <phase>`. On a resumed UAT, present only the next incomplete checkpoint and wait for the human.

@@ -5,6 +5,7 @@ HOOK_EVENT="${1:-PostToolUse}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOOK_OUTPUT_GUARD="$SCRIPT_DIR/lib/hook-output-guard.sh"
 if [ -f "$HOOK_OUTPUT_GUARD" ]; then
+  # shellcheck source=/dev/null
   source "$HOOK_OUTPUT_GUARD"
 fi
 INPUT=$(cat)

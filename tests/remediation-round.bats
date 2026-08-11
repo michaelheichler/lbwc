@@ -235,3 +235,53 @@ setup_git_repo() {
   grep -q '^layout=round-dir$' "$PHASE_DIR/remediation/uat/.uat-remediation-stage"
   ! grep -q '^round_started_at_commit=' "$PHASE_DIR/remediation/uat/.uat-remediation-stage"
 }
+
+@test "qa-remediation-state records the source verification metadata" {
+  printf '%s\n' '---' 'result: FAIL' 'failed: 1' '---' '### P1' '- **Result:** fail' > "$PHASE_DIR/01-VERIFICATION.md"
+  PHASE_REAL="$(cd "$PHASE_DIR" && pwd -P)"
+
+  run bash "$STATE_API" init "$PHASE_DIR"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"source_verification_path=$PHASE_REAL/01-VERIFICATION.md"* ]]
+  [[ "$output" == *"source_fail_count=1"* ]]
+  [[ "$output" == *"input_mode=verification"* ]]
+  grep -q "^source_verification_path=$PHASE_REAL/01-VERIFICATION.md$" "$PHASE_DIR/remediation/qa/.qa-remediation-stage"
+}
+
+@test "qa-remediation-state uses completed QA round as authoritative source" {
+  mkdir -p "$PHASE_DIR/remediation/qa/round-01"
+  printf '%s\n' 'stage=done' 'round=01' > "$PHASE_DIR/remediation/qa/.qa-remediation-stage"
+  printf '%s\n' '---' 'result: FAIL' 'failed: 2' '---' > "$PHASE_DIR/remediation/qa/round-01/R01-VERIFICATION.md"
+  PHASE_REAL="$(cd "$PHASE_DIR" && pwd -P)"
+
+  run bash "$STATE_API" open "$PHASE_DIR"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"round=02"* ]]
+  grep -q "^source_verification_path=$PHASE_REAL/remediation/qa/round-01/R01-VERIFICATION.md$" "$PHASE_DIR/remediation/qa/.qa-remediation-stage"
+  grep -q '^source_fail_count=2$' "$PHASE_DIR/remediation/qa/.qa-remediation-stage"
+}
+
+@test "qa-remediation-state reports known-issues-only input" {
+  printf '%s\n' '{"schema_version":1,"phase":"01","issues":[{"signature":"0123456789ab","disposition":"unresolved"}]}' > "$PHASE_DIR/known-issues.json"
+
+  run bash "$STATE_API" init "$PHASE_DIR"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"known_issues_status=present"* ]]
+  [[ "$output" == *"known_issues_count=1"* ]]
+  [[ "$output" == *"input_mode=known-issues"* ]]
+}
+
+@test "qa-remediation-state reports combined verification and known-issue input" {
+  printf '%s\n' '---' 'result: FAIL' 'failed: 1' '---' > "$PHASE_DIR/01-VERIFICATION.md"
+  printf '%s\n' '{"schema_version":1,"phase":"01","issues":[{"signature":"0123456789ab","disposition":"unresolved"}]}' > "$PHASE_DIR/known-issues.json"
+
+  run bash "$STATE_API" init "$PHASE_DIR"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"source_fail_count=1"* ]]
+  [[ "$output" == *"known_issues_count=1"* ]]
+  [[ "$output" == *"input_mode=both"* ]]
+}

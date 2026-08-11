@@ -25,17 +25,18 @@ teardown() {
   teardown_temp_dir
 }
 
-@test "compile-context: default configuration skips the absent metrics collector" {
+@test "compile-context: default configuration skips session telemetry" {
   cd "$TEST_TEMP_DIR"
 
   run bash -x "$SCRIPTS_DIR/compile-context.sh" 01 dev .lbwc-planning/phases
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"V3_METRICS_ENABLED=false"* ]]
-  [[ "$output" != *"collect-metrics.sh"* ]]
+  [[ "$output" != *"session-telemetry.py"* ]]
+  [ ! -e "$TEST_TEMP_DIR/.lbwc-planning/telemetry/session.jsonl" ]
 }
 
-@test "compile-context: project metrics opt-in reaches the collector branch" {
+@test "compile-context: project metrics opt-in records session telemetry" {
   printf '%s\n' '{"metrics":true}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
   cd "$TEST_TEMP_DIR"
 
@@ -43,5 +44,7 @@ teardown() {
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"V3_METRICS_ENABLED=true"* ]]
-  [[ "$output" == *"collect-metrics.sh"* ]]
+  [[ "$output" == *"session-telemetry.py"* ]]
+  run python3 -c 'import json,sys; records=[json.loads(line) for line in open(sys.argv[1])]; assert records[-1]["event"]=="command"; assert records[-1]["outcome"]=="success"' "$TEST_TEMP_DIR/.lbwc-planning/telemetry/session.jsonl"
+  [ "$status" -eq 0 ]
 }

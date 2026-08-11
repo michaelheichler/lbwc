@@ -114,7 +114,7 @@ case "$mode" in
     ;;
   --help|-h|help|'') usage; [ -n "$mode" ] || exit 2 ;;
   *)
-    if [ "$mode" = --set=* ]; then
+    if [[ "$mode" == --set=* ]]; then
       version="${mode#--set=}"
     else
       die "unknown mode $mode"

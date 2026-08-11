@@ -1,0 +1,73 @@
+name: Routing platform locks
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/routing-platform-locks.yml
+      - commands/config.md
+      - commands/init.md
+      - commands/models.md
+      - config/settings.json
+      - scripts/claude-capabilities.sh
+      - scripts/lbwc-config.sh
+      - scripts/lbwc-model
+      - scripts/lbwc-routing.sh
+      - templates/agent-roles/defaults.json
+      - tests/claude-capabilities.bats
+      - tests/lbwc-config.bats
+      - tests/lbwc-model.bats
+      - tests/lbwc-routing.bats
+      - tests/model-config-commands.bats
+      - tests/test_helper.bash
+  push:
+    paths:
+      - .github/workflows/routing-platform-locks.yml
+      - commands/config.md
+      - commands/init.md
+      - commands/models.md
+      - config/settings.json
+      - scripts/claude-capabilities.sh
+      - scripts/lbwc-config.sh
+      - scripts/lbwc-model
+      - scripts/lbwc-routing.sh
+      - templates/agent-roles/defaults.json
+      - tests/claude-capabilities.bats
+      - tests/lbwc-config.bats
+      - tests/lbwc-model.bats
+      - tests/lbwc-routing.bats
+      - tests/model-config-commands.bats
+      - tests/test_helper.bash
+  workflow_dispatch:
+
+jobs:
+  routing-platform-locks:
+    name: ${{ matrix.os }} routing locks
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-15
+          - ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install macOS test dependencies
+        if: runner.os == 'macOS'
+        run: brew install bash bats-core jq ripgrep
+
+      - name: Install Linux test dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y bats jq libdigest-sha-perl ripgrep
+
+      - name: Run capability and routing transaction suites
+        run: >-
+          bats
+          tests/claude-capabilities.bats
+          tests/lbwc-config.bats
+          tests/lbwc-routing.bats
+          tests/lbwc-model.bats
+          tests/model-config-commands.bats

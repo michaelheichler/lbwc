@@ -5,8 +5,47 @@ load test_helper
 RESOLVER="${SCRIPTS_DIR}/resolve-agent-settings.sh"
 
 setup() {
-  setup_temp_dir
-  create_test_config
+  TEST_TEMP_DIR=$(mktemp -d /private/tmp/lbwc-resolver.XXXXXX)
+  export TEST_TEMP_DIR
+  export _ORIG_HOME="${HOME:-}"
+  export _ORIG_LBWC_PLANNING_DIR="${LBWC_PLANNING_DIR:-}"
+  export HOME="$TEST_TEMP_DIR"
+  unset LBWC_PLANNING_DIR CLAUDE_SESSION_ID 2>/dev/null || true
+  mkdir -p "$TEST_TEMP_DIR/.lbwc-planning"
+  ROUTE_BINARY="$TEST_TEMP_DIR/claude-resolver-fixture"
+  printf '%s\n' '#!/usr/bin/env bash' 'printf "%s\\n" "fixture"' > "$ROUTE_BINARY"
+  chmod +x "$ROUTE_BINARY"
+  ROUTE_SHA=$(shasum -a 256 "$ROUTE_BINARY" | awk '{print $1}')
+  jq -n --arg binary "$ROUTE_BINARY" --arg sha "$ROUTE_SHA" '
+    {
+      schema_version: 1,
+      source: {binary_path: $binary, version: "fixture", sha256: $sha, detected_at: "2035-01-02T03:04:05Z"},
+      models: [
+        {selector: "nova-route", label: "Nova Route", description: "Fixture selector"},
+        {selector: "ember-path", label: "Ember Path", description: "Second fixture selector"}
+      ],
+      reasoning: {
+        scope: "global",
+        accepted_values: ["deliberate", "swift", "default"],
+        model_associations: {"nova-route": ["deliberate"]}
+      }
+    }
+  ' > "$TEST_TEMP_DIR/.lbwc-planning/claude-capabilities.json"
+  jq --slurpfile defaults "$PROJECT_ROOT/templates/agent-roles/defaults.json" '
+    . + {
+      schema_version: 1,
+      routing: {
+        active_profile: "balanced",
+        profiles: {
+          quality: {roles: {}},
+          balanced: {
+            roles: ($defaults[0] | keys | map({key: ., value: {model: "nova-route", reasoning: "deliberate", status: "resolved"}}) | from_entries)
+          },
+          turbo: {roles: {}}
+        }
+      }
+    }
+  ' "$CONFIG_DIR/settings.json" > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
 }
 
 teardown() {
@@ -17,89 +56,83 @@ resolve() {
   run bash "$RESOLVER" "$@"
 }
 
+update_config() {
+  local filter="$1" path="$TEST_TEMP_DIR/.lbwc-planning/config.json"
+  jq "$filter" "$path" > "$path.next"
+  mv "$path.next" "$path"
+}
+
 @test "profile value resolves with no project override" {
   resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='claude-fable-5'"* ]]
-  [[ "$output" == *"RESOLVED_EFFORT='medium'"* ]]
+  [[ "$output" == *"RESOLVED_AGENT_MODEL='nova-route'"* ]]
+  [[ "$output" == *"RESOLVED_MODEL='nova-route'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING='deliberate'"* ]]
 }
 
-@test "project roles override wins over the profile" {
-  echo '{"roles":{"lead":{"model":"terra","effort":"high"}}}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+@test "active profile selects its exact saved route" {
+  update_config '.routing.active_profile = "quality" | .routing.profiles.quality.roles.lead = {model: "ember-path", reasoning: "swift", status: "resolved"}'
   resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='gpt-5.6-terra'"* ]]
-  [[ "$output" == *"RESOLVED_EFFORT='high'"* ]]
+  [[ "$output" == *"RESOLVED_AGENT_MODEL='ember-path'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING='swift'"* ]]
 }
 
-@test "a CLI flag wins over a project roles override" {
-  echo '{"roles":{"lead":{"model":"terra","effort":"high"}}}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
-  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model sonnet --reasoning low
+@test "CLI route values remain exact after catalog validation" {
+  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model ember-path --reasoning swift
   [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='claude-sonnet-5'"* ]]
-  [[ "$output" == *"RESOLVED_EFFORT='low'"* ]]
-}
-
-@test "the sol alias canonicalizes to gpt-5.6-sol" {
-  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model sol
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='gpt-5.6-sol'"* ]]
+  [[ "$output" == *"RESOLVED_AGENT_MODEL='ember-path'"* ]]
+  [[ "$output" == *"RESOLVED_MODEL='ember-path'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING='swift'"* ]]
 }
 
 @test "an unknown model exits 3" {
-  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model not-a-real-model
+  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model missing-route
   [ "$status" -eq 3 ]
-  [[ "$output" == *"unknown model"* ]]
+  [[ "$output" == *"saved capability catalog"* ]]
 }
 
-@test "a retired project config key is rejected with its replacement named" {
-  echo '{"model_overrides":{"lead":"opus"}}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+@test "an absent active route fails closed" {
+  update_config 'del(.routing.profiles.balanced.roles.lead)'
   resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
   [ "$status" -eq 1 ]
-  [[ "$output" == *"model_overrides"* ]]
-  [[ "$output" == *"roles.<role>.model"* ]]
+  [[ "$output" == *"route is unresolved or absent"* ]]
 }
 
-@test "the inherit model passes through without pricing validation" {
-  resolve qa-author "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
+@test "null reasoning emits an empty renderer effort" {
+  update_config '.routing.profiles.balanced.roles.docs.reasoning = null'
+  resolve docs "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='inherit'"* ]]
-}
-
-@test "reasoning effort clamps to the model's ladder" {
-  resolve docs "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model haiku
-  [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='claude-haiku-4-5'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING=''"* ]]
   [[ "$output" == *"RESOLVED_EFFORT=''"* ]]
 }
 
-@test "docs is a valid role and resolves" {
-  resolve docs "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
+@test "global reasoning ignores model associations" {
+  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model nova-route --reasoning swift
   [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='claude-sonnet-5'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING='swift'"* ]]
 }
 
-@test "qa-author is a valid role and resolves" {
-  resolve qa-author "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
+@test "detected reasoning named default remains an exact string" {
+  resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --model nova-route --reasoning default
   [ "$status" -eq 0 ]
-  [[ "$output" == *"RESOLVED_MODEL='inherit'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING='default'"* ]]
+  [[ "$output" == *"RESOLVED_REASONING_JSON='\"default\"'"* ]]
 }
 
 @test "docs renders through render-agent-template.sh" {
   run bash "${SCRIPTS_DIR}/render-agent-template.sh" docs \
-    NAME=lbwc-docs-test JOB="write a README" MODEL=claude-sonnet-5 EFFORT=medium
+    NAME=lbwc-docs-test JOB="write a README" MODEL=nova-route EFFORT=deliberate
   [ "$status" -eq 0 ]
   [[ "$output" == *"lbwc-docs-test"* ]]
 }
 
 @test "qa-author renders through render-agent-template.sh" {
   run bash "${SCRIPTS_DIR}/render-agent-template.sh" qa-author \
-    NAME=lbwc-qa-author-test JOB="write failing tests" MODEL=inherit EFFORT=medium
+    NAME=lbwc-qa-author-test JOB="write failing tests" MODEL=ember-path EFFORT=swift
   [ "$status" -eq 0 ]
   [[ "$output" == *"lbwc-qa-author-test"* ]]
 }
-
-# --- max_turns resolution characterization (default effort = balanced, multiplier 1/1) ---
 
 @test "max_turns: defaults.json value wins for python-engineer" {
   resolve python-engineer "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
@@ -168,7 +201,7 @@ resolve() {
 }
 
 @test "max_turns: project roles override beats the defaults.json value" {
-  echo '{"roles":{"python-engineer":{"max_turns":99}}}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+  update_config '.roles."python-engineer".max_turns = 99'
   resolve python-engineer "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
   [ "$status" -eq 0 ]
   [[ "$output" == *"RESOLVED_MAX_TURNS='99'"* ]]
@@ -209,14 +242,14 @@ resolve() {
 }
 
 @test "max_turns: CLI --max-turns 99 wins over everything" {
-  echo '{"roles":{"lead":{"max_turns":33}}}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+  update_config '.roles.lead.max_turns = 33'
   resolve lead "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT" --max-turns 99
   [ "$status" -eq 0 ]
   [[ "$output" == *"RESOLVED_MAX_TURNS='99'"* ]]
 }
 
 @test "max_turns: project roles override for lead-critic wins over defaults.json" {
-  echo '{"roles":{"lead-critic":{"max_turns":33}}}' > "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+  update_config '.roles."lead-critic".max_turns = 33'
   resolve lead-critic "$TEST_TEMP_DIR/.lbwc-planning/config.json" "$PROJECT_ROOT"
   [ "$status" -eq 0 ]
   [[ "$output" == *"RESOLVED_MAX_TURNS='33'"* ]]

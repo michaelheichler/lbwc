@@ -18,10 +18,10 @@ usage() {
   exit 1
 }
 
-PROFILES_PATH="$PLUGIN_ROOT/config/model-profiles.json"
-[ -f "$PROFILES_PATH" ] || fail "model profiles not found: $PROFILES_PATH"
+ROLE_DEFAULTS_PATH="$PLUGIN_ROOT/templates/agent-roles/defaults.json"
+[ -f "$ROLE_DEFAULTS_PATH" ] || fail "role defaults not found: $ROLE_DEFAULTS_PATH"
 
-is_valid_role() { agent_role_is_valid "$1" "$PROFILES_PATH"; }
+is_valid_role() { jq -e --arg role "$1" 'has($role)' "$ROLE_DEFAULTS_PATH" >/dev/null 2>&1; }
 
 PAIR_MODE=""
 TRIO_MODE=""
@@ -50,8 +50,30 @@ TASK_ID=""
 
 option_token() { agent_field_token "$1"; }
 
+apply_option() {
+  local key="$1" value="$2" token role path
+  case "$key" in
+    --job) JOB="$value" ;;
+    --contract|--contract-input) CONTRACT_PATH="$value" ;;
+    --task-id|--task-identity) TASK_ID="$value" ;;
+    --pair-role) PAIR_ROLE_ARG="$value" ;;
+    --write-allowance) WRITE_ALLOWANCES+=("$value") ;;
+    --role-write-allowance)
+      role="${value%%:*}"
+      path="${value#*:}"
+      [ "$role" != "$value" ] && [ -n "$role" ] && [ -n "$path" ] || fail "invalid --role-write-allowance '$value'"
+      ROLE_WRITE_ALLOWANCE_ROLES+=("$role")
+      ROLE_WRITE_ALLOWANCE_PATHS+=("$path")
+      ;;
+    *)
+      token=$(option_token "$key") || fail "unknown option '$key'"
+      OVERRIDES["$token"]="$value"
+      ;;
+  esac
+}
+
 parse_options() {
-  local argument key value token
+  local argument key value
   while [ "$#" -gt 0 ]; do
     argument="$1"
     shift
@@ -68,35 +90,7 @@ parse_options() {
       value="$1"
       shift
     fi
-    if [ "$key" = "--job" ]; then
-      JOB="$value"
-      continue
-    fi
-    if [ "$key" = "--contract" ] || [ "$key" = "--contract-input" ]; then
-      CONTRACT_PATH="$value"
-      continue
-    fi
-    if [ "$key" = "--task-id" ] || [ "$key" = "--task-identity" ]; then
-      TASK_ID="$value"
-      continue
-    fi
-    if [ "$key" = "--pair-role" ]; then
-      PAIR_ROLE_ARG="$value"
-      continue
-    fi
-    if [ "$key" = "--write-allowance" ]; then
-      WRITE_ALLOWANCES+=("$value")
-      continue
-    fi
-    if [ "$key" = "--role-write-allowance" ]; then
-      local role="${value%%:*}" path="${value#*:}"
-      [ "$role" != "$value" ] && [ -n "$role" ] && [ -n "$path" ] || fail "invalid --role-write-allowance '$value'"
-      ROLE_WRITE_ALLOWANCE_ROLES+=("$role")
-      ROLE_WRITE_ALLOWANCE_PATHS+=("$path")
-      continue
-    fi
-    token=$(option_token "$key") || fail "unknown option '$key'"
-    OVERRIDES["$token"]="$value"
+    apply_option "$key" "$value"
   done
 }
 
@@ -142,13 +136,11 @@ PLANNING_DIR="$PROJECT_ROOT/.lbwc-planning"
 CONFIG_PATH="$PLANNING_DIR/config.json"
 TEMPLATE_DEFAULTS="$PLUGIN_ROOT/templates/agent-roles/defaults.json"
 [ -f "$TEMPLATE_DEFAULTS" ] || fail "role defaults not found: $TEMPLATE_DEFAULTS"
-[ -f "$PLUGIN_ROOT/config/model-pricing.json" ] || fail "model pricing catalogue not found: $PLUGIN_ROOT/config/model-pricing.json"
 AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
 
 CONTRACT_ID=""
 CONTRACT_DIGEST=""
 CONTRACT_ALLOWANCES_JSON='[]'
-CONTRACT_ROLES_JSON='[]'
 validate_contract() {
   [ -f "$CONTRACT_PATH" ] || fail "contract not found: $CONTRACT_PATH"
   local contract root task requested
@@ -171,7 +163,6 @@ validate_contract() {
   [ -n "$CONTRACT_ID" ] || fail "contract id is required"
   jq -e --arg role "$ROLE" '(.roles | type == "array" and index($role) != null)' <<< "$contract" >/dev/null || fail "contract role mismatch"
   CONTRACT_ALLOWANCES_JSON=$(jq -ce --arg role "$ROLE" '.allowances_by_role[$role] | select(type == "array" and all(.[]; type == "string"))' <<< "$contract") || fail "contract write allowances are invalid"
-  CONTRACT_ROLES_JSON=$(jq -c '.roles // []' <<< "$contract")
   requested=$(printf '%s\n' "${WRITE_ALLOWANCES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
   jq -ne --argjson requested "$requested" --argjson allowed "$CONTRACT_ALLOWANCES_JSON" '$requested == $allowed' >/dev/null || fail "write allowances do not match contract"
   case "$ROLE" in
@@ -236,7 +227,7 @@ parse_resolved_settings() {
     [ -n "$line" ] || continue
     key=${line%%=*}
     case "$key" in
-      RESOLVED_AGENT|RESOLVED_MODEL|RESOLVED_MAX_TURNS|RESOLVED_EFFORT|RESOLVED_REASONING) ;;
+      RESOLVED_AGENT|RESOLVED_AGENT_MODEL|RESOLVED_MODEL|RESOLVED_MAX_TURNS|RESOLVED_EFFORT|RESOLVED_REASONING|RESOLVED_REASONING_JSON) ;;
       *) fail "invalid resolver assignment '$key'" ;;
     esac
     raw=${line#*=}
@@ -249,6 +240,7 @@ parse_resolved_settings() {
 
 declare -A ROLE_MODEL=()
 declare -A ROLE_EFFORT=()
+declare -A ROLE_REASONING_JSON=()
 declare -A ROLE_MAXTURNS=()
 
 resolve_role_settings() {
@@ -268,10 +260,16 @@ resolve_role_settings() {
   elif [ "$rc" -ne 0 ]; then
     fail "$settings"
   fi
+  RESOLVED_AGENT_MODEL=""
+  RESOLVED_REASONING_JSON=""
   parse_resolved_settings "$settings"
+  [ -n "$RESOLVED_AGENT_MODEL" ] || fail "resolver omitted the Claude Code model selector for '$role'"
+  jq -e 'type == "string" or . == null' <<< "$RESOLVED_REASONING_JSON" >/dev/null 2>&1 \
+    || fail "resolver emitted invalid reasoning JSON for '$role'"
 
-  ROLE_MODEL["$role"]="$RESOLVED_MODEL"
+  ROLE_MODEL["$role"]="$RESOLVED_AGENT_MODEL"
   ROLE_EFFORT["$role"]="$RESOLVED_EFFORT"
+  ROLE_REASONING_JSON["$role"]="$RESOLVED_REASONING_JSON"
   ROLE_MAXTURNS["$role"]="$RESOLVED_MAX_TURNS"
 }
 
@@ -427,7 +425,7 @@ register_entry() {
   entry=$(jq -cn \
     --arg name "$name" --arg role "$role" --arg project_root "$PROJECT_ROOT" \
     --arg definition_path "$target" --arg created_at "$created" \
-    --arg model "${ROLE_MODEL[$role]}" --arg effort "${ROLE_EFFORT[$role]}" --arg max_turns "${ROLE_MAXTURNS[$role]}" \
+    --arg model "${ROLE_MODEL[$role]}" --argjson effort "${ROLE_REASONING_JSON[$role]}" --arg max_turns "${ROLE_MAXTURNS[$role]}" \
     --argjson overrides "$overrides" --argjson allowances "$allowances" --argjson pair_id "$pid_json" --argjson pair_role "$role_json" \
     --arg contract_path "$CONTRACT_PATH" --arg contract_id "$CONTRACT_ID" --arg contract_digest "$CONTRACT_DIGEST" --arg task_id "$TASK_ID" \
     '{name:$name,role:$role,project_root:$project_root,definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,overrides:$overrides,write_allowances:$allowances,pair_id:$pair_id,pair_role:$pair_role} + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')

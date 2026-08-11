@@ -2,16 +2,19 @@
   "architect": {
     "description": "Turns requirements into a phased ROADMAP.md, REQUIREMENTS.md, and PROJECT.md. Use for initial project scoping or re-planning after a milestone ships. Not for per-phase task planning. That belongs to lead.",
     "tools": "Read, Glob, Grep, Write, LSP, Skill, SendMessage",
+    "disallowedTools": "AskUserQuestion",
     "memory": "project",
     "permissionMode": "acceptEdits",
-    "maxTurns": 50
+    "maxTurns": 50,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "debugger": {
     "description": "Diagnoses and fixes a single reported bug via reproduce, hypothesize, evidence, diagnose, fix, verify. Use for concrete bug reports, crashes, or test failures needing root-cause investigation. Not for phase planning (lead), verification of completed work (qa), or documentation (docs).",
-    "disallowedTools": "Task, TaskCreate, Bash",
+    "disallowedTools": "Task, TaskCreate, AskUserQuestion, Bash",
     "memory": "project",
     "permissionMode": "acceptEdits",
-    "maxTurns": 40
+    "maxTurns": 40,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "coding-dijkstra": {
     "description": "Use to design, implement, or review an algorithm, a loop, or logic in any language when correctness matters. Works postcondition-first, derives loops from invariants, proves termination with a variant function, and refines stepwise, grounded in A Discipline of Programming and Structured Programming (Dahl, Dijkstra, Hoare). Pairs with the dijkstra-critic teammate, which audits the invariant, the variant, and the guard coverage before the code ships. Applies the Dijkstra correctness discipline (postcondition-first, invariant/variant-derived loops) for algorithms, loops, and tricky logic.",
@@ -19,6 +22,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 50,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "coding-dijkstra-critic"
   },
   "coding-dijkstra-critic": {
@@ -26,8 +30,9 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "tools": "Read, Grep, Glob, SendMessage, TaskGet, TaskList, TaskUpdate",
-    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "coding-dijkstra"
   },
   "python-engineer": {
@@ -36,6 +41,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 50,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "python-critic"
   },
   "python-critic": {
@@ -43,8 +49,9 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
-    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "python-engineer"
   },
   "web-engineer": {
@@ -53,6 +60,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 50,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "web-code-critic"
   },
   "web-code-critic": {
@@ -60,8 +68,9 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
-    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "web-engineer"
   },
   "ux-oracle": {
@@ -70,30 +79,36 @@
     "permissionMode": "acceptEdits",
     "tools": "Read, Grep, Glob, SendMessage, TaskGet, TaskList, TaskUpdate",
     "disallowedTools": "Task, TaskCreate, Agent, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
-    "maxTurns": 20
+    "maxTurns": 20,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "docs": {
     "description": "Documentation agent for READMEs, changelogs, inline API docs, and guides. Use for standalone documentation tasks and for doc-only plans or tasks a Lead has scoped out of a phase. Documentation changes bundled inside a feature implementation task stay with dev under its plan contract. Read access to the full codebase, write access limited to documentation files only.",
     "tools": "Read, Grep, Glob, Bash, Write, Edit, LSP, Skill, TaskGet, SendMessage",
+    "disallowedTools": "AskUserQuestion",
     "memory": "project",
     "permissionMode": "acceptEdits",
-    "maxTurns": 30
+    "maxTurns": 30,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "lead": {
     "description": "Turns a scoped phase into executable PLAN.md task lists through research, decomposition, and self-review in one compaction-extended session. Use for per-phase task planning once a phase exists in ROADMAP.md and REQUIREMENTS.md. Not for initial project scoping or roadmap creation. That belongs to architect.",
     "memory": "project",
     "permissionMode": "acceptEdits",
     "tools": "Read, Glob, Grep, Write, Bash, WebFetch, LSP, Skill, Task, SendMessage",
+    "disallowedTools": "AskUserQuestion",
     "pairsWith": "lead-critic",
-    "maxTurns": 50
+    "maxTurns": 50,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "lead-critic": {
     "description": "Sparring-partner reviewer for lead's PLAN.md output. Use to challenge and harden a phase's plan set, strategy choice, task estimates, dependencies, craft gates, and validation block, before execution starts. Reviews delivery-strategy fit against lead's own strategy table, disguised point estimates dressed as ranges, acyclic task dependencies free of same-wave file overlap, craft-gate presence on coding tasks, and a filled or honestly skipped validation block. Adversarial in service of a plan that survives execution. Ends every review with a binary GREENLIGHT or BLOCK verdict. Pairs with the lead teammate, whose plans it reviews.",
     "memory": "project",
     "permissionMode": "acceptEdits",
     "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
-    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "lead"
   },
   "qa-author": {
@@ -101,28 +116,32 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, NotebookEdit, Bash",
-    "maxTurns": 30
+    "maxTurns": 30,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "qa": {
     "description": "Validates completed plan or phase work against PLAN.md must_haves and declared deviations using goal-backward checks. Use after Dev or Docs finish a plan or phase, or for standalone debug-session verification. Not for diagnosing root causes of bugs. That belongs to debugger. Read-only derives and reports PASS, FAIL, or PARTIAL verdicts, never edits source or planning files.",
     "memory": "project",
     "permissionMode": "plan",
-    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode",
-    "maxTurns": 20
+    "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
+    "maxTurns": 20,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "scout": {
     "description": "Research agent for web/doc/codebase scanning and read-only live validation. Use for pre-plan domain research, codebase mapping (/map), and standalone research (/research). Not for planning or task decomposition. That belongs to architect and lead. Writes RESEARCH.md files directly. Never edits existing files.",
     "memory": "local",
     "permissionMode": "plan",
-    "disallowedTools": "Edit, NotebookEdit, Task, TaskCreate, Agent",
-    "maxTurns": 30
+    "disallowedTools": "Edit, NotebookEdit, Task, TaskCreate, Agent, AskUserQuestion",
+    "maxTurns": 30,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "test-dev": {
     "description": "Writes unit tests for every function a paired engineer implements, grounded in The Art of Unit Testing (Osherove, Khorikov). Always spawned as the third member of an engineer plus critic trio via --trio, never solo-paired. The engineer is barred from writing to the test directory. This role owns it.",
     "memory": "project",
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
-    "maxTurns": 40
+    "maxTurns": 40,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "deviq": {
     "description": "Read-only DevIQ advisor. Use to answer one framed question by grounding it in the DevIQ corpus (references/deviq-corpus/) via scripts/deviq-lookup.sh. Returns a specific recommendation citing 1-3 corpus article ids. Never a verdict, never a block, never writes a file. Spawned solo, not paired.",
@@ -130,7 +149,8 @@
     "disallowedTools": "Edit, Write, NotebookEdit, ExitPlanMode, Task, TaskCreate, Agent, AskUserQuestion",
     "memory": "project",
     "permissionMode": "plan",
-    "maxTurns": 15
+    "maxTurns": 15,
+    "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "trios": {
     "coding-dijkstra": [

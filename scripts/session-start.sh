@@ -3,6 +3,15 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLANNING_DIR="${LBWC_PLANNING_DIR:-.lbwc-planning}"
+CANONICAL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+
+if [ -f "$CANONICAL_ROOT/scripts/hook-wrapper.sh" ] && \
+  [ -f "$CANONICAL_ROOT/scripts/ensure-plugin-root-link.sh" ] && \
+  ! bash "$CANONICAL_ROOT/scripts/ensure-plugin-root-link.sh" \
+    "/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}" "$CANONICAL_ROOT" >/dev/null 2>&1; then
+  echo "LBWC: SessionStart plugin root link bootstrap failed" >&2
+  exit 1
+fi
 
 if ! command -v jq >/dev/null 2>&1; then
   echo '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"lbwc: jq not found. Install jq (brew install jq / apt install jq) -- quality gates are degraded until then."}}'

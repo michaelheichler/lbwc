@@ -1,10 +1,14 @@
 # Discussion Engine
 
-One engine, two entry points: `/vibe` auto-dispatches here when phase detection reports `needs_discussion`, and `/discuss` invokes it directly. The user is the visionary, the orchestrator is the builder. The engine's job is to surface decisions that downstream agents (`lead`, engineers) need so they never ask the user again mid-phase. No agent is spawned for this, the orchestrator runs it inline.
+One engine, two entry points: `/lbwc:vibe` auto-dispatches here when phase detection reports `needs_discussion`, and `/lbwc:discuss` invokes it directly. The user is the visionary, the orchestrator is the builder. The engine's job is to surface decisions that downstream agents (`lead`, engineers) need so they never ask the user again mid-phase. No agent is spawned for this, the main session runs it inline.
+
+## Shared decision boundary
+
+Follow `references/ask-user-question.md`. The main session asks one bounded, single-select question at a time and pauses the workflow while it is pending. Recommendations guide the user, but do not create a decision. Generated agents return the escalation payload in `references/subagent-contracts.md` instead of asking the user or changing decision state.
 
 ## Step 1: Calibrate
 
-Infer user sophistication from conversation signals, never ask: language in prior messages (jargon vs plain), project description complexity, and whether they typed `/discuss` explicitly or arrived via `/vibe`.
+Infer user sophistication from conversation signals, never ask: language in prior messages (jargon vs plain), project description complexity, and whether they typed `/lbwc:discuss` explicitly or arrived via `/lbwc:vibe`.
 
 | Mode | Signals | Question style |
 | --- | --- | --- |
@@ -29,7 +33,7 @@ Activation, first match wins:
 3. `discussion_mode` is `"auto"` and `.lbwc-planning/codebase/META.md` exists → assumptions path
 4. Otherwise → questions path (Step 2)
 
-If the assumptions path activates but no codebase map exists, say so and fall back to questions: "Assumptions mode works best with codebase context. Run `/map` first for evidence-backed assumptions, or falling back to questions mode."
+If the assumptions path activates but no codebase map exists, say so and fall back to questions: "Assumptions mode works best with codebase context. Run `/lbwc:map` first for evidence-backed assumptions, or falling back to questions mode."
 
 **A1: Codebase analysis.** Read `.lbwc-planning/codebase/ARCHITECTURE.md`, `PATTERNS.md`, and `CONCERNS.md` when present, plus the phase goal from ROADMAP.md. For gray areas needing deeper evidence, read the actual source files, do not form assumptions from summaries alone when the source is readily available.
 
@@ -44,9 +48,9 @@ If the assumptions path activates but no codebase map exists, say so and fall ba
 **Consequence if wrong:** [What breaks or needs rework]
 ```
 
-**A3: Present for correction.** High confidence: batch as a numbered confirmation list ("All correct" / "I'd like to correct one" / "Let me explain..."). Medium confidence: present individually with the recommendation first. Low confidence: treat as genuine questions and run them through Step 3.
+**A3: Present for correction.** Present one assumption at a time with its recommendation. High and medium confidence assumptions still need an explicit user confirmation. Low confidence assumptions are genuine questions and follow Step 3.
 
-**A4: Process corrections.** Confirmed: record the assumption as the decision. Corrected: record the user's correction, preserving the original assumption as context. "Let me explain...": stop using structured questions, take the plain-text explanation, update the assumption, confirm.
+**A4: Process corrections.** Confirmed: record the assumption as the decision. Corrected: record the user's correction, preserving the original assumption as context. Native Other returns the typed correction directly. Use it to update the assumption, then confirm. A dismissed interaction records no decision and stops the workflow.
 
 ## Step 2: Orient
 
@@ -58,7 +62,7 @@ Form a preliminary recommendation per area before asking anything. If a recommen
 
 **Continuation mode:** exclude areas already covered by existing `## Decisions Made` subsections. Focus on topics not selected last time, second-order effects of decisions already made, and deferred ideas worth revisiting. Continuation selection must always offer an explicit `None: discussion is complete` path.
 
-**Selection:** 1-4 gray areas: structured multi-select question. 5-6: a numbered list with intentional freeform selection, no options array. Fresh discussion copy: "Which areas should we discuss?" Continuation copy: "These topics weren't covered in the previous discussion. Which would you like to explore?"
+**Selection:** present one gray area at a time. Use a structured single-select question only when there are 2-4 visible options. For a single fresh area, proceed to that area without a selection question. For 5-6 areas, use a numbered list and ask the user to name the next area in a plain-text reply, with no options array. Split a structured candidate list when adding continuation's explicit `None: discussion is complete` path would exceed four options. After resolving an area, ask whether to choose another area. Fresh discussion copy: "Which area should we discuss first?" Continuation copy: "These topics weren't covered in the previous discussion. Which would you like to explore first?"
 
 ## Step 3: Explore
 
@@ -66,13 +70,13 @@ Form a preliminary recommendation per area before asking anything. If a recommen
 
 For each selected area, a natural conversation, not a form:
 
-1. Open with your recommendation: state the gray area, give the recommendation with 2-3 sentences of reasoning, ask for confirmation. First option is the recommended choice with "(Recommended: [brief reason])" in the label, plus 1-2 alternatives and "Let me explain...".
+1. Open with your recommendation: state the gray area, give the recommendation with 2-3 sentences of reasoning, ask for confirmation. The first option is the recommended choice with "(Recommended: [brief reason])" in the label, followed by 1-2 alternatives. Claude Code adds native Other.
 2. Recommended picked: confirm in one line, move on.
 3. Alternative picked: record it. Follow up only if it changes a downstream requirement.
-4. "Let me explain...": drop structured questions, take the plain-text answer, adjust, confirm.
+4. Native Other: process the typed answer, adjust, and confirm.
 5. Move to the next area.
 
-**Clear-cut batching:** where the standard practice answer is obvious, batch several decisions into one confirmation question instead of asking each.
+**Clear-cut decisions:** when a standard practice answer is obvious, state the recommendation and ask one confirmation question for that decision. Do not batch decisions.
 
 **Scope awareness:** if the user mentions something outside the phase boundary, one line: "[Feature] sounds like its own phase. I'll note it." Captured under Deferred Ideas.
 
@@ -90,6 +94,6 @@ Write or update `.lbwc-planning/phases/{NN}-{slug}/{NN}-CONTEXT.md` from `templa
 
 ## Design principles
 
-- **One engine.** `/vibe` dispatch and standalone `/discuss` run the same protocol.
+- **One engine.** `/lbwc:vibe` dispatch and standalone `/lbwc:discuss` run the same protocol.
 - **Calibrate silently.** Never ask "are you technical?".
 - **Orient from the phase, not from templates.** Gray areas come from analysis, not predefined lists.

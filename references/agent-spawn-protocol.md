@@ -1,6 +1,6 @@
 # Agent Spawn Protocol
 
-This document defines how an lbwc command mints and starts a teammate. Every command that spawns follows it. This includes `/vibe`, `/plan`, `/build`, `/fix`, and `/qa`. It also includes `/research`, `/debug`, `/docs`, and `/map`. Do not duplicate this mechanic at a call site. Cite this file instead.
+This document defines how an LBWC command mints and starts a teammate. Every spawning command follows it. This includes `/lbwc:vibe`, `/lbwc:plan`, `/lbwc:build`, `/lbwc:fix`, `/lbwc:qa`, `/lbwc:research`, `/lbwc:debug`, `/lbwc:docs`, and `/lbwc:map`. Do not duplicate this mechanic at a call site. Cite this file instead.
 
 ## Roles
 
@@ -39,9 +39,9 @@ The spawn guard accepts only a contract that the main session advanced to `dispa
 
 ## Admit one task team at a time
 
-Every `/build` generator call includes the standalone `--exclusive` option after the role and its other options. This applies to a solo such as `bash "$w" qa-author --job "<brief>" --write-allowance <test-path> --exclusive`, a pair such as `bash "$w" --pair <role> --job "<brief>" --exclusive`, and a trio such as `bash "$w" --trio <role> --job "<brief>" --exclusive`.
+Every `/lbwc:build` generator call includes the standalone `--exclusive` option after the role and its other options. This applies to a solo such as `bash "$w" qa-author --job "<brief>" --write-allowance <test-path> --exclusive`, a pair such as `bash "$w" --pair <role> --job "<brief>" --exclusive`, and a trio such as `bash "$w" --trio <role> --job "<brief>" --exclusive`.
 
-Generate one build grouping just in time. A grouping is a solo red stage, a pair, or a trio. Do not call the generator for the next grouping until every manifest member of the current grouping is `used` or `expired`. A TDD `qa-author` must reach `used` or `expired` after its `tests_ready` report and red-stage commit before `/build` generates the engineer pair with `--exclusive`. Within a dependency wave, the calling command preserves PLAN order and completes this admission cycle once per grouping. Dependency-wave ordering remains unchanged.
+Generate one build grouping just in time. A grouping is a solo red stage, a pair, or a trio. Do not call the generator for the next grouping until every manifest member of the current grouping is `used` or `expired`. A TDD `qa-author` must reach `used` or `expired` after its `tests_ready` report and red-stage commit before `/lbwc:build` generates the engineer pair with `--exclusive`. Within a dependency wave, the calling command preserves PLAN order and completes this admission cycle once per grouping. Dependency-wave ordering remains unchanged.
 
 Do not generate the next task's pair or trio until every manifest member of the current task team is `used` or `expired`.
 
@@ -64,7 +64,7 @@ Build the brief accordingly instead of hitting these blind:
 - `test_scope_guard.py`: `coding-dijkstra`, `python-engineer`, and `web-engineer` are denied writes under `tests?/` or to `*.test.*` / `*.spec.*` files. In a non-TDD trio that lane belongs to `test-dev`. In a TDD task, it belongs to the solo `qa-author` red stage. Don't ask the engineer role to also write tests.
 - `qa`'s own role definition denies it `Write`, `Edit`, `NotebookEdit`, and `ExitPlanMode`. It reports a verdict, it never touches files.
 - `scout`'s own role definition denies it `Edit` and `NotebookEdit`. It writes new research files, it never edits existing ones.
-- `debugger`'s own role definition denies it `Task` and `TaskCreate`. It works the single bug itself, it does not spawn further.
+- `debugger`'s own role definition denies `TaskCreate`. It works the single bug itself and does not spawn further.
 
 ## Oracle Role Pattern
 

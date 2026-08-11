@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://code.claude.com/docs/en/plugins"><img src="https://img.shields.io/badge/Claude%20Code-2.1.226%2B-D97757?logo=anthropic&logoColor=white" alt="Claude Code 2.1.226 or newer verified"></a>
-  <img src="https://img.shields.io/badge/tests-703%20passing-2EA44F" alt="703 local tests passing">
+  <img src="https://img.shields.io/badge/tests-706%20passing-2EA44F" alt="706 local tests passing">
   <img src="https://img.shields.io/badge/release-local%20verification%20passed-2EA44F" alt="Local release verification passed">
 </p>
 
@@ -16,10 +16,15 @@ LBWC keeps the useful parts of a multi-agent workflow without asking you to beco
 
 ## Quick start
 
-LBWC is verified with Claude Code 2.1.226. Add the marketplace, then install the plugin:
+LBWC is verified with Claude Code 2.1.226 and up until Anthropic (or myself at 3 after midnight) breaks something. Add the marketplace:
 
 ```bash
 claude plugin marketplace add michaelheichler/lbwc
+```
+
+...then install it:
+
+```bash
 claude plugin install lbwc@lbwc-marketplace
 ```
 
@@ -36,7 +41,7 @@ Open Claude Code in the project you want to work on. Run setup once, then use `/
 /lbwc:vibe
 ```
 
-`/lbwc:init` creates LBWC planning state. After that, `/lbwc:vibe` is the only LBWC command you need to drive the work. It reads the actual state, names the next missing artifact, asks for confirmation, and dispatches to the command that owns that step. Use `claude plugin marketplace update lbwc-marketplace` and `claude plugin update lbwc@lbwc-marketplace` to update. Use `claude plugin uninstall lbwc@lbwc-marketplace` to remove it.
+`/lbwc:init` creates LBWC planning state. After that, `/lbwc:vibe` is the **only** LBWC command you need to drive the work. It reads the actual state, names the next missing artifact, asks for confirmation, and dispatches to the command that owns that step. Use `claude plugin marketplace update lbwc-marketplace` and `claude plugin update lbwc@lbwc-marketplace` to update. Use `claude plugin uninstall lbwc@lbwc-marketplace` to remove it.
 
 ## One command after setup
 
@@ -147,5 +152,7 @@ The release scripts verify local state. Publishing, tags, pushes, and history ch
 - [Release history](CHANGELOG.md)
 
 ## License and maintenance
+
+Huge thanks to VBW, BMAD and other great planning harnesses. This repository is the merging of my old "Agentic Project Love" Framework and VBW, a great script-based planning system. The port is from VBW to LBWC, and many of VBWs source code is taken into LBWC.
 
 LBWC is released under the [GNU General Public License v3.0 only](LICENSE). It is maintained by [Michael Heichler](https://github.com/michaelheichler). Report bugs or propose changes through the [issue tracker](https://github.com/michaelheichler/lbwc/issues).

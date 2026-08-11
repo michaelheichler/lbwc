@@ -5,10 +5,14 @@ setup() {
   SCRIPT="$REPO_ROOT/scripts/session-start.sh"
   TEST_ROOT="$(mktemp -d)"
   PLANNING_DIR="$TEST_ROOT/.lbwc-planning"
+  export CLAUDE_SESSION_ID="session-start-${BATS_TEST_NUMBER}-$$"
+  ROOT_LINK="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID}"
+  rm -rf "$ROOT_LINK"
 }
 
 teardown() {
-  rm -rf "$TEST_ROOT"
+  rm -rf "$TEST_ROOT" "$ROOT_LINK"
+  unset CLAUDE_SESSION_ID
 }
 
 run_session_start() {
@@ -24,6 +28,30 @@ run_session_start_from() {
     cd "$REPO_ROOT"
     LBWC_PLANNING_DIR="$PLANNING_DIR" bash "$script_dir/session-start.sh"
   )
+}
+
+@test "session-start fails clearly when a required root link cannot be created" {
+  local plugin_root="$TEST_ROOT/plugin"
+  mkdir -p "$plugin_root"
+  cp -R "$REPO_ROOT/scripts" "$plugin_root/scripts"
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 1' > "$plugin_root/scripts/ensure-plugin-root-link.sh"
+  chmod +x "$plugin_root/scripts/ensure-plugin-root-link.sh"
+
+  run run_session_start_from "$plugin_root/scripts"
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"LBWC: SessionStart plugin root link bootstrap failed"* ]]
+}
+
+@test "session-start creates the exact session plugin root link" {
+  local canonical_root
+  canonical_root=$(cd "$REPO_ROOT" && pwd -P)
+
+  run run_session_start
+
+  [ "$status" -eq 0 ]
+  [ -L "$ROOT_LINK" ]
+  [ "$(readlink "$ROOT_LINK")" = "$canonical_root" ]
 }
 
 @test "session-start: cold start with no planning dir exits 0 and reports init needed" {

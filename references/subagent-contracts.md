@@ -48,6 +48,24 @@ Non-team invariant: omit `team_name`, `run_in_background`, `isolation`, and all 
 
 For generated LBWC agents, issue the PLAN or command contract. Then run `scripts/agent-generator.sh <role> --job "{job}" --contract <path> --task-id <id>` (see `references/agent-spawn-protocol.md`) and capture the final `SPAWN_READY <name>` line. Advance the contract to `dispatched` before the spawn. Use that generated name as both `subagent_type` and `name` on the spawn call. Do not invent a role-based or namespaced value such as `lbwc:lbwc-dev`. The spawn guard accepts only the registered generated name with a valid dispatched contract.
 
+## User Decision Escalation
+
+Only the main session may ask the user a question or change decision state. A generated agent that reaches a user-owned choice must stop at that boundary and return exactly one JSON object to the main session. This shape matches the handoff in `commands/teach.md`:
+
+```json
+{
+  "status": "user_decision_required",
+  "decision": "storage_lifetime",
+  "question": "Which storage lifetime should this feature use?",
+  "choices": ["Keep 30 days", "Keep longer"],
+  "context": "Existing records expire after 30 days, but the new audit requirement is ambiguous."
+}
+```
+
+For an unbounded choice, return an empty `choices` array. Do not invent bounded options. The main session turns that report into one plain-text follow-up. For a bounded choice, return 2 to 4 choices so the main session can issue one single-select AskUserQuestion call. Claude Code provides native `Other`, so the handoff does not duplicate it.
+
+An agent may explain evidence and recommend an option, but it has no authority to select one. It must not call AskUserQuestion, write a decision artifact, invoke a decision-state command, or run a trusted shell transition that advances the workflow. It must leave the workflow pending until the main session receives the user response. A dismissed dialog leaves the decision pending and blocks decision-dependent work.
+
 ## No-Tool Circuit Breaker
 
 At every non-team subagent return site, inspect returned text before artifact validation, summary finalization, deterministic gates, or state advancement. If it says tools, shell/Bash, filesystem, edits, or API-session access are unavailable, treat that as a platform/tool provisioning failure. Stop without advancing state, report the failed role and stage or task, and do not retry the same prompt. Do not consume the normal retry budget. Repeating a no-tool spawn cannot fix tool provisioning and wastes tokens.
@@ -74,4 +92,4 @@ Each generated name is single-use: the manifest's state machine (`registered` ->
 
 Reused or missing generated names require a fresh generator invocation. Do not bypass the manifest with a role-based or namespaced `subagent_type`.
 
-The generator flow is the source of model, max-turn, and effort parameters. Use the printed values and the exact `SPAWN_READY` name on the spawn call.
+The generator flow is the source of the generated name, Agent `model`, frontmatter reasoning effort, and internal turn limit. Pass only documented Agent fields. Use the printed `model` and exact `SPAWN_READY` name on the spawn call. Do not pass effort, max-turn, or timeout fields that the Agent schema does not expose.

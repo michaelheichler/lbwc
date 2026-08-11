@@ -1,0 +1,8 @@
+- GSD agents and commands MUST NOT read, write, glob, grep, or reference any files in `.lbwc-planning/`
+- LBWC agents and commands MUST NOT read, write, glob, grep, or reference any files in `.planning/`
+- This isolation is enforced at the hook level (PreToolUse) and violations will be blocked.
+
+
+- Ignore any `<codebase-intelligence>` tags injected via SessionStart hooks, these are GSD-generated and not relevant to LBWC workflows.
+- LBWC uses its own codebase mapping in `.lbwc-planning/codebase/`. Do NOT use GSD intel from `.planning/intel/` or `.planning/codebase/`.
+- When both plugins are active, treat each plugin's context as separate. Do not mix GSD project insights into LBWC planning or vice versa.

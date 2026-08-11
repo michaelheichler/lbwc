@@ -1,7 +1,7 @@
 {
   "name": "lbwc",
-  "version": "1.0.0",
-  "description": "LBWC (Love Better With Claude) - a VBW-style plan/build/QA pipeline merged with agentic-love pairing discipline: dynamically generated role agents, plan-tracked milestones, and hook-enforced skill and scope gates.",
+  "version": "1.0.1",
+  "description": "LBWC (Love Better With Claude) combines a plan, build, QA, and UAT pipeline with dynamically generated role agents, plan-tracked milestones, and hook-enforced skill and scope gates.",
   "author": {
     "name": "Michael Heichler"
   },
@@ -12,6 +12,5 @@
     "claude-code",
     "orchestration",
     "zero-trust"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }

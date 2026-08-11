@@ -36,14 +36,13 @@ esac
 STATE_DIR="$PHASE_DIR/remediation/qa"
 STATE_FILE="$STATE_DIR/.qa-remediation-stage"
 LOCK_DIR="$STATE_DIR/.qa-remediation.lock"
-STAGES=(plan execute verify done)
+STAGES=(plan execute verify "done")
 LOCK_HELD=false
 
 release_lock() {
   if [ "$LOCK_HELD" = true ]; then
     rm -f "$LOCK_DIR/pid" 2>/dev/null || true
     rmdir "$LOCK_DIR" 2>/dev/null || true
-    LOCK_HELD=false
   fi
 }
 
@@ -131,10 +130,56 @@ round_started_at_commit() {
   state_value round_started_at_commit
 }
 
+source_verification_path() {
+  state_value source_verification_path
+}
+
+source_fail_count() {
+  state_value source_fail_count
+}
+
+capture_source_verification_path() {
+  bash "$SCRIPT_DIR/resolve-verification-path.sh" authoritative "$PHASE_DIR" 2>/dev/null || true
+}
+
+count_source_failures() {
+  local verification_path="$1" failed
+  [ -r "$verification_path" ] || { printf '0\n'; return; }
+  failed=$(sed -n '/^---$/,/^---$/{ /^failed:/{ s/^failed:[[:space:]]*//; p; q; }; }' "$verification_path" | tr -d '[:space:]')
+  case "$failed" in
+    ''|*[!0-9]*) awk -F'|' '/\|[[:space:]]*FAIL[[:space:]]*\|/ { count++ } END { print count + 0 }' "$verification_path" ;;
+    *) printf '%s\n' "$failed" ;;
+  esac
+}
+
+known_issue_metadata() {
+  bash "$SCRIPT_DIR/track-known-issues.sh" status "$PHASE_DIR"
+}
+
+input_mode_for() {
+  local failures="$1" known_count="$2"
+  if [ "$failures" -gt 0 ] && [ "$known_count" -gt 0 ]; then printf 'both\n'
+  elif [ "$failures" -gt 0 ]; then printf 'verification\n'
+  elif [ "$known_count" -gt 0 ]; then printf 'known-issues\n'
+  else printf 'none\n'
+  fi
+}
+
 write_state() {
-  local stage="$1" round="$2" commit="${3:-}" tmp
+  local stage="$1" round="$2" commit="${3:-}" source_path source_failures known_metadata known_count input_mode tmp
+  source_path="$(source_verification_path)"
+  source_failures="$(source_fail_count)"
+  if [ -z "$source_path" ]; then
+    source_path="$(capture_source_verification_path)"
+    source_failures="$(count_source_failures "$source_path")"
+  fi
+  source_failures="${source_failures:-0}"
+  known_metadata="$(known_issue_metadata)"
+  known_count=$(printf '%s\n' "$known_metadata" | awk -F= '$1 == "known_issues_count" { print $2; exit }')
+  known_count="${known_count:-0}"
+  input_mode="$(input_mode_for "$source_failures" "$known_count")"
   tmp=$(mktemp "${STATE_FILE}.tmp.XXXXXX")
-  if printf 'stage=%s\nround=%s\nround_started_at_commit=%s\n' "$stage" "$round" "$commit" > "$tmp"; then
+  if printf 'stage=%s\nround=%s\nround_started_at_commit=%s\nsource_verification_path=%s\nsource_fail_count=%s\ninput_mode=%s\n' "$stage" "$round" "$commit" "$source_path" "$source_failures" "$input_mode" > "$tmp"; then
     mv "$tmp" "$STATE_FILE"
   else
     rm -f "$tmp"
@@ -143,15 +188,22 @@ write_state() {
 }
 
 emit_metadata() {
-  local round round_dir
+  local round round_dir source_path source_failures known_metadata known_count input_mode
   round="$(get_round)"
   round_dir="$STATE_DIR/round-$round"
+  source_path="$(source_verification_path)"
+  source_failures="$(source_fail_count)"
+  source_failures="${source_failures:-0}"
+  known_metadata="$(known_issue_metadata)"
+  known_count=$(printf '%s\n' "$known_metadata" | awk -F= '$1 == "known_issues_count" { print $2; exit }')
+  known_count="${known_count:-0}"
+  input_mode="$(input_mode_for "$source_failures" "$known_count")"
   printf 'round=%s\n' "$round"
   printf 'round_dir=%s\n' "$round_dir"
   printf 'round_started_at_commit=%s\n' "$(round_started_at_commit)"
-  printf 'source_verification_path=\nsource_fail_count=0\n'
-  printf 'known_issues_path=%s/known-issues.json\nknown_issues_status=missing\nknown_issues_count=0\n' "$PHASE_DIR"
-  printf 'input_mode=none\n'
+  printf 'source_verification_path=%s\nsource_fail_count=%s\n' "$source_path" "$source_failures"
+  printf '%s\n' "$known_metadata"
+  printf 'input_mode=%s\n' "$input_mode"
   printf 'plan_path=%s/R%s-PLAN.md\nsummary_path=%s/R%s-SUMMARY.md\nverification_path=%s/R%s-VERIFICATION.md\n' "$round_dir" "$round" "$round_dir" "$round" "$round_dir" "$round"
 }
 
@@ -189,8 +241,21 @@ find_config_file() {
   printf '%s/.lbwc-planning/config.json\n' "$config_dir"
 }
 
+next_round_decision() {
+  local round="$1" config_file
+  config_file="$(find_config_file)"
+  bash "$SCRIPT_DIR/resolve-uat-remediation-round-limit.sh" --next-round-decision "$config_file" "$round"
+}
+
+emit_round_cap() {
+  local decision="$1" max
+  max=$(printf '%s\n' "$decision" | awk -F= '/^max_rounds=/{print $2; exit}')
+  echo "remediation-round: round cap reached (max_remediation_rounds=$max) for $OUTPUT_PHASE_DIR" >&2
+  printf '%s\n' "$decision"
+}
+
 open_round() {
-  local stage round decision next_round cap_reached max config_file
+  local stage round decision next_round cap_reached
   acquire_lock
   stage="$(get_stage)"
   round="$(get_round)"
@@ -200,23 +265,11 @@ open_round() {
     emit_driver_metadata
     return 0
   fi
-
-  if [ ! -f "$STATE_FILE" ]; then
-    round=0
-  fi
-  config_file="$(find_config_file)"
-  if ! decision=$(bash "$SCRIPT_DIR/resolve-uat-remediation-round-limit.sh" --next-round-decision "$config_file" "$round"); then
-    return 1
-  fi
+  [ -f "$STATE_FILE" ] || round=0
+  decision="$(next_round_decision "$round")" || return 1
   next_round=$(printf '%s\n' "$decision" | awk -F= '/^next_round=/{print $2; exit}')
   cap_reached=$(printf '%s\n' "$decision" | awk -F= '/^cap_reached=/{print $2; exit}')
-  if [ "$cap_reached" = true ]; then
-    max=$(printf '%s\n' "$decision" | awk -F= '/^max_rounds=/{print $2; exit}')
-    echo "remediation-round: round cap reached (max_remediation_rounds=$max) for $OUTPUT_PHASE_DIR" >&2
-    printf '%s\n' "$decision"
-    return 3
-  fi
-
+  [ "$cap_reached" != true ] || { emit_round_cap "$decision"; return 3; }
   mkdir -p "$STATE_DIR/round-$next_round"
   write_state plan "$next_round" "$(capture_commit)"
   printf 'stage=plan\n'
