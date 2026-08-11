@@ -1,0 +1,31 @@
+AGENTS.md
+  s_1435467b546181::t_c9c7f2d54020ee 1-217
+CLAUDE.md
+  s_b5945b94a6afe8::t_cf15d6206a073f 1
+scripts/refresh-claude-md-lbwc-sections.sh
+  s_b5945b94a6afe8::t_5982994011a7ae 1-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6f285ab1f107eddb64e391b19d7e08c132926d62",
+  "prompts": {},
+  "sessions": {
+    "s_1435467b546181": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "209822dc-2c44-4767-9b95-b7c02ffb1511",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_b5945b94a6afe8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ab8fa3ac3a5cf3063",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
