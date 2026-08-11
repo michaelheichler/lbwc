@@ -1,0 +1,36 @@
+commands/config.md
+  s_1435467b546181::t_89fcdde79acf8c 6
+commands/help.md
+  s_1435467b546181::t_8080bd4b1b0b4a 6
+  s_1435467b546181::t_09d691e019891a 5
+  s_1435467b546181::t_0661ca51495873 2,10,17,29,36,40,44-56
+commands/pause.md
+  s_1435467b546181::t_6d3d80ec79e5b0 6
+  s_1435467b546181::t_df638f44a36f1c 2,10,21,25-26,30-34
+commands/qa.md
+  s_1435467b546181::t_95d1451d06fa6f 7
+  s_1435467b546181::t_7b5ea627694c7d 2,11,24,29,31,36,44,51-52,86,91,95,106,116,122,126,134,159,164,167-172,175,205,211,213-214,231-232,249,252,255-260,263-265,278,283,327,331,334,337,372-373,379,382,416-428
+commands/map.md
+  s_1435467b546181::t_0ae75852be524e 6
+commands/status.md
+  s_1435467b546181::t_338685bed67474 6
+  s_1435467b546181::t_6a458a57069e7b 3-5
+  s_1435467b546181::t_fb017bf17c1f2c 7
+  s_1435467b546181::t_76269959e03352 2,10,12-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8e2a9cf458b0febbf461adac753ebbfabae71648",
+  "prompts": {},
+  "sessions": {
+    "s_1435467b546181": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "209822dc-2c44-4767-9b95-b7c02ffb1511",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
