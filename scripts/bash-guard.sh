@@ -162,10 +162,10 @@ command_targets_protected_control_path() {
   local command="$1" normalized
   normalized=$(command_without_shell_syntax "$command")
   case "$command" in
-    *config/*|*.lbwc-planning/config.json*|*.lbwc-planning/.agent-manifest*|*.lbwc-planning/.contracts*|*.claude/agents*|*scripts/agent-generator.sh*|*scripts/agent-lifecycle.sh*|*scripts/agent-spawn-guard.sh*|*scripts/bash-guard.sh*|*scripts/file-guard.sh*|*scripts/security-filter.sh*|*scripts/task-contract.sh*|*scripts/render-agent-template.sh*|*scripts/lib/agent-manifest.sh*) return 0 ;;
+    *config/*|*.lbwc-planning/config.json*|*.lbwc-planning/.agent-manifest*|*.lbwc-planning/.contracts*|*.temporary-agent-runfiles*|*.claude/agents*|*.git/*|*scripts/agent-generator.sh*|*scripts/agent-lifecycle.sh*|*scripts/agent-spawn-guard.sh*|*scripts/bash-guard.sh*|*scripts/file-guard.sh*|*scripts/security-filter.sh*|*scripts/task-contract.sh*|*scripts/render-agent-template.sh*|*scripts/lib/agent-manifest.sh*) return 0 ;;
   esac
   case "$normalized" in
-    *config/*|*.lbwc-planning/config.json*|*.lbwc-planning/.agent-manifest*|*.lbwc-planning/.contracts*|*.claude/agents*|*scripts/agent-generator.sh*|*scripts/agent-lifecycle.sh*|*scripts/agent-spawn-guard.sh*|*scripts/bash-guard.sh*|*scripts/file-guard.sh*|*scripts/security-filter.sh*|*scripts/task-contract.sh*|*scripts/render-agent-template.sh*|*scripts/lib/agent-manifest.sh*) return 0 ;;
+    *config/*|*.lbwc-planning/config.json*|*.lbwc-planning/.agent-manifest*|*.lbwc-planning/.contracts*|*.temporary-agent-runfiles*|*.claude/agents*|*.git/*|*scripts/agent-generator.sh*|*scripts/agent-lifecycle.sh*|*scripts/agent-spawn-guard.sh*|*scripts/bash-guard.sh*|*scripts/file-guard.sh*|*scripts/security-filter.sh*|*scripts/task-contract.sh*|*scripts/render-agent-template.sh*|*scripts/lib/agent-manifest.sh*) return 0 ;;
   esac
   case "$normalized" in
     *python*-c*config*subagent-critical-execution.txt*|*python*-c*subagent-critical-execution.txt*config*) return 0 ;;

@@ -30,6 +30,23 @@ teardown() {
   [[ "$output" == *"jq not available"* ]]
 }
 
+@test "generated identity without a control root fails closed" {
+  rm -rf "$TEST_TEMP_DIR/.lbwc-planning"
+
+  run bash -c 'jq -cn '\''{tool_name:"Agent",tool_input:{subagent_type:"lbwc-docs-missing"}}'\'' | bash "$1"' _ "$SCRIPTS_DIR/agent-spawn-guard.sh"
+
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"no resolvable control root or manifest"* ]]
+}
+
+@test "ordinary agent without a control root remains outside LBWC enforcement" {
+  rm -rf "$TEST_TEMP_DIR/.lbwc-planning"
+
+  run bash -c 'jq -cn '\''{tool_name:"Agent",tool_input:{subagent_type:"general-purpose"}}'\'' | bash "$1"' _ "$SCRIPTS_DIR/agent-spawn-guard.sh"
+
+  [ "$status" -eq 0 ]
+}
+
 @test "spawn guard rejects a member of a second unclaimed generated group" {
   local first_contract second_contract first_id second_id
   first_contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" first-pair \

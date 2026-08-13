@@ -220,3 +220,53 @@ teardown() { rm -rf "$ROOT"; }
   [ -f "$first" ]
   [ -f "$second" ]
 }
+
+@test "issue writes schema 3 typed capabilities in an explicit temporary control root" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/team-one"
+  mkdir -p "$control_root"
+  run bash "$SCRIPT" issue "$ROOT" "team-scope" \
+    --command team --role web-engineer --team solo --job "Implement the web scope" \
+    --control-root "$control_root" \
+    --write-capability file:src/web/index.ts \
+    --write-capability directory:tests/web
+  [ "$status" -eq 0 ]
+  local contract="$output"
+  control_root=$(cd -P "$control_root" && pwd -P)
+  [ "$contract" = "$control_root/contracts/tasks/$(basename "$contract")" ]
+  run jq -e '
+    .schema_version == 3
+    and .control_root == "'"$control_root"'"
+    and .capabilities_by_role["web-engineer"] == [
+      {access:"write",kind:"file",path:"src/web/index.ts"},
+      {access:"write",kind:"directory",path:"tests/web"}
+    ]
+    and .write_allowances == ["src/web/index.ts", "tests/web"]
+    and .runtime_kind == "native-team"
+    and .communication_policy == "native-team"
+  ' "$contract"
+  [ "$status" -eq 0 ]
+}
+
+@test "schema 3 root capability is limited to the team command" {
+  run bash "$SCRIPT" issue "$ROOT" "not-team" \
+    --command test --role web-engineer --team solo --job "scope" \
+    --write-capability directory:.
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"repository root capability is only valid for team"* ]]
+}
+
+@test "schema 3 state updates use the temporary control root only" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/team-state" contract id
+  rm -rf "$ROOT/.lbwc-planning"
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPT" issue "$ROOT" "team-state" \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --write-capability directory:src/web)
+  id=$(basename "$contract" .json)
+
+  run bash "$SCRIPT" state "$ROOT" "$id" dispatched
+
+  [ "$status" -eq 0 ]
+  [ ! -e "$ROOT/.lbwc-planning" ]
+  [ ! -e "$control_root/contracts/.lock" ]
+}

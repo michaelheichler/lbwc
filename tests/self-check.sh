@@ -16,6 +16,7 @@ setup_fixture() {
   cp "$LBWC_ROOT/scripts/agent-spawn-guard.sh" "$work/scripts/agent-spawn-guard.sh"
   cp "$LBWC_ROOT/scripts/agent-lifecycle.sh" "$work/scripts/agent-lifecycle.sh"
   cp "$LBWC_ROOT/scripts/task-contract.sh" "$work/scripts/task-contract.sh"
+  cp "$LBWC_ROOT/scripts/lib/lbwc-control-root.sh" "$work/scripts/lib/lbwc-control-root.sh"
   cp "$LBWC_ROOT/templates/agent-roles/defaults.json" "$work/templates/agent-roles/defaults.json"
   cp "$HERE/fixture-agent-manifest.sh" "$work/scripts/lib/agent-manifest.sh"
   chmod +x "$work/scripts/agent-spawn-guard.sh" "$work/scripts/agent-lifecycle.sh" "$work/scripts/task-contract.sh"

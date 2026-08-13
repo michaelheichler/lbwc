@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 import time
@@ -31,13 +32,16 @@ LEGAL = {
     "cancelled": set(),
 }
 STATES = set(LEGAL)
-SCHEMA_KEYS = {
+SCHEMA_2_KEYS = {
     "contract_id", "schema_version", "created_by", "project_root",
     "source_kind", "source_path", "source_sha256", "command_name",
     "phase", "task_name", "task_identity", "group_name", "team_mode",
     "role", "roles", "test_dev", "plan_files", "files",
     "write_allowances", "allowances_by_role", "job_sha256", "action",
     "verify", "done", "strategy", "state", "contract_digest",
+}
+SCHEMA_3_KEYS = SCHEMA_2_KEYS | {
+    "capabilities_by_role", "communication_policy", "control_root", "runtime_kind"
 }
 
 
@@ -72,7 +76,44 @@ def safe_path(value):
     return value
 
 
+def safe_capability_path(value, kind):
+    if kind == "directory" and value == ".":
+        return value
+    if kind not in {"file", "directory"}:
+        fail("capability kind must be file or directory")
+    safe_path(value)
+    return value
+
+
+def resolve_control_root(value, root):
+    script = Path(os.environ["TASK_CONTRACT_SCRIPT_DIR"]) / "lib" / "lbwc-control-root.sh"
+    if not script.is_file():
+        fail("control root resolver is unavailable")
+    try:
+        result = subprocess.run(
+            ["bash", "-c", '. "$1"; lbwc_resolve_control_root "$2" "$3" "$4"',
+             "lbwc-control-root", str(script), value, str(root), str(root)],
+            check=True, capture_output=True, text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        fail("control root is unavailable or invalid")
+    resolved = result.stdout.strip()
+    if not resolved:
+        fail("control root is unavailable or invalid")
+    return Path(resolved)
+
+
 def protected_worker_path(value):
+    if value == ".git" or value.startswith(".git/"):
+        return True
+    if value == ".temporary-agent-runfiles" or value.startswith(".temporary-agent-runfiles/"):
+        return True
+    if value == ".env" or value.startswith(".env.") or "/.env" in value:
+        return True
+    if re.search(r"(^|/)[^/]+\.(pem|key|cert|p12|pfx)(\.[A-Za-z0-9]+)?$", value):
+        return True
+    if value.endswith("credentials.json") or value.endswith("secrets.json") or value.endswith("service-account.json"):
+        return True
     if value in {
         "config/subagent-critical-execution.txt",
         "config/destructive-commands.txt",
@@ -147,6 +188,11 @@ def parse_options(arguments, require_command=False):
         "command": "",
         "write_allowances": [],
         "role_write_allowances": [],
+        "control_root": "",
+        "capabilities": [],
+        "role_capabilities": [],
+        "runtime_kind": "",
+        "communication_policy": "",
     }
     value_options = {
         "--role": "role",
@@ -154,6 +200,9 @@ def parse_options(arguments, require_command=False):
         "--group": "group",
         "--job": "job",
         "--command": "command",
+        "--control-root": "control_root",
+        "--runtime-kind": "runtime_kind",
+        "--communication-policy": "communication_policy",
     }
     index = 0
     while index < len(arguments):
@@ -172,6 +221,16 @@ def parse_options(arguments, require_command=False):
             options["write_allowances"].append(value)
         elif flag == "--role-write-allowance":
             options["role_write_allowances"].append(value)
+        elif flag in ("--write-capability", "--capability"):
+            if ":" not in value:
+                fail("invalid write capability")
+            kind, path = value.split(":", 1)
+            options["capabilities"].append((kind, path))
+        elif flag == "--role-write-capability":
+            parts = value.split(":", 2)
+            if len(parts) != 3:
+                fail("invalid role write capability")
+            options["role_capabilities"].append(tuple(parts))
         else:
             fail(USAGE)
     if require_command and not options["command"]:
@@ -248,6 +307,30 @@ def build_allowances(roles, primary, primary_paths, role_specs, allowed_paths=No
     return allowances, flattened
 
 
+def build_capabilities(roles, primary, primary_capabilities, role_specs):
+    capabilities = {role: [] for role in roles}
+    for kind, path in primary_capabilities:
+        safe_capability_path(path, kind)
+        if protected_worker_path(path):
+            fail("protected path cannot be granted to a generated worker")
+        capabilities[primary].append({"access": "write", "kind": kind, "path": path})
+    for role, kind, path in role_specs:
+        if role not in roles:
+            fail("capability role is not in contract team")
+        safe_capability_path(path, kind)
+        if protected_worker_path(path):
+            fail("protected path cannot be granted to a generated worker")
+        capabilities[role].append({"access": "write", "kind": kind, "path": path})
+    seen = set()
+    for role in roles:
+        for capability in capabilities[role]:
+            identity = (role, capability["kind"], capability["path"])
+            if identity in seen:
+                fail("duplicate contract capability")
+            seen.add(identity)
+    return capabilities
+
+
 def digest_contract(contract):
     immutable = {key: value for key, value in contract.items() if key not in ("contract_digest", "state")}
     canonical = json.dumps(immutable, sort_keys=True, separators=(",", ":"))
@@ -268,11 +351,27 @@ def command_contract(root, task_name, options):
     if not options["job"]:
         fail("--job is required")
     roles = configured_team(role, options["team"])
-    allowances, files = build_allowances(
-        roles, role, options["write_allowances"], options["role_write_allowances"]
-    )
+    capabilities = build_capabilities(roles, role, options["capabilities"], options["role_capabilities"])
+    typed = bool(options["capabilities"] or options["role_capabilities"] or options["control_root"])
+    if typed:
+        allowances = {
+            team_role: [item["path"] for item in capabilities[team_role]]
+            for team_role in roles
+        }
+        files = [path for team_role in roles for path in allowances[team_role]]
+    else:
+        allowances, files = build_allowances(
+            roles, role, options["write_allowances"], options["role_write_allowances"]
+        )
+    if typed and options["write_allowances"]:
+        fail("typed capabilities cannot be combined with exact write allowances")
+    if typed and not options["capabilities"] and not options["role_capabilities"]:
+        fail("typed contract requires at least one capability")
+    if typed and "." in [item["path"] for role_caps in capabilities.values() for item in role_caps] and command != "team":
+        fail("repository root capability is only valid for team")
+    control_root = resolve_control_root(options["control_root"], root) if typed else None
     contract_id = safe_id("cmd", command, task_name, group)
-    return with_digest({
+    contract = {
         "contract_id": contract_id,
         "schema_version": 2,
         "created_by": "main",
@@ -300,7 +399,16 @@ def command_contract(root, task_name, options):
         "strategy": "command",
         "state": "planned",
         "contract_digest": "",
-    })
+    }
+    if typed:
+        contract.update({
+            "capabilities_by_role": capabilities,
+            "communication_policy": options["communication_policy"] or "native-team",
+            "control_root": str(control_root),
+            "runtime_kind": options["runtime_kind"] or "native-team",
+            "schema_version": 3,
+        })
+    return with_digest(contract)
 
 
 def plan_contract(path, root, task_name, options):
@@ -349,9 +457,11 @@ def plan_contract(path, root, task_name, options):
 
 
 def validate_contract(contract, root, expected_id=None, expected_job=None):
-    if not isinstance(contract, dict) or set(contract) != SCHEMA_KEYS:
+    if not isinstance(contract, dict):
         fail("invalid contract")
-    if contract.get("schema_version") != 2:
+    schema_version = contract.get("schema_version")
+    expected_keys = SCHEMA_2_KEYS if schema_version == 2 else SCHEMA_3_KEYS if schema_version == 3 else set()
+    if set(contract) != expected_keys:
         fail("invalid contract")
     if contract.get("contract_digest") != digest_contract(contract):
         fail("contract digest mismatch")
@@ -375,10 +485,42 @@ def validate_contract(contract, root, expected_id=None, expected_job=None):
         if not isinstance(paths, list) or any(not isinstance(path, str) for path in paths):
             fail("invalid contract")
         for path in paths:
-            safe_path(path)
+            if schema_version == 2:
+                safe_path(path)
             if path in flattened:
                 fail("invalid contract")
             flattened.append(path)
+    if schema_version == 3:
+        control_root = resolve_control_root(contract.get("control_root", ""), root)
+        if str(control_root) != contract.get("control_root"):
+            fail("invalid contract")
+        capabilities = contract.get("capabilities_by_role")
+        if not isinstance(capabilities, dict) or set(capabilities) != set(roles):
+            fail("invalid contract")
+        capability_paths = {role: [] for role in roles}
+        for team_role in roles:
+            entries = capabilities[team_role]
+            if not isinstance(entries, list):
+                fail("invalid contract")
+            for entry in entries:
+                if not isinstance(entry, dict) or set(entry) != {"access", "kind", "path"} or entry.get("access") != "write":
+                    fail("invalid contract")
+                kind = entry.get("kind")
+                path = entry.get("path")
+                safe_capability_path(path, kind)
+                if protected_worker_path(path):
+                    fail("invalid contract")
+                capability_paths[team_role].append(path)
+        if contract.get("write_allowances") != capability_paths[contract["role"]]:
+            fail("invalid contract")
+        if contract.get("files") != [path for team_role in roles for path in capability_paths[team_role]]:
+            fail("invalid contract")
+        if not isinstance(contract.get("runtime_kind"), str) or not contract.get("runtime_kind"):
+            fail("invalid contract")
+        if not isinstance(contract.get("communication_policy"), str) or not contract.get("communication_policy"):
+            fail("invalid contract")
+    elif any(key in contract for key in ("capabilities_by_role", "control_root", "runtime_kind", "communication_policy")):
+        fail("invalid contract")
     if contract.get("write_allowances") != allowances[role] or contract.get("files") != flattened:
         fail("invalid contract")
     plan_files = contract.get("plan_files")
@@ -414,20 +556,49 @@ def validate_contract(contract, root, expected_id=None, expected_job=None):
             fail("job digest mismatch")
 
 
-def contract_path(root, contract_id):
-    return root / ".lbwc-planning" / ".contracts" / "tasks" / f"{contract_id}.json"
+def contract_path(root, contract_id, control_root=None):
+    registry = control_root / "contracts" / "tasks" if control_root and control_root.name != ".lbwc-planning" else (control_root or root / ".lbwc-planning") / ".contracts" / "tasks"
+    return registry / f"{contract_id}.json"
+
+
+def locate_contract_path(root, contract_id):
+    active = contract_path(root, contract_id)
+    if active.is_file():
+        return active
+    runs = root / ".temporary-agent-runfiles" / "runs"
+    if runs.is_dir():
+        for run_root in sorted(runs.iterdir()):
+            candidate = contract_path(root, contract_id, run_root)
+            if candidate.is_file():
+                return candidate
+    return active
+
+
+def control_root_for_contract_path(path, root):
+    resolved = path.resolve()
+    active_root = (root / ".lbwc-planning").resolve()
+    if resolved.parent == active_root / ".contracts" / "tasks":
+        return None
+    return resolved.parent.parent.parent
 
 
 def validate_contract_path(path, root):
     resolved = path.resolve()
     expected_parent = (root / ".lbwc-planning" / ".contracts" / "tasks").resolve()
-    if resolved.parent != expected_parent:
+    valid = resolved.parent == expected_parent
+    temporary_parent = root / ".temporary-agent-runfiles" / "runs"
+    if temporary_parent.is_dir():
+        for run_root in temporary_parent.iterdir():
+            if run_root.is_dir() and resolved.parent == (run_root / "contracts" / "tasks").resolve():
+                valid = True
+                break
+    if not valid:
         fail("contract path is outside the protected registry")
     return resolved
 
 
-def lock(root):
-    contracts = root / ".lbwc-planning" / ".contracts"
+def lock(root, control_root=None):
+    contracts = ((control_root or root / ".lbwc-planning") / ("contracts" if control_root and control_root.name != ".lbwc-planning" else ".contracts"))
     tasks = contracts / "tasks"
     lock_dir = contracts / ".lock"
     if contracts.is_symlink():
@@ -485,13 +656,15 @@ def load(path):
 
 def immutable_equal(left, right):
     ignored = {"state", "contract_digest"}
-    return all(left.get(key) == right.get(key) for key in SCHEMA_KEYS - ignored)
+    keys = SCHEMA_2_KEYS if left.get("schema_version") == 2 else SCHEMA_3_KEYS
+    return all(left.get(key) == right.get(key) for key in keys - ignored)
 
 
 def create_or_reopen(root, contract):
     validate_contract(contract, root)
-    path = contract_path(root, contract["contract_id"])
-    held = lock(root)
+    control_root = Path(contract["control_root"]) if contract.get("schema_version") == 3 else None
+    path = contract_path(root, contract["contract_id"], control_root)
+    held = lock(root, control_root)
     try:
         if path.exists():
             existing = load(path)
@@ -543,10 +716,11 @@ def main():
             fail(USAGE)
         root = canonical_root(sys.argv[2])
         contract_id = safe_token(sys.argv[3], "task id")
-        path = contract_path(root, contract_id)
+        path = locate_contract_path(root, contract_id)
         if not path.is_file():
             fail("unknown contract")
-        held = lock(root)
+        control_root = control_root_for_contract_path(path, root)
+        held = lock(root, control_root)
         try:
             contract = load(path)
             validate_contract(contract, root, contract_id)

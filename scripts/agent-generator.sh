@@ -5,6 +5,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 PLUGIN_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 . "$SCRIPT_DIR/lib/agent-manifest.sh"
 . "$SCRIPT_DIR/lib/agent-fields.sh"
+. "$SCRIPT_DIR/lib/lbwc-control-root.sh"
 
 fail() {
   printf 'agent-generator: %s\n' "$1" >&2
@@ -40,8 +41,12 @@ is_valid_role "$ROLE" || fail "invalid role '$ROLE'"
 
 declare -A OVERRIDES=()
 WRITE_ALLOWANCES=()
+WRITE_CAPABILITIES=()
 ROLE_WRITE_ALLOWANCE_ROLES=()
 ROLE_WRITE_ALLOWANCE_PATHS=()
+ROLE_WRITE_CAPABILITY_ROLES=()
+ROLE_WRITE_CAPABILITY_VALUES=()
+CONTROL_ROOT_ARG=""
 JOB=""
 PAIR_ROLE_ARG=""
 EXCLUSIVE_MODE=""
@@ -56,14 +61,23 @@ apply_option() {
     --job) JOB="$value" ;;
     --contract|--contract-input) CONTRACT_PATH="$value" ;;
     --task-id|--task-identity) TASK_ID="$value" ;;
+    --control-root) CONTROL_ROOT_ARG="$value" ;;
     --pair-role) PAIR_ROLE_ARG="$value" ;;
     --write-allowance) WRITE_ALLOWANCES+=("$value") ;;
+    --write-capability|--capability) WRITE_CAPABILITIES+=("$value") ;;
     --role-write-allowance)
       role="${value%%:*}"
       path="${value#*:}"
       [ "$role" != "$value" ] && [ -n "$role" ] && [ -n "$path" ] || fail "invalid --role-write-allowance '$value'"
       ROLE_WRITE_ALLOWANCE_ROLES+=("$role")
       ROLE_WRITE_ALLOWANCE_PATHS+=("$path")
+      ;;
+    --role-write-capability)
+      role="${value%%:*}"
+      capability="${value#*:}"
+      [ "$role" != "$value" ] && [ -n "$role" ] && [ -n "$capability" ] || fail "invalid --role-write-capability '$value'"
+      ROLE_WRITE_CAPABILITY_ROLES+=("$role")
+      ROLE_WRITE_CAPABILITY_VALUES+=("$capability")
       ;;
     *)
       token=$(option_token "$key") || fail "unknown option '$key'"
@@ -101,28 +115,6 @@ parse_options "$@"
 [ -z "$PAIR_ROLE_ARG" ] || [ -n "$PAIR_MODE" ] || fail "--pair-role is only valid with --pair"
 [ -z "$PAIR_ROLE_ARG" ] || [ -z "$TRIO_MODE" ] || fail "--pair-role is not valid with --trio"
 
-find_project_root() {
-  local dir
-  dir=$(cd "$PWD" 2>/dev/null && pwd -P) || dir="$PWD"
-  while [ "$dir" != "/" ]; do
-    [ -d "$dir/.lbwc-planning" ] && { printf '%s\n' "$dir"; return 0; }
-    dir=$(dirname "$dir")
-  done
-  printf '%s\n' "$PLUGIN_ROOT"
-}
-
-find_primary_workspace() {
-  local root="$1" primary
-  primary=$(git -C "$root" worktree list --porcelain 2>/dev/null | awk '
-    /^worktree / { sub(/^worktree /, ""); print; exit }
-  ')
-  if [ -n "$primary" ] && [ -d "$primary/.lbwc-planning" ]; then
-    cd "$primary" && pwd -P
-  else
-    printf '%s\n' "$root"
-  fi
-}
-
 task_write_path_is_safe() {
   case "$1" in
     ''|/*|.|./*|*/.|..|../*|*/..|*/../*|*'//'*) return 1 ;;
@@ -131,9 +123,25 @@ task_write_path_is_safe() {
   esac
 }
 
-PROJECT_ROOT=$(find_primary_workspace "$(find_project_root)")
-PLANNING_DIR="$PROJECT_ROOT/.lbwc-planning"
-CONFIG_PATH="$PLANNING_DIR/config.json"
+[[ "$CONTRACT_PATH" = /* ]] || CONTRACT_PATH="$PWD/$CONTRACT_PATH"
+CONTRACT_PATH=$(cd "$(dirname "$CONTRACT_PATH")" 2>/dev/null && printf '%s/%s' "$(pwd -P)" "$(basename "$CONTRACT_PATH")") || fail "contract path is unavailable"
+[ -f "$CONTRACT_PATH" ] || fail "contract not found: $CONTRACT_PATH"
+PROJECT_ROOT=$(jq -r '.project_root // empty' "$CONTRACT_PATH" 2>/dev/null) || fail "invalid contract"
+[ -n "$PROJECT_ROOT" ] || fail "contract project root is required"
+PROJECT_ROOT=$(cd "$PROJECT_ROOT" 2>/dev/null && pwd -P) || fail "contract project root is unavailable"
+CONTRACT_SCHEMA_PREVIEW=$(jq -r '.schema_version // empty' "$CONTRACT_PATH" 2>/dev/null) || fail "invalid contract"
+if [ "$CONTRACT_SCHEMA_PREVIEW" = "3" ]; then
+  CONTRACT_CONTROL_ROOT=$(jq -r '.control_root // empty' "$CONTRACT_PATH" 2>/dev/null) || fail "invalid contract"
+  [ -n "$CONTROL_ROOT_ARG" ] || CONTROL_ROOT_ARG="$CONTRACT_CONTROL_ROOT"
+  [ "$CONTROL_ROOT_ARG" = "$CONTRACT_CONTROL_ROOT" ] || fail "contract control root mismatch"
+  CONTROL_ROOT=$(lbwc_control_root_validate "$CONTROL_ROOT_ARG" 0) || fail "control root is unavailable or invalid"
+else
+  [ "$CONTRACT_SCHEMA_PREVIEW" = "2" ] || fail "unsupported contract schema"
+  [ -z "$CONTROL_ROOT_ARG" ] || fail "schema 2 contract does not accept --control-root"
+  CONTROL_ROOT=$(lbwc_control_root_validate "$PROJECT_ROOT/.lbwc-planning" 1) || fail "active planning control root is unavailable"
+fi
+PLANNING_DIR="$CONTROL_ROOT"
+CONFIG_PATH="$PROJECT_ROOT/.lbwc-planning/config.json"
 TEMPLATE_DEFAULTS="$PLUGIN_ROOT/templates/agent-roles/defaults.json"
 [ -f "$TEMPLATE_DEFAULTS" ] || fail "role defaults not found: $TEMPLATE_DEFAULTS"
 AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
@@ -141,11 +149,12 @@ AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
 CONTRACT_ID=""
 CONTRACT_DIGEST=""
 CONTRACT_ALLOWANCES_JSON='[]'
+CONTRACT_CAPABILITIES_JSON='[]'
+CONTRACT_SCHEMA_VERSION=2
+CONTRACT_CAPABILITY_ARGS_JSON='[]'
+declare -A CONTRACT_ROLE_CAPABILITIES=()
 validate_contract() {
-  [ -f "$CONTRACT_PATH" ] || fail "contract not found: $CONTRACT_PATH"
   local contract root task requested
-  [[ "$CONTRACT_PATH" = /* ]] || CONTRACT_PATH="$PROJECT_ROOT/$CONTRACT_PATH"
-  CONTRACT_PATH=$(cd "$(dirname "$CONTRACT_PATH")" 2>/dev/null && printf '%s/%s' "$(pwd -P)" "$(basename "$CONTRACT_PATH")") || fail "contract path is unavailable"
   contract=$(bash "$SCRIPT_DIR/task-contract.sh" verify "$CONTRACT_PATH" "$PROJECT_ROOT" --job "$JOB" 2>&1) || fail "$contract"
   contract=$(jq -ce 'select(type == "object")' <<< "$contract" 2>/dev/null) || fail "invalid contract"
   CONTRACT_DIGEST=$(jq -r '.contract_digest // empty' <<< "$contract")
@@ -154,7 +163,20 @@ validate_contract() {
   [ -n "$root" ] || fail "contract project root is required"
   root=$(cd "$root" 2>/dev/null && pwd -P) || fail "contract project root is unavailable"
   [ "$root" = "$PROJECT_ROOT" ] || fail "contract project root mismatch"
-  jq -e '.schema_version == 2 and .created_by == "main" and .state == "planned"' <<< "$contract" >/dev/null || fail "contract must be a planned main-session contract"
+  jq -e '(.schema_version == 2 or .schema_version == 3) and .created_by == "main" and .state == "planned"' <<< "$contract" >/dev/null || fail "contract must be a planned main-session contract"
+  CONTRACT_SCHEMA_VERSION=$(jq -r '.schema_version' <<< "$contract")
+  if [ "$CONTRACT_SCHEMA_VERSION" = "3" ]; then
+    contract_control_root=$(jq -r '.control_root // empty' <<< "$contract")
+    [ -n "$contract_control_root" ] || fail "contract control root is required"
+    contract_control_root=$(lbwc_control_root_validate "$contract_control_root" 0) || fail "contract control root is unavailable"
+    [ "$contract_control_root" = "$CONTROL_ROOT" ] || fail "contract control root mismatch"
+    CONTRACT_CAPABILITIES_JSON=$(jq -ce --arg role "$ROLE" '.capabilities_by_role[$role] | select(type == "array")' <<< "$contract") || fail "contract capabilities are invalid"
+    CONTRACT_CAPABILITY_ARGS_JSON=$(printf '%s\n' "${WRITE_CAPABILITIES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0) | (split(":")) | select(length == 2) | {access:"write",kind:.[0],path:.[1]})')
+    jq -ne --argjson requested "$CONTRACT_CAPABILITY_ARGS_JSON" --argjson allowed "$CONTRACT_CAPABILITIES_JSON" '$requested == $allowed' >/dev/null || fail "write capabilities do not match contract"
+    for contract_role in $(jq -r '.roles[]' <<< "$contract"); do
+      CONTRACT_ROLE_CAPABILITIES["$contract_role"]=$(jq -ce --arg role "$contract_role" '.capabilities_by_role[$role] // []' <<< "$contract") || fail "contract capabilities are invalid"
+    done
+  fi
   task=$(jq -r '.task_identity // .task_id // .contract_id // empty' <<< "$contract")
   [ -n "$task" ] || fail "contract task identity is required"
   [ -n "$TASK_ID" ] || TASK_ID="$task"
@@ -163,8 +185,10 @@ validate_contract() {
   [ -n "$CONTRACT_ID" ] || fail "contract id is required"
   jq -e --arg role "$ROLE" '(.roles | type == "array" and index($role) != null)' <<< "$contract" >/dev/null || fail "contract role mismatch"
   CONTRACT_ALLOWANCES_JSON=$(jq -ce --arg role "$ROLE" '.allowances_by_role[$role] | select(type == "array" and all(.[]; type == "string"))' <<< "$contract") || fail "contract write allowances are invalid"
-  requested=$(printf '%s\n' "${WRITE_ALLOWANCES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
-  jq -ne --argjson requested "$requested" --argjson allowed "$CONTRACT_ALLOWANCES_JSON" '$requested == $allowed' >/dev/null || fail "write allowances do not match contract"
+  if [ "$CONTRACT_SCHEMA_VERSION" = "2" ]; then
+    requested=$(printf '%s\n' "${WRITE_ALLOWANCES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
+    jq -ne --argjson requested "$requested" --argjson allowed "$CONTRACT_ALLOWANCES_JSON" '$requested == $allowed' >/dev/null || fail "write allowances do not match contract"
+  fi
   case "$ROLE" in
     *critic) [ "$CONTRACT_ALLOWANCES_JSON" = '[]' ] || fail "contract grants allowances to critic" ;;
   esac
@@ -174,6 +198,10 @@ validate_contract
 for write_allowance in "${WRITE_ALLOWANCES[@]}"; do
   task_write_path_is_safe "$write_allowance" || fail "invalid --write-allowance '$write_allowance'"
 done
+
+if [ "$CONTRACT_SCHEMA_VERSION" = "3" ] && [ "${#WRITE_ALLOWANCES[@]}" -gt 0 ]; then
+  fail "schema 3 contracts require typed write capabilities"
+fi
 
 NAME_MAX_ATTEMPTS=100
 LIVE_AGENT_MAX_AGE_SECONDS=3600
@@ -330,8 +358,30 @@ elif [ -n "$TRIO_MODE" ]; then
   TEAM_ROLES=("${TRIO_ROLES[@]}")
 fi
 
+build_capabilities_json() {
+  local role="$1" raw kind path role_capability_index
+  if [ "$CONTRACT_SCHEMA_VERSION" != "3" ]; then
+    printf '%s\n' '[]'
+    return
+  fi
+  if [ "$role" = "$ROLE" ]; then
+    printf '%s\n' "$CONTRACT_CAPABILITY_ARGS_JSON"
+    return
+  fi
+  for role_capability_index in "${!ROLE_WRITE_CAPABILITY_ROLES[@]}"; do
+    if [ "${ROLE_WRITE_CAPABILITY_ROLES[$role_capability_index]}" = "$role" ]; then
+      raw="${ROLE_WRITE_CAPABILITY_VALUES[$role_capability_index]}"
+      kind="${raw%%:*}"
+      path="${raw#*:}"
+      jq -cn --arg kind "$kind" --arg path "$path" '[{access:"write",kind:$kind,path:$path}]'
+      return
+    fi
+  done
+  printf '%s\n' '[]'
+}
+
 validate_team_contract_roles() {
-  local team_role role_allowances expected requested_roles mode index scoped_role scoped_path
+  local team_role role_allowances expected requested_roles mode index scoped_role scoped_path capability_json
   if [ -n "$PAIR_MODE" ]; then mode="pair"; elif [ -n "$TRIO_MODE" ]; then mode="trio"; else mode="solo"; fi
   requested_roles=$(printf '%s\n' "${TEAM_ROLES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')
   jq -e --arg mode "$mode" --argjson roles "$requested_roles" '.team_mode == $mode and .roles == $roles' "$CONTRACT_PATH" >/dev/null 2>&1 || fail "contract team mismatch"
@@ -349,7 +399,12 @@ validate_team_contract_roles() {
       done
     fi
     role_allowances=$(jq -c --arg role "$team_role" '.allowances_by_role[$role]' "$CONTRACT_PATH")
-    [ "$role_allowances" = "$expected" ] || fail "contract allowances mismatch for '$team_role'"
+    if [ "$CONTRACT_SCHEMA_VERSION" = "3" ]; then
+      capability_json=$(build_capabilities_json "$team_role")
+      [ "$capability_json" = "${CONTRACT_ROLE_CAPABILITIES[$team_role]}" ] || fail "contract capabilities mismatch for '$team_role'"
+    else
+      [ "$role_allowances" = "$expected" ] || fail "contract allowances mismatch for '$team_role'"
+    fi
   done
 }
 validate_team_contract_roles
@@ -428,7 +483,8 @@ register_entry() {
     --arg model "${ROLE_MODEL[$role]}" --argjson effort "${ROLE_REASONING_JSON[$role]}" --arg max_turns "${ROLE_MAXTURNS[$role]}" \
     --argjson overrides "$overrides" --argjson allowances "$allowances" --argjson pair_id "$pid_json" --argjson pair_role "$role_json" \
     --arg contract_path "$CONTRACT_PATH" --arg contract_id "$CONTRACT_ID" --arg contract_digest "$CONTRACT_DIGEST" --arg task_id "$TASK_ID" \
-    '{name:$name,role:$role,project_root:$project_root,definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,overrides:$overrides,write_allowances:$allowances,pair_id:$pair_id,pair_role:$pair_role} + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
+    --arg control_root "$CONTROL_ROOT" --arg schema_version "$CONTRACT_SCHEMA_VERSION" --argjson capabilities "$(build_capabilities_json "$role")" \
+    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
   MANIFEST=$(jq -c --arg name "$name" --argjson entry "$entry" '.agents[$name] = $entry' <<< "$MANIFEST")
 }
 

@@ -21,7 +21,7 @@ if [ -z "$FILE_PATH" ]; then
   exit 2
 fi
 
-if echo "$FILE_PATH" | grep -qE '\.env$|\.env\.|(^|/)[^/]+\.(pem|key|cert|p12|pfx)(\.[A-Za-z0-9]+)?($|/)|credentials\.json$|secrets\.json$|service-account.*\.json$|(^|/)node_modules/|(^|/)\.git/|(^|/)dist/|(^|/)build/'; then
+if echo "$FILE_PATH" | grep -qE '\.env$|\.env\.|(^|/)[^/]+\.(pem|key|cert|p12|pfx)(\.[A-Za-z0-9]+)?($|/)|credentials\.json$|secrets\.json$|service-account.*\.json$|(^|/)node_modules/|(^|/)\.git/|(^|/)\.temporary-agent-runfiles/|(^|/)dist/|(^|/)build/'; then
   echo "Blocked: sensitive file ($FILE_PATH)" >&2
   exit 2
 fi

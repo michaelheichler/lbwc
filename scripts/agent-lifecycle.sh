@@ -10,8 +10,10 @@ command -v jq >/dev/null 2>&1 || lifecycle_manifest_error unavailable
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 [ -f "$SCRIPT_DIR/lib/agent-manifest.sh" ] || lifecycle_manifest_error unavailable
 . "$SCRIPT_DIR/lib/agent-manifest.sh" || lifecycle_manifest_error unavailable
+. "$SCRIPT_DIR/lib/lbwc-control-root.sh" || lifecycle_manifest_error unavailable
 
-PLANNING_DIR="${LBWC_PLANNING_DIR:-.lbwc-planning}"
+PLANNING_DIR=$(lbwc_resolve_control_root "${LBWC_CONTROL_ROOT:-}" "" "$PWD" 2>/dev/null || true)
+[ -n "$PLANNING_DIR" ] || PLANNING_DIR="${LBWC_PLANNING_DIR:-.lbwc-planning}"
 IDLE_WAIT_SECONDS=120
 COMMAND="${1:-}"
 case "$COMMAND" in

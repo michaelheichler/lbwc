@@ -223,6 +223,28 @@ make_contract() {
   ' "$TEST_TEMP_DIR/.lbwc-planning/.agent-manifest.json" >/dev/null
 }
 
+@test "schema 3 generator uses the explicit temporary control root" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/team-one"
+  mkdir -p "$control_root"
+  local contract
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" team-scope \
+    --command team --role web-engineer --team solo --job "write the web scope" \
+    --control-root "$control_root" --write-capability directory:src/web)
+  generate web-engineer --job "write the web scope" --task-id "$(basename "$contract" .json)" \
+    --contract "$contract" --control-root "$control_root" --write-capability directory:src/web
+  [ "$status" -eq 0 ]
+  control_root=$(cd -P "$control_root" && pwd -P)
+  local name
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-web-engineer-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  jq -e --arg name "$name" --arg root "$control_root" '
+    .agents[$name].schema_version == 3
+    and .agents[$name].control_root == $root
+    and .agents[$name].capabilities == [{access:"write",kind:"directory",path:"src/web"}]
+  ' "$control_root/agent-manifest.json" >/dev/null
+  [ -f "$TEST_TEMP_DIR/.claude/agents/$name.md" ]
+}
+
 @test "--pair with a pairsWith role prints ENGINEER and CRITIC SPAWN_READY lines" {
   generate --pair python-engineer --job "build a parser"
   [ "$status" -eq 0 ]

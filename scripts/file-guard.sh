@@ -2,10 +2,13 @@
 set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 PLANNING_DIR_OVERRIDE="${LBWC_PLANNING_DIR:-}"
-LBWC_PLANNING_DIR="${LBWC_PLANNING_DIR:-.lbwc-planning}"
 
 command -v jq >/dev/null 2>&1 || {
   echo "Blocked: jq not available, cannot validate file write" >&2
+  exit 2
+}
+. "$SCRIPT_DIR/lib/lbwc-control-root.sh" 2>/dev/null || {
+  echo "Blocked: control root resolver unavailable" >&2
   exit 2
 }
 
@@ -22,15 +25,22 @@ esac
 
 HOOK_CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // ""' 2>/dev/null) || HOOK_CWD=""
 [ -n "$HOOK_CWD" ] || HOOK_CWD="$PWD"
+HOOK_CWD=$(cd "$HOOK_CWD" 2>/dev/null && pwd -P || printf '%s' "$HOOK_CWD")
 case "$FILE_PATH" in
   [/]*) RESOLVED_PATH="$FILE_PATH" ;;
   *) RESOLVED_PATH="$HOOK_CWD/$FILE_PATH" ;;
 esac
 
+CONTROL_ROOT=""
 if [ -n "$PLANNING_DIR_OVERRIDE" ]; then
-  MANIFEST="$PLANNING_DIR_OVERRIDE/.agent-manifest.json"
+  CONTROL_ROOT=$(lbwc_control_root_validate "$PLANNING_DIR_OVERRIDE" 1 2>/dev/null || true)
 else
-  MANIFEST="$HOOK_CWD/.lbwc-planning/.agent-manifest.json"
+  CONTROL_ROOT=$(lbwc_resolve_control_root "" "" "$HOOK_CWD" 2>/dev/null || true)
+fi
+if [ -n "$CONTROL_ROOT" ]; then
+  MANIFEST=$(lbwc_control_root_manifest_path "$CONTROL_ROOT" 2>/dev/null || true)
+else
+  MANIFEST=""
 fi
 
 resolve_agent_role() {
@@ -91,7 +101,8 @@ path_is_within_root() {
 }
 
 agent_write_capability_allows() {
-  local entry="$1" identifier="$2" expected_root actual_root candidate_path candidate_parent candidate_target allowance contract_path contract contract_root contract_task manifest_contract_id entry_role relative_path contract_state
+  local entry="$1" identifier="$2" expected_root actual_root candidate_path candidate_parent candidate_target allowance contract_path contract contract_root contract_task manifest_contract_id entry_role relative_path contract_state schema_version capability capability_kind capability_path capability_relative
+  schema_version=$(jq -r 'if .schema_version != null then .schema_version elif .capabilities != null then 3 else 2 end' <<< "$entry")
   expected_root=$(jq -r '.project_root // empty' <<< "$entry") || return 1
   [ -n "$expected_root" ] || return 1
   expected_root=$(canonical_directory "$expected_root") || return 1
@@ -123,6 +134,45 @@ agent_write_capability_allows() {
     contract_state=$(jq -r '.state // empty' <<< "$contract")
     case "$contract_state" in dispatched|running) ;; *) return 6 ;; esac
     jq -e --arg role "$entry_role" --argjson allowances "$(jq -c '.write_allowances' <<< "$entry")" '.allowances_by_role[$role] == $allowances' <<< "$contract" >/dev/null 2>&1 || return 6
+    schema_version=$(jq -r '.schema_version // 2' <<< "$contract")
+    if [ "$schema_version" = "3" ]; then
+      jq -e --arg role "$entry_role" --argjson capabilities "$(jq -c '.capabilities // []' <<< "$entry")" '.capabilities_by_role[$role] == $capabilities' <<< "$contract" >/dev/null 2>&1 || return 6
+    fi
+  fi
+  if [ "$schema_version" = "3" ]; then
+    jq -e '.capabilities | type == "array" and length > 0 and all(.[]; type == "object")' <<< "$entry" >/dev/null 2>&1 || return 3
+    while IFS= read -r capability; do
+      capability_kind=$(jq -r '.kind // empty' <<< "$capability")
+      capability_path=$(jq -r '.path // empty' <<< "$capability")
+      case "$capability_kind" in
+        file)
+          capability_relative="$relative_path"
+          [ "$candidate_path" = "$expected_root/$capability_path" ] || continue
+          ;;
+        directory)
+          if [ "$capability_path" = "." ]; then
+            capability_relative="$relative_path"
+          else
+            case "$relative_path" in
+              "$capability_path"|"$capability_path"/*) capability_relative="$relative_path" ;;
+              *) continue ;;
+            esac
+          fi
+          ;;
+        *) return 6 ;;
+      esac
+      candidate_parent=$(canonical_existing_parent "$candidate_path") || return 5
+      path_is_within_root "$candidate_parent" "$expected_root" || return 5
+      if [ -L "$candidate_path" ]; then
+        candidate_target=$(canonical_existing_path "$candidate_path") || return 5
+        path_is_within_root "$candidate_target" "$expected_root" || return 5
+      fi
+      case "$capability_relative" in
+        .lbwc-planning|.lbwc-planning/*|.temporary-agent-runfiles|.temporary-agent-runfiles/*|.claude/agents|.claude/agents/*|.git|.git/*|.env|.env.*|*/.env|*/.env.*|*.pem|*.key|*.cert|*.p12|*.pfx|*/credentials.json|*/secrets.json|*/service-account.json|credentials.json|secrets.json|service-account.json|config/subagent-critical-execution.txt|config/destructive-commands.txt|scripts/*guard*|scripts/task-contract.sh|scripts/agent-lifecycle.sh) return 7 ;;
+      esac
+      return 0
+    done < <(jq -c '.capabilities[]' <<< "$entry")
+    return 4
   fi
   jq -e '.write_allowances | type == "array" and length > 0 and all(.[]; type == "string")' <<< "$entry" >/dev/null 2>&1 || return 3
   while IFS= read -r allowance; do
@@ -140,8 +190,18 @@ agent_write_capability_allows() {
 }
 
 path_in_planning() {
+  local planning_dir="${CONTROL_ROOT:-${PLANNING_DIR_OVERRIDE:-.lbwc-planning}}"
+  if [ -n "$CONTROL_ROOT" ]; then
+    case "$1" in
+      "$CONTROL_ROOT"|"$CONTROL_ROOT"/*) return 0 ;;
+      *) return 1 ;;
+    esac
+  fi
+  if [[ "$planning_dir" != /* ]]; then
+    planning_dir="$HOOK_CWD/${planning_dir#./}"
+  fi
   case "$1" in
-    "$LBWC_PLANNING_DIR"|"$LBWC_PLANNING_DIR"/*|*"/$LBWC_PLANNING_DIR"|*"/$LBWC_PLANNING_DIR"/*) return 0 ;;
+    "$planning_dir"|"$planning_dir"/*|*"/$planning_dir"|*"/$planning_dir"/*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -216,7 +276,7 @@ fi
 case "$AGENT_ROLE" in
   architect|lead|scout)
     path_in_planning "$RESOLVED_PATH" || {
-      echo "Blocked: role '$AGENT_ROLE' can only write under $LBWC_PLANNING_DIR/" >&2
+      echo "Blocked: role '$AGENT_ROLE' can only write under the control root" >&2
       exit 2
     }
     ;;

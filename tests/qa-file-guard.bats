@@ -52,6 +52,14 @@ make_guard_contract() {
   [[ "$output" == *"scout"* ]]
 }
 
+@test "generated identity without a project root fails closed" {
+  write_manifest "$TEST_TEMP_DIR/.lbwc-planning" '{"agents":{"dev-1":{"role":"python-engineer","write_allowances":["src/main.py"]}}}'
+
+  run run_guard "src/main.py" "dev-1"
+
+  [ "$status" -eq 2 ]
+}
+
 @test "architect may write its assigned roadmap but not product source" {
   write_manifest "$TEST_TEMP_DIR/.lbwc-planning" "{\"agents\":{\"architect-1\":{\"role\":\"architect\",\"project_root\":\"$TEST_TEMP_DIR\",\"write_allowances\":[\".lbwc-planning/ROADMAP.md\"]}}}"
   run run_guard ".lbwc-planning/ROADMAP.md" "architect-1"
@@ -201,6 +209,39 @@ make_guard_contract() {
   run bash -c "printf '%s' '$json' | LBWC_PLANNING_DIR='$TEST_TEMP_DIR/.lbwc-planning' bash '$SCRIPTS_DIR/file-guard.sh'"
   [ "$status" -eq 2 ]
   [[ "$output" == *"primary workspace"* ]]
+}
+
+@test "schema 3 directory capability permits descendants but not siblings" {
+  mkdir -p "$TEST_TEMP_DIR/src/web"
+  write_manifest "$TEST_TEMP_DIR/.lbwc-planning" "$(jq -cn --arg root "$TEST_TEMP_DIR" '{agents:{"dev-1":{role:"web-engineer",project_root:$root,capabilities:[{access:"write",kind:"directory",path:"src/web"}]}}}')"
+  run run_guard "src/web/page.ts" "dev-1"
+  [ "$status" -eq 0 ]
+  run run_guard "src/api/page.ts" "dev-1"
+  [ "$status" -eq 2 ]
+}
+
+@test "schema 3 repository root capability cannot write temporary control files" {
+  write_manifest "$TEST_TEMP_DIR/.lbwc-planning" "$(jq -cn --arg root "$TEST_TEMP_DIR" '{agents:{"dev-1":{role:"web-engineer",project_root:$root,capabilities:[{access:"write",kind:"directory",path:"."}]}}}')"
+  run run_guard ".lbwc-planning/config.json" "dev-1"
+  [ "$status" -eq 2 ]
+  run run_guard ".temporary-agent-runfiles/runs/one/run.json" "dev-1"
+  [ "$status" -eq 2 ]
+}
+
+@test "schema 3 repository root capability cannot write secrets" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/root-secrets" contract id
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" "root-secrets" \
+    --command team --role python-engineer --team solo --job "root scope" \
+    --control-root "$control_root" --write-capability directory:.)
+  id=$(basename "$contract" .json)
+  bash "$SCRIPTS_DIR/task-contract.sh" state "$TEST_TEMP_DIR" "$id" dispatched >/dev/null
+  printf '%s' "{\"agents\":{\"dev-1\":{\"role\":\"python-engineer\",\"project_root\":\"$TEST_TEMP_DIR\",\"schema_version\":3,\"capabilities\":[{\"access\":\"write\",\"kind\":\"directory\",\"path\":\".\"}],\"write_allowances\":[\".\"],\"contract_path\":\"$contract\",\"contract_id\":\"$id\",\"contract_digest\":\"$(jq -r .contract_digest "$contract")\",\"task_identity\":\"$id\"}}}" > "$control_root/agent-manifest.json"
+
+  for secret in .env config/private.key credentials.json; do
+    run bash -c 'jq -cn --arg path "$1" --arg cwd "$2" "{tool_name:\"Write\",tool_input:{file_path:\$path},agent_id:\"dev-1\",cwd:\$cwd}" | LBWC_CONTROL_ROOT="$3" bash "$4"' _ "$secret" "$TEST_TEMP_DIR" "$control_root" "$SCRIPTS_DIR/file-guard.sh"
+    [ "$status" -eq 2 ]
+  done
 }
 
 @test "registered lbwc worker outside primary workspace is blocked without planning override" {

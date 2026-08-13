@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -u
 
+AGENT_MANIFEST_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+. "$AGENT_MANIFEST_SCRIPT_DIR/lbwc-control-root.sh" 2>/dev/null || return 1
+
+agent_manifest_control_root() {
+  local requested="${1:-.lbwc-planning}" resolved
+  resolved=$(lbwc_control_root_validate "$requested" 1 2>/dev/null) || return 1
+  printf '%s\n' "$resolved"
+}
+
 agent_manifest_path() {
-  printf '%s/.agent-manifest.json\n' "${1:-.lbwc-planning}"
+  lbwc_control_root_manifest_path "${1:-.lbwc-planning}"
 }
 
 agent_manifest_lock_path() {
-  printf '%s/.agent-manifest.lock\n' "${1:-.lbwc-planning}"
+  lbwc_control_root_lock_path "${1:-.lbwc-planning}"
 }
 
 agent_manifest_lock_mtime() {
@@ -56,13 +65,14 @@ agent_manifest_record_lock_owner() {
 }
 
 agent_manifest_acquire_lock() {
-  local planning_dir="${1:-.lbwc-planning}" lock_dir started now elapsed stale_seconds timeout
-  lock_dir=$(agent_manifest_lock_path "$planning_dir")
+  local planning_dir="${1:-.lbwc-planning}" lock_dir started now elapsed stale_seconds timeout control_root
+  control_root=$(agent_manifest_control_root "$planning_dir") || return 1
+  lock_dir=$(agent_manifest_lock_path "$control_root")
   timeout="${LBWC_AGENT_MANIFEST_LOCK_TIMEOUT:-10}"
   stale_seconds="${LBWC_AGENT_MANIFEST_LOCK_STALE_SECONDS:-30}"
   case "$timeout" in ''|*[!0-9]*) timeout=10 ;; esac
   case "$stale_seconds" in ''|*[!0-9]*) stale_seconds=30 ;; esac
-  mkdir -p "$planning_dir" 2>/dev/null || return 1
+  mkdir -p "$control_root" 2>/dev/null || return 1
   started=$(date +%s 2>/dev/null || printf '0')
   while ! mkdir "$lock_dir" 2>/dev/null; do
     now=$(date +%s 2>/dev/null || printf '0')
@@ -75,8 +85,9 @@ agent_manifest_acquire_lock() {
 }
 
 agent_manifest_release_lock() {
-  local lock_dir
-  lock_dir=$(agent_manifest_lock_path "${1:-.lbwc-planning}")
+  local lock_dir control_root
+  control_root=$(agent_manifest_control_root "${1:-.lbwc-planning}") || return 1
+  lock_dir=$(agent_manifest_lock_path "$control_root")
   rm -f "$lock_dir/pid" 2>/dev/null || true
   rmdir "$lock_dir" 2>/dev/null || true
 }
@@ -96,8 +107,9 @@ agent_manifest_with_lock() {
 }
 
 agent_manifest_read() {
-  local planning_dir="${1:-.lbwc-planning}" path
-  path=$(agent_manifest_path "$planning_dir")
+  local planning_dir="${1:-.lbwc-planning}" path control_root
+  control_root=$(agent_manifest_control_root "$planning_dir") || return 1
+  path=$(agent_manifest_path "$control_root")
   if [ ! -f "$path" ]; then
     printf '%s\n' '{"agents":{}}'
     return 0
@@ -112,9 +124,10 @@ agent_manifest_read() {
 }
 
 agent_manifest_write() {
-  local planning_dir="$1" manifest="$2" path tmp
-  path=$(agent_manifest_path "$planning_dir")
-  mkdir -p "$planning_dir" 2>/dev/null || return 1
+  local planning_dir="$1" manifest="$2" path tmp control_root
+  control_root=$(agent_manifest_control_root "$planning_dir") || return 1
+  path=$(agent_manifest_path "$control_root")
+  mkdir -p "$control_root" 2>/dev/null || return 1
   tmp="${path}.tmp.${BASHPID:-$$}"
   if ! printf '%s\n' "$manifest" | jq -ce 'select(type == "object" and (.agents | type) == "object")' > "$tmp" 2>/dev/null; then
     rm -f "$tmp"
@@ -134,9 +147,10 @@ agent_manifest_safe_name() {
 }
 
 agent_manifest_definition_path() {
-  local planning_dir="$1" name="$2" project_root
+  local planning_dir="$1" name="$2" project_root control_root
   agent_manifest_safe_name "$name" || return 1
-  project_root=$(cd "$planning_dir/.." 2>/dev/null && pwd -P) || return 1
+  control_root=$(agent_manifest_control_root "$planning_dir") || return 1
+  project_root=$(lbwc_control_root_project_root "$control_root") || return 1
   printf '%s/.claude/agents/%s.md\n' "$project_root" "$name"
 }
 

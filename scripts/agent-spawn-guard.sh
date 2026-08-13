@@ -12,6 +12,7 @@ INPUT=$(cat 2>/dev/null) || exit 0
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 [ -f "$SCRIPT_DIR/lib/agent-manifest.sh" ] || exit 0
 . "$SCRIPT_DIR/lib/agent-manifest.sh" || exit 0
+. "$SCRIPT_DIR/lib/lbwc-control-root.sh" || exit 0
 
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || exit 0
 case "$TOOL_NAME" in
@@ -19,24 +20,22 @@ case "$TOOL_NAME" in
   *) exit 0 ;;
 esac
 
-find_project_root() {
-  local dir="$PWD"
-  while [ "$dir" != "/" ]; do
-    if [ -d "$dir/.lbwc-planning" ]; then
-      printf '%s\n' "$dir"
-      return 0
-    fi
-    dir=$(dirname "$dir")
-  done
-  return 1
+SUBAGENT_TYPE=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // .tool_input.agent_type // .tool_input.name // ""' 2>/dev/null) || exit 0
+
+block_unresolved_generated_identity() {
+  case "$SUBAGENT_TYPE" in
+    lbwc-*) echo "Blocked: generated LBWC identity has no resolvable control root or manifest" >&2; exit 2 ;;
+  esac
+  exit 0
 }
 
-PROJECT_ROOT=$(find_project_root) || exit 0
-PLANNING_DIR="$PROJECT_ROOT/.lbwc-planning"
-MANIFEST_PATH=$(agent_manifest_path "$PLANNING_DIR" 2>/dev/null) || exit 0
-[ -f "$MANIFEST_PATH" ] || exit 0
-
-SUBAGENT_TYPE=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // .tool_input.agent_type // .tool_input.name // ""' 2>/dev/null) || exit 0
+CONTROL_ROOT=$(lbwc_resolve_control_root "" "" "$PWD" 2>/dev/null || true)
+[ -n "$CONTROL_ROOT" ] || block_unresolved_generated_identity
+PROJECT_ROOT=$(lbwc_control_root_project_root "$CONTROL_ROOT" 2>/dev/null || true)
+[ -n "$PROJECT_ROOT" ] || block_unresolved_generated_identity
+PLANNING_DIR="$CONTROL_ROOT"
+MANIFEST_PATH=$(agent_manifest_path "$PLANNING_DIR" 2>/dev/null) || block_unresolved_generated_identity
+[ -f "$MANIFEST_PATH" ] || block_unresolved_generated_identity
 
 requested_cwd_values() {
   echo "$INPUT" | jq -r '[.tool_input.cwd? // empty, .tool_input.working_dir? // empty, .tool_input.workingDirectory? // empty, .tool_input.workdir? // empty] | map(select(type == "string")) | .[]' 2>/dev/null \
