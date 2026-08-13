@@ -16,7 +16,9 @@ fail() {
 }
 
 usage() {
-  printf '%s\n' 'Usage: claude-capabilities.sh <refresh planning-dir|validate catalog-path>' >&2
+  printf '%s\n' \
+    'Usage: claude-capabilities.sh <refresh planning-dir|validate catalog-path>' \
+    '       claude-capabilities.sh refresh-from-binary <binary-path>' >&2
 }
 
 require_tools() {
@@ -311,6 +313,20 @@ validate_catalog_file() {
   printf '%s\n' "$path"
 }
 
+refresh_from_binary() {
+  local binary="$1" temporary
+  binary=$(realpath "$binary" 2>/dev/null) || fail "could not resolve Claude Code executable: $binary"
+  [ -f "$binary" ] || fail "Claude Code executable is not a file: $binary"
+  [ -x "$binary" ] || fail "Claude Code executable is not executable: $binary"
+  temporary=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-capabilities.XXXXXX") || fail 'could not create capability temporary file'
+  TEMPORARY="$temporary"
+  build_catalog "$binary" "$temporary"
+  validate_catalog_json "$temporary" || fail 'extracted Claude Code capability catalog is invalid'
+  cat "$temporary"
+  rm -f "$temporary"
+  TEMPORARY=""
+}
+
 catalog_planning_directory() {
   local path="$1" parent
   [ "${path##*/}" = 'claude-capabilities.json' ] || return 1
@@ -350,6 +366,9 @@ main() {
   case "$command" in
     refresh)
       refresh_catalog "$target"
+      ;;
+    refresh-from-binary)
+      refresh_from_binary "$target"
       ;;
     validate)
       validate_catalog_file "$target"

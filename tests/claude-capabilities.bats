@@ -54,10 +54,16 @@ EOF
 }
 
 extract_init_bootstrap() {
+  # Extract the executable bootstrap block: the fenced bash block that invokes
+  # lbwc-config.sh, not the earlier Context template-expansion blocks.
   awk '
-    /^[[:space:]]*```bash$/ { capture = 1; next }
-    capture && /^[[:space:]]*```$/ { exit }
-    capture { sub(/^[[:space:]]{3}/, ""); print }
+    /^[[:space:]]*```bash$/ { capture = 1; block = ""; next }
+    capture && /^[[:space:]]*```$/ {
+      if (block ~ /lbwc-config\.sh/) { printf "%s", block; exit }
+      capture = 0
+      next
+    }
+    capture { sub(/^[[:space:]]{3}/, ""); block = block $0 "\n" }
   ' "$REPO_ROOT/commands/init.md"
 }
 
