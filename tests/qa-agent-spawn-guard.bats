@@ -93,10 +93,34 @@ teardown() {
 
   run bash -c 'jq -cn --arg name "$1" \
     '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
-    | bash "$2"' _ "$name" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
   [ "$status" -eq 2 ]
   [[ "$output" == *"contract is missing, stale, tampered, or not dispatched"* ]]
   [ "$(jq -r --arg name "$name" '.agents[$name].state' "$TEST_TEMP_DIR/.lbwc-planning/.agent-manifest.json")" = "registered" ]
+}
+
+@test "spawn guard rejects a manifest communication policy mismatch" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/spawn-policy" contract name
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" spawn-policy \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --write-capability directory:src/web)
+  local contract_id
+  contract_id=$(basename "$contract" .json)
+  bash "$SCRIPTS_DIR/agent-generator.sh" web-engineer --job "scope" \
+    --contract "$contract" --task-id "$contract_id" --control-root "$control_root" \
+    --write-capability directory:src/web >/dev/null
+  name=$(jq -r '.agents | keys[0]' "$control_root/agent-manifest.json")
+  bash "$SCRIPTS_DIR/task-contract.sh" state "$TEST_TEMP_DIR" "$contract_id" dispatched >/dev/null
+  jq --arg name "$name" '.agents[$name].communication_policy = "critic-relay"' \
+    "$control_root/agent-manifest.json" > "$control_root/manifest.tmp"
+  mv "$control_root/manifest.tmp" "$control_root/agent-manifest.json"
+
+  run bash -c 'jq -cn --arg name "$1" \
+    '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
+    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"runtime or communication policy"* ]]
 }
 
 @test "build contract serializes task teams within each dependency wave" {

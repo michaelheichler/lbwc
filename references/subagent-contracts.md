@@ -93,3 +93,5 @@ Each generated name is single-use: the manifest's state machine (`registered` ->
 Reused or missing generated names require a fresh generator invocation. Do not bypass the manifest with a role-based or namespaced `subagent_type`.
 
 The generator flow is the source of the generated name, Agent `model`, frontmatter reasoning effort, and internal turn limit. Pass only documented Agent fields. Use the printed `model` and exact `SPAWN_READY` name on the spawn call. Do not pass effort, max-turn, or timeout fields that the Agent schema does not expose.
+
+Schema 3 native-team contracts also bind `runtime_kind`, `communication_policy`, typed capabilities, and native shared task identity. `TaskCreated` must bind to one pending contract before work starts. `TaskCompleted` is accepted only after that same contract reaches `verified`.

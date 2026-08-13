@@ -270,3 +270,22 @@ teardown() { rm -rf "$ROOT"; }
   [ ! -e "$ROOT/.lbwc-planning" ]
   [ ! -e "$control_root/contracts/.lock" ]
 }
+
+@test "schema 3 rejects unsupported runtime and communication policies" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/team-policy"
+  mkdir -p "$control_root"
+
+  run bash "$SCRIPT" issue "$ROOT" "bad-runtime" \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --runtime-kind unknown-runtime \
+    --write-capability directory:src/web
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"runtime_kind"* ]]
+
+  run bash "$SCRIPT" issue "$ROOT" "bad-communication" \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --communication-policy unknown-policy \
+    --write-capability directory:src/web
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"communication_policy"* ]]
+}

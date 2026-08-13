@@ -4,6 +4,7 @@ import sys
 from skill_gate import (
     _agent_identifier,
     _pair_id_for_identifier,
+    _manifest_entry_for_identifier,
     _parse_pretool_input,
     _role_for_identifier,
     emit_pretool_denial,
@@ -14,6 +15,17 @@ MAIN_RECIPIENT = "main"
 
 def _is_critic_role(role: "str | None") -> bool:
     return bool(role) and role.endswith("-critic")
+
+
+def _may_report_to_main(entry: "dict | None", role: "str | None") -> bool:
+    if _is_critic_role(role):
+        return True
+    if not entry:
+        return False
+    if (entry.get("runtime_kind") == "native-team"
+            and entry.get("communication_policy") == "native-team"):
+        return True
+    return role == "test-dev" and entry.get("communication_policy") == "critic-relay"
 
 
 def blocked() -> str:
@@ -34,8 +46,10 @@ def verdict(stdin_text, cwd=None) -> "str | None":
     identifier = _agent_identifier(data)
     if not identifier:
         return None
-    role = _role_for_identifier(identifier, cwd or data.get("cwd"))
-    if role is None or _is_critic_role(role):
+    resolved_cwd = cwd or data.get("cwd")
+    role = _role_for_identifier(identifier, resolved_cwd)
+    entry = _manifest_entry_for_identifier(identifier, resolved_cwd)
+    if role is None or _may_report_to_main(entry, role):
         return None
     pair_id = _pair_id_for_identifier(identifier, cwd or data.get("cwd"))
     if not pair_id:

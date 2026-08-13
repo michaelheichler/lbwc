@@ -101,11 +101,18 @@ find_blocking_open_pair() {
 }
 
 validate_entry_contract() {
-  local name="$1" entry="$2" manifest="$3" contract_path contract contract_id contract_digest task_identity role allowances team_mode pair_id manifest_roles contract_roles
+  local name="$1" entry="$2" manifest="$3" contract_path contract contract_id contract_digest task_identity role allowances team_mode pair_id manifest_roles contract_roles runtime_kind communication_policy capabilities
   contract_path=$(jq -r '.contract_path // empty' <<< "$entry")
   [ -n "$contract_path" ] || return 1
   contract=$(bash "$SCRIPT_DIR/task-contract.sh" verify "$contract_path" "$PROJECT_ROOT" 2>/dev/null) || return 1
   jq -e '.state == "dispatched"' <<< "$contract" >/dev/null 2>&1 || return 1
+  if [ "$(jq -r '.schema_version' <<< "$contract")" = "3" ]; then
+    runtime_kind=$(jq -r '.runtime_kind // empty' <<< "$contract")
+    communication_policy=$(jq -r '.communication_policy // empty' <<< "$contract")
+    jq -e --arg runtime "$runtime_kind" --arg policy "$communication_policy" '
+      .runtime_kind == $runtime and .communication_policy == $policy
+    ' <<< "$entry" >/dev/null 2>&1 || return 2
+  fi
   contract_id=$(jq -r '.contract_id // empty' <<< "$contract")
   contract_digest=$(jq -r '.contract_digest // empty' <<< "$contract")
   task_identity=$(jq -r '.task_identity // empty' <<< "$contract")
@@ -121,6 +128,10 @@ validate_entry_contract() {
       and $id != ""
     ' <<< "$entry" >/dev/null 2>&1 || return 1
   jq -e --arg role "$role" --argjson allowances "$allowances" '.allowances_by_role[$role] == $allowances' <<< "$contract" >/dev/null 2>&1 || return 1
+  if [ "$(jq -r '.schema_version' <<< "$contract")" = "3" ]; then
+    capabilities=$(jq -c '.capabilities // []' <<< "$entry")
+    jq -e --arg role "$role" --argjson capabilities "$capabilities" '.capabilities_by_role[$role] == $capabilities' <<< "$contract" >/dev/null 2>&1 || return 2
+  fi
   team_mode=$(jq -r '.team_mode' <<< "$contract")
   pair_id=$(jq -r '.pair_id // empty' <<< "$entry")
   if [ "$team_mode" = "solo" ]; then
@@ -157,7 +168,9 @@ _claim_manifest_spawn_locked() {
   manifest=$(agent_manifest_read "$PLANNING_DIR" 2>/dev/null) || return 1
   entry=$(jq -c --arg name "$name" '.agents[$name] // empty' <<< "$manifest" 2>/dev/null) || return 1
   [ -n "$entry" ] || return 10
-  validate_entry_contract "$name" "$entry" "$manifest" || return 30
+  validate_entry_contract "$name" "$entry" "$manifest"
+  contract_status=$?
+  [ "$contract_status" -eq 0 ] || { [ "$contract_status" -eq 2 ] && return 31; return 30; }
 
   blocking=$(find_blocking_open_pair "$manifest" "$name")
   if [ -n "$blocking" ]; then
@@ -201,6 +214,10 @@ manifest_guard() {
       ;;
     30)
       echo "Blocked: generated agent '$SUBAGENT_TYPE' contract is missing, stale, tampered, or not dispatched." >&2
+      exit 2
+      ;;
+    31)
+      echo "Blocked: generated agent '$SUBAGENT_TYPE' runtime or communication policy does not match its contract." >&2
       exit 2
       ;;
     3)

@@ -133,8 +133,9 @@ CONTRACT_SCHEMA_PREVIEW=$(jq -r '.schema_version // empty' "$CONTRACT_PATH" 2>/d
 if [ "$CONTRACT_SCHEMA_PREVIEW" = "3" ]; then
   CONTRACT_CONTROL_ROOT=$(jq -r '.control_root // empty' "$CONTRACT_PATH" 2>/dev/null) || fail "invalid contract"
   [ -n "$CONTROL_ROOT_ARG" ] || CONTROL_ROOT_ARG="$CONTRACT_CONTROL_ROOT"
-  [ "$CONTROL_ROOT_ARG" = "$CONTRACT_CONTROL_ROOT" ] || fail "contract control root mismatch"
   CONTROL_ROOT=$(lbwc_control_root_validate "$CONTROL_ROOT_ARG" 0) || fail "control root is unavailable or invalid"
+  CONTRACT_CONTROL_ROOT=$(lbwc_control_root_validate "$CONTRACT_CONTROL_ROOT" 0) || fail "contract control root is unavailable"
+  [ "$CONTROL_ROOT" = "$CONTRACT_CONTROL_ROOT" ] || fail "contract control root mismatch"
 else
   [ "$CONTRACT_SCHEMA_PREVIEW" = "2" ] || fail "unsupported contract schema"
   [ -z "$CONTROL_ROOT_ARG" ] || fail "schema 2 contract does not accept --control-root"
@@ -151,6 +152,8 @@ CONTRACT_DIGEST=""
 CONTRACT_ALLOWANCES_JSON='[]'
 CONTRACT_CAPABILITIES_JSON='[]'
 CONTRACT_SCHEMA_VERSION=2
+CONTRACT_RUNTIME_KIND=""
+CONTRACT_COMMUNICATION_POLICY=""
 CONTRACT_CAPABILITY_ARGS_JSON='[]'
 declare -A CONTRACT_ROLE_CAPABILITIES=()
 validate_contract() {
@@ -171,6 +174,8 @@ validate_contract() {
     contract_control_root=$(lbwc_control_root_validate "$contract_control_root" 0) || fail "contract control root is unavailable"
     [ "$contract_control_root" = "$CONTROL_ROOT" ] || fail "contract control root mismatch"
     CONTRACT_CAPABILITIES_JSON=$(jq -ce --arg role "$ROLE" '.capabilities_by_role[$role] | select(type == "array")' <<< "$contract") || fail "contract capabilities are invalid"
+    CONTRACT_RUNTIME_KIND=$(jq -r '.runtime_kind // empty' <<< "$contract")
+    CONTRACT_COMMUNICATION_POLICY=$(jq -r '.communication_policy // empty' <<< "$contract")
     CONTRACT_CAPABILITY_ARGS_JSON=$(printf '%s\n' "${WRITE_CAPABILITIES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0) | (split(":")) | select(length == 2) | {access:"write",kind:.[0],path:.[1]})')
     jq -ne --argjson requested "$CONTRACT_CAPABILITY_ARGS_JSON" --argjson allowed "$CONTRACT_CAPABILITIES_JSON" '$requested == $allowed' >/dev/null || fail "write capabilities do not match contract"
     for contract_role in $(jq -r '.roles[]' <<< "$contract"); do
@@ -484,7 +489,8 @@ register_entry() {
     --argjson overrides "$overrides" --argjson allowances "$allowances" --argjson pair_id "$pid_json" --argjson pair_role "$role_json" \
     --arg contract_path "$CONTRACT_PATH" --arg contract_id "$CONTRACT_ID" --arg contract_digest "$CONTRACT_DIGEST" --arg task_id "$TASK_ID" \
     --arg control_root "$CONTROL_ROOT" --arg schema_version "$CONTRACT_SCHEMA_VERSION" --argjson capabilities "$(build_capabilities_json "$role")" \
-    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
+    --arg runtime_kind "$CONTRACT_RUNTIME_KIND" --arg communication_policy "$CONTRACT_COMMUNICATION_POLICY" \
+    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if $runtime_kind != "" then {runtime_kind:$runtime_kind,communication_policy:$communication_policy} else {} end) + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
   MANIFEST=$(jq -c --arg name "$name" --argjson entry "$entry" '.agents[$name] = $entry' <<< "$MANIFEST")
 }
 

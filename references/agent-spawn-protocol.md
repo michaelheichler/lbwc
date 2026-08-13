@@ -60,7 +60,7 @@ Build the brief accordingly instead of hitting these blind:
 - For a hook repair, derive an exact path allowance from the named failing hook path before generation. The hook repair receives its exact path allowance through the manifest, never a broad `hooks/` allowance.
 
 - `skill_gate.py`: each teammate's first `Write`, `Edit`, or `NotebookEdit` is denied until it has read a bundled skill file from `skills-bundle/`. Expect that as their first read, not a stall.
-- `message_scope_guard.py`: non-critic generated teammates cannot `SendMessage` the orchestrator (`"main"`) directly. Only the critic, or `test-dev` in a trio, reports back.
+- `message_scope_guard.py`: native-team contracts allow peer and lead messages. Legacy `critic-relay` contracts allow only the critic, or `test-dev` in a trio, to report to `main`.
 - `test_scope_guard.py`: `coding-dijkstra`, `python-engineer`, and `web-engineer` are denied writes under `tests?/` or to `*.test.*` / `*.spec.*` files. In a non-TDD trio that lane belongs to `test-dev`. In a TDD task, it belongs to the solo `qa-author` red stage. Don't ask the engineer role to also write tests.
 - `qa`'s own role definition denies it `Write`, `Edit`, `NotebookEdit`, and `ExitPlanMode`. It reports a verdict, it never touches files.
 - `scout`'s own role definition denies it `Edit` and `NotebookEdit`. It writes new research files, it never edits existing ones.

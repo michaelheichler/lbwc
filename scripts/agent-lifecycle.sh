@@ -148,14 +148,17 @@ touch_agent() {
 }
 
 lifecycle_contract_is_valid() {
-  local entry="$1" contract_path contract root expected_root contract_id role task
+  local entry="$1" contract_path contract root expected_root contract_id role task schema_version capabilities
   jq -e '.contract_enabled == true' <<< "$entry" >/dev/null 2>&1 || return 1
   contract_path=$(jq -r '.contract_path // empty' <<< "$entry" 2>/dev/null) || return 1
   [ -n "$contract_path" ] && [ -f "$contract_path" ] && [ ! -L "$contract_path" ] || return 1
   contract_path=$(cd "$(dirname "$contract_path")" 2>/dev/null && printf '%s/%s' "$(pwd -P)" "$(basename "$contract_path")") || return 1
   root=$(cd "$PLANNING_DIR" 2>/dev/null && pwd -P) || return 1
-  case "$contract_path" in "$root/.contracts/"*) ;; *) return 1 ;; esac
-  expected_root=$(cd "$PLANNING_DIR/.." 2>/dev/null && pwd -P) || return 1
+  case "$(basename "$root")" in
+    .lbwc-planning) case "$contract_path" in "$root/.contracts/"*) ;; *) return 1 ;; esac ;;
+    *) case "$contract_path" in "$root/contracts/"*) ;; *) return 1 ;; esac ;;
+  esac
+  expected_root=$(lbwc_control_root_project_root "$root") || return 1
   contract=$(bash "$SCRIPT_DIR/task-contract.sh" verify "$contract_path" "$expected_root" 2>/dev/null) || return 1
   contract_id=$(jq -r '.contract_id // .id // empty' <<< "$contract")
   [ -n "$contract_id" ] && [ "$contract_id" = "$(jq -r '.contract_id // empty' <<< "$entry")" ] || return 1
@@ -165,6 +168,15 @@ lifecycle_contract_is_valid() {
   task=$(jq -r '.task_identity // .task_id // .contract_id // empty' <<< "$contract")
   [ -n "$task" ] && [ "$task" = "$(jq -r '.task_identity // empty' <<< "$entry")" ] || return 1
   jq -e --arg role "$role" --argjson allowances "$(jq -c '.write_allowances // []' <<< "$entry")" '.allowances_by_role[$role] == $allowances' <<< "$contract" >/dev/null 2>&1 || return 1
+  schema_version=$(jq -r '.schema_version' <<< "$contract")
+  if [ "$schema_version" = "3" ]; then
+    capabilities=$(jq -c '.capabilities // []' <<< "$entry")
+    jq -e --arg role "$role" --arg runtime "$(jq -r '.runtime_kind' <<< "$entry")" --arg policy "$(jq -r '.communication_policy' <<< "$entry")" --argjson capabilities "$capabilities" '
+      .runtime_kind == $runtime
+      and .communication_policy == $policy
+      and .capabilities_by_role[$role] == $capabilities
+    ' <<< "$contract" >/dev/null 2>&1 || return 1
+  fi
 }
 
 mark_idle_locked() {

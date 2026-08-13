@@ -32,6 +32,8 @@ LEGAL = {
     "cancelled": set(),
 }
 STATES = set(LEGAL)
+RUNTIME_KINDS = {"native-team"}
+COMMUNICATION_POLICIES = {"native-team", "critic-relay"}
 SCHEMA_2_KEYS = {
     "contract_id", "schema_version", "created_by", "project_root",
     "source_kind", "source_path", "source_sha256", "command_name",
@@ -370,6 +372,12 @@ def command_contract(root, task_name, options):
     if typed and "." in [item["path"] for role_caps in capabilities.values() for item in role_caps] and command != "team":
         fail("repository root capability is only valid for team")
     control_root = resolve_control_root(options["control_root"], root) if typed else None
+    runtime_kind = options["runtime_kind"] or "native-team"
+    communication_policy = options["communication_policy"] or "native-team"
+    if typed and runtime_kind not in RUNTIME_KINDS:
+        fail("invalid runtime_kind")
+    if typed and communication_policy not in COMMUNICATION_POLICIES:
+        fail("invalid communication_policy")
     contract_id = safe_id("cmd", command, task_name, group)
     contract = {
         "contract_id": contract_id,
@@ -403,9 +411,9 @@ def command_contract(root, task_name, options):
     if typed:
         contract.update({
             "capabilities_by_role": capabilities,
-            "communication_policy": options["communication_policy"] or "native-team",
+            "communication_policy": communication_policy,
             "control_root": str(control_root),
-            "runtime_kind": options["runtime_kind"] or "native-team",
+            "runtime_kind": runtime_kind,
             "schema_version": 3,
         })
     return with_digest(contract)
@@ -515,9 +523,9 @@ def validate_contract(contract, root, expected_id=None, expected_job=None):
             fail("invalid contract")
         if contract.get("files") != [path for team_role in roles for path in capability_paths[team_role]]:
             fail("invalid contract")
-        if not isinstance(contract.get("runtime_kind"), str) or not contract.get("runtime_kind"):
+        if contract.get("runtime_kind") not in RUNTIME_KINDS:
             fail("invalid contract")
-        if not isinstance(contract.get("communication_policy"), str) or not contract.get("communication_policy"):
+        if contract.get("communication_policy") not in COMMUNICATION_POLICIES:
             fail("invalid contract")
     elif any(key in contract for key in ("capabilities_by_role", "control_root", "runtime_kind", "communication_policy")):
         fail("invalid contract")
