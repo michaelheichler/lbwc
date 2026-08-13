@@ -1,5 +1,6 @@
 def text: type == "string" and length > 0 and (test("[[:cntrl:]]") | not);
 def nullable_text: . == null or text;
+def nullable_content: . == null or (type == "string" and (test("[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]") | not));
 def nullable_array: . == null or type == "array";
 def provenance_entry:
   type == "object"
@@ -16,7 +17,13 @@ def plan:
   and (.source_path | text)
   and (.title | nullable_text)
   and (.status | nullable_text)
+  and (.content | nullable_content)
+  and (.summary_present | . == null or type == "boolean")
   and (.depends_on | nullable_array);
+def skipped_entry:
+  type == "object"
+  and (.path | text)
+  and (.reason | text);
 
 if type != "object" then error("IR must be an object")
 elif .schema_version != 1 then error("IR schema_version must be 1")
@@ -30,6 +37,7 @@ elif ((.requirements | type) != "array") or (all(.requirements[]; requirement) |
 elif ((.milestones | type) != "array") or (all(.milestones[]; type == "object" and (.name | text)) | not) then error("IR milestones are invalid")
 elif ((.phases | type) != "array") or (all(.phases[]; type == "object" and (.slug | text)) | not) then error("IR phases are invalid")
 elif ((.plans | type) != "array") or (all(.plans[]; plan) | not) then error("IR plans are invalid")
+elif ((.source.skipped_files != null) and (((.source.skipped_files | type) != "array") or (all(.source.skipped_files[]; skipped_entry) | not))) then error("IR skipped files are invalid")
 elif ((.decisions | type) != "array") or (all(.decisions[]; type == "object" and (.text | text)) | not) then error("IR decisions are invalid")
 elif ((.warnings | type) != "array") or (all(.warnings[]; text) | not) then error("IR warnings are invalid")
 elif ((.conflicts | type) != "array") or (all(.conflicts[]; type == "object") | not) then error("IR conflicts are invalid")

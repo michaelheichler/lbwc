@@ -16,6 +16,8 @@ fail() {
 
 usage() {
   printf '%s\n' 'Usage: lbwc-config.sh <init|migrate|validate|get|set> <planning-dir> [setting] [json-value]' >&2
+  printf '%s\n' '       lbwc-config.sh default-config' >&2
+  printf '%s\n' '       lbwc-config.sh validate-config-json (reads JSON on stdin)' >&2
   printf '%s\n' '       lbwc-config.sh agent-teams-status --settings PATH' >&2
   printf '%s\n' '       lbwc-config.sh agent-teams-enable --settings PATH --approved' >&2
 }
@@ -474,6 +476,22 @@ main() {
     agent-teams-status|agent-teams-enable)
       shift
       global_command "$command" "$@"
+      return
+      ;;
+    default-config)
+      [ "$#" -eq 1 ] || { usage; exit 1; }
+      local default_config
+      default_config=$(migrate_config_json '{}') || fail 'could not build default configuration'
+      validate_or_fail "$default_config"
+      jq '.' <<< "$default_config"
+      return
+      ;;
+    validate-config-json)
+      [ "$#" -eq 1 ] || { usage; exit 1; }
+      local stdin_config
+      stdin_config=$(cat)
+      validate_or_fail "$stdin_config"
+      printf '%s\n' "$stdin_config"
       return
       ;;
   esac

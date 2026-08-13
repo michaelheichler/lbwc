@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
 
-import_adapter_markdown_read_heading() {
-  local path="$1"
-  awk '
-    /^[[:space:]]*#[[:space:]]+/ {
-      sub(/^[[:space:]]*#[[:space:]]+/, "")
-      sub(/[[:space:]]+#+[[:space:]]*$/, "")
-      print
-      exit
-    }
-  ' "$path"
-}
-
 import_adapter_markdown_normalize() {
-  local source="$1" output="$2" plans='[]' provenance='[]' warnings='["unverified generic Markdown adapter"]' skipped='[]' selected=0 total_selected_bytes=0 path relative size title plan_json
+  local source="$1" output="$2" plans='[]' provenance='[]' warnings='["unverified generic Markdown adapter"]' skipped='[]' selected=0 total_selected_bytes=0 path relative size title plan_json content root_label
   local max_files=64 max_file_bytes=1048576 max_total_bytes=8388608
   local total_markdown=0 oversized=0 total_capped=0
 
-  [ -d "$source" ] || import_fail "Markdown source is not a directory: $source"
+  [ -e "$source" ] || import_fail "Markdown source does not exist: $source"
   import_source_metadata "$source"
+  if [ -d "$source" ]; then
+    root_label=$(basename "$source")
+  else
+    root_label=$source
+    case "$source" in
+      *.md) ;;
+      *) import_fail "Markdown file source must end in .md: $source" ;;
+    esac
+  fi
 
   while IFS= read -r path; do
     [ -n "$path" ] || continue
-    relative=${path#"$source"/}
+    if [ -d "$source" ]; then
+      relative=${path#"$source"/}
+    else
+      relative=$(basename "$path")
+    fi
     size=$(import_file_size "$path") || import_fail "could not read Markdown file size: $path"
     total_markdown=$((total_markdown + 1))
     if [ "$size" -gt "$max_file_bytes" ]; then
@@ -39,18 +40,23 @@ import_adapter_markdown_normalize() {
       skipped=$(jq -c --arg path "$relative" --arg reason total-byte-cap '. + [{path:$path,reason:$reason}]' <<< "$skipped")
       continue
     fi
-    title=$(import_adapter_markdown_read_heading "$path")
-    [ -n "$title" ] || title=null
-    plan_json=$(jq -n --arg path "$relative" --arg title "$title" \
-      '{source_path:$path,title:(if $title == "null" then null else $title end),status:null,depends_on:null}')
+    title=$(import_adapter_read_heading "$path")
+    content=$(import_adapter_bounded_content "$path")
+    plan_json=$(import_adapter_plan_json "$relative" "$title" '' "$content" '' '' '')
     plans=$(jq -c --argjson plan "$plan_json" '. + [$plan]' <<< "$plans")
-    if [ "$title" != null ]; then
+    if [ -n "$title" ]; then
       provenance=$(jq -c --arg field "plans[$selected].title" --arg path "$relative" --arg value "$title" \
         '. + [{field:$field,source_path:$path,extraction_method:"markdown-heading",value:$value}]' <<< "$provenance")
     fi
     selected=$((selected + 1))
     total_selected_bytes=$((total_selected_bytes + size))
-  done < <(find "$source" -type f -name '*.md' -print 2>/dev/null | LC_ALL=C sort)
+  done < <(
+    if [ -d "$source" ]; then
+      find "$source" -type f -name '*.md' -print 2>/dev/null
+    else
+      printf '%s\n' "$source"
+    fi | LC_ALL=C sort
+  )
 
   [ "$oversized" -eq 0 ] || warnings=$(jq -c --arg message "file-size-cap: skipped $oversized Markdown file(s) larger than $max_file_bytes bytes" '. + [$message]' <<< "$warnings")
   if [ "$total_markdown" -gt "$max_files" ]; then
@@ -59,7 +65,7 @@ import_adapter_markdown_normalize() {
   [ "$total_capped" -eq 0 ] || warnings=$(jq -c --arg message "total-byte-cap: skipped $total_capped Markdown file(s) after selecting $max_total_bytes bytes" '. + [$message]' <<< "$warnings")
 
   jq -n \
-    --arg system markdown --arg trust unverified-markdown --arg root "$(basename "$source")" --arg digest "$SOURCE_DIGEST" \
+    --arg system markdown --arg trust unverified-markdown --arg root "$root_label" --arg digest "$SOURCE_DIGEST" \
     --argjson plans "$plans" --argjson provenance "$provenance" --argjson warnings "$warnings" --argjson skipped "$skipped" \
     --argjson file_count "$SOURCE_FILE_COUNT" --argjson total_bytes "$SOURCE_TOTAL_BYTES" \
     --argjson max_files "$max_files" --argjson max_file_bytes "$max_file_bytes" --argjson max_total_bytes "$max_total_bytes" \
