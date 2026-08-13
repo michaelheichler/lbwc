@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  <a href="https://code.claude.com/docs/en/plugins"><img src="https://img.shields.io/badge/Claude%20Code-2.1.226%2B-D97757?logo=anthropic&logoColor=white" alt="Claude Code 2.1.226 or newer verified"></a>
-  <img src="https://img.shields.io/badge/tests-706%20passing-2EA44F" alt="706 local tests passing">
+  <a href="https://code.claude.com/docs/en/plugins"><img src="https://img.shields.io/badge/Claude%20Code-2.1.231-D97757?logo=anthropic&logoColor=white" alt="Claude Code 2.1.231 verified"></a>
+  <img src="https://img.shields.io/badge/tests-1189%20passing-2EA44F" alt="1189 local tests passing">
   <img src="https://img.shields.io/badge/release-local%20verification%20passed-2EA44F" alt="Local release verification passed">
 </p>
 
@@ -16,7 +16,7 @@ LBWC keeps the useful parts of a multi-agent workflow without asking you to beco
 
 ## Quick start
 
-LBWC is verified with Claude Code 2.1.226 and up until Anthropic (or myself at 3 after midnight) breaks something. Add the marketplace:
+LBWC is locally verified with Claude Code 2.1.231. Add the marketplace:
 
 ```bash
 claude plugin marketplace add michaelheichler/lbwc
@@ -88,6 +88,8 @@ Give `/lbwc:vibe` a focused brief when you have one:
 | `/lbwc:debug` | The brief describes a defect | Root cause, fix evidence, and a focused record |
 | `/lbwc:fix` | The work is a known-small repair | A narrow repair path |
 | `/lbwc:docs` | The work is documentation scoped | Documentation scoped to the request |
+| `/lbwc:import` | External plans need staged review and promotion | A normalized preview and explicit conflict decisions |
+| `/lbwc:team` | One scoped task benefits from a native Claude Code team | Contract-bound teammate work and native task evidence |
 
 The command files are intentionally readable. If you want the exact workflow or ownership boundary, start with [the public architecture overview](PUBLIC-ARCHITECTURE.md).
 
@@ -108,7 +110,7 @@ Template-granted Bash remains available for normal work. The guard blocks genera
 
 ## Teams, status, and release work
 
-LBWC runs its work through small team shapes: solo specialists, engineer and critic pairs, and test-owner trios where the task needs them. Each member receives only the paths its role owns. Critics receive no write allowance. The main session reviews evidence, persists the approved artifacts, and owns commits.
+LBWC runs its work through small team shapes: solo specialists, engineer and critic pairs, test-owner trios, and explicit native Claude Code teams through `/lbwc:team`. Native teams use generated `.claude/agents/` definitions and Claude's session-owned team and task storage. LBWC does not pre-author native team configuration. Each member receives only the paths its role owns. Critics receive no write allowance. The main session reviews evidence, persists approved artifacts, and owns commits.
 
 The statusline is read-only. It shows Claude Code supplied model, context, and rate-limit fields when available, plus project phase, task progress, active team state, QA or UAT status, and telemetry health. It does not call an API or read credentials.
 
@@ -126,8 +128,10 @@ For local tool and release work, LBWC includes:
 Validate a checkout before installing or releasing it:
 
 ```bash
-claude plugin validate .
-rtk bats tests/
+claude plugin validate --strict .
+bats tests/
+bash tests/self-check.sh
+bash scripts/tests/agent-generator-core.sh
 bash scripts/release-verify.sh
 ```
 

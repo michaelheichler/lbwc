@@ -44,7 +44,7 @@ Agent output is evidence, not authority. The framework protects the human from a
 
 ## Durable project state
 
-LBWC stores workflow state under `.lbwc-planning/` in the target project.
+LBWC stores initialized workflow state under `.lbwc-planning/` in the target project. Authoritative team runs and import interviews can stage diagnostic state under `.temporary-agent-runfiles/` without initializing the project.
 
 | Artifact | Purpose |
 | --- | --- |
@@ -65,7 +65,7 @@ Before an agent starts, the main session creates a shell-owned contract. The con
 
 - task identity and source plan digest
 - selected role, team shape, and job
-- exact repository-relative write paths for each writable role
+- exact repository-relative file paths for schema 2 contracts, or typed file and directory capabilities for schema 3 contracts
 - allowed lifecycle transitions
 - primary workspace
 
@@ -79,6 +79,8 @@ planned -> dispatched -> running -> awaiting_review -> verified
 
 Invalid transitions fail closed. A worker cannot add paths, change roles, edit contract records, or promote its own result.
 
+Schema 3 native-team contracts also bind runtime kind, communication policy, generated-definition authority, and native shared task identity. `TaskCreated` must bind one pending contract. `TaskCompleted` is accepted only after that bound contract reaches `verified`.
+
 ## Team boundaries
 
 LBWC uses the smallest team that matches the work:
@@ -86,8 +88,13 @@ LBWC uses the smallest team that matches the work:
 - A solo specialist handles a bounded planning, research, QA, debug, or documentation task.
 - An engineer and critic pair handles implementation and independent review.
 - A trio adds `test-dev` when the task has separate test-path ownership.
+- `/lbwc:team` forms a Claude Code native team after the main session displays and confirms the roster and scope.
 
-Only one generated grouping is active at a time. The next grouping waits until every current member is `used` or `expired`. Critics have no write allowance. Test owners receive test paths only. The main session owns commits and final artifact writes.
+Only one generated grouping is active at a time. The next grouping waits until every current member is `used` or `expired`. Native teams form when Claude Code spawns the first teammate. LBWC never calls `TeamCreate`, passes deprecated `team_name`, or edits native team configuration. Critics have no write allowance. Test owners receive test paths only. The main session owns commits and final artifact writes.
+
+## External plan import
+
+`/lbwc:import` parses external planning sources into schema 1 normalized IR. The GSD adapter is fixture-verified. Generic Markdown is visibly unverified and capped by file count and bytes. Source text is inert data. Staging, preview, and conflict decisions occur before promotion. Promotion accepts an explicit artifact list, writes atomically, persists provenance, and rolls back selected destinations on failure.
 
 ## Enforcement
 
@@ -97,6 +104,7 @@ Only one generated grouping is active at a time. The next grouping waits until e
 | File capability | Exact writes in the primary workspace | File guard on Write, Edit, and NotebookEdit |
 | Test ownership | Product code and test-path separation | Test scope guard and contracts |
 | Worker lifecycle | Active work, idle expiry, exclusive admission | Manifest lock and lifecycle script |
+| Native task binding | Task identity and verified completion | TaskCreated and TaskCompleted hooks |
 | Command admission | Git, shell evaluation, critical commands, control paths | Bash guard |
 | Main-session persistence | Verification and remediation artifacts | Deterministic writers and locked state scripts |
 
@@ -133,8 +141,10 @@ Release metadata stays synchronized across `VERSION`, plugin metadata, marketpla
 Run the local checks with:
 
 ```bash
-claude plugin validate .
-rtk bats tests/
+claude plugin validate --strict .
+bats tests/
+bash tests/self-check.sh
+bash scripts/tests/agent-generator-core.sh
 bash scripts/release-verify.sh
 ```
 
