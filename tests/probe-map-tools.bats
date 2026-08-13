@@ -116,6 +116,25 @@ map_data() {
   [ ! -d "$PROJECT_DIR/.lbwc-planning" ]
   data=$(map_data)
   echo "$data" | jq -e '.recommended_route' >/dev/null
+  echo "$data" | jq -e '.codebase_map.available == false and .codebase_map.canonical_path == null' >/dev/null
+}
+
+@test "reports canonical codebase map pointer, digest, and freshness" {
+  mock_serena_absent
+  mock_gitnexus_absent
+  mkdir -p "$PROJECT_DIR/.lbwc-planning/codebase"
+  current_hash=$(git -C "$PROJECT_DIR" rev-parse HEAD)
+  printf 'mapped_at: 2026-08-01T00:00:00Z\ngit_hash: %s\nfile_count: 1\n' \
+    "$current_hash" > "$PROJECT_DIR/.lbwc-planning/codebase/META.md"
+
+  run_probe
+
+  [ "$status" -eq 0 ]
+  data=$(map_data)
+  digest=$(shasum -a 256 "$PROJECT_DIR/.lbwc-planning/codebase/META.md" | awk '{print "sha256:" $1}')
+  echo "$data" | jq -e --arg path "$(cd "$PROJECT_DIR/.lbwc-planning/codebase" && pwd -P)/META.md" \
+    --arg digest "$digest" \
+    '.codebase_map == {available:true,canonical_path:$path,digest:$digest,freshness:"fresh"}' >/dev/null
 }
 
 @test "writes MAP-TOOLS.json when .lbwc-planning already exists" {

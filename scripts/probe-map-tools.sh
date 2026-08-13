@@ -55,6 +55,26 @@ if command -v git >/dev/null 2>&1 && git -C "$PROJECT_DIR" rev-parse --git-dir >
   GIT_AVAILABLE=true
 fi
 
+CODEBASE_MAP_PATH=""
+CODEBASE_MAP_DIGEST=""
+CODEBASE_MAP_FRESHNESS="unavailable"
+CODEBASE_MAP_META="$PLANNING_DIR/codebase/META.md"
+if [[ -f "$CODEBASE_MAP_META" ]]; then
+  CODEBASE_MAP_PATH=$(cd "$(dirname "$CODEBASE_MAP_META")" && pwd -P)/$(basename "$CODEBASE_MAP_META")
+  if command -v shasum >/dev/null 2>&1; then
+    CODEBASE_MAP_DIGEST=$(shasum -a 256 "$CODEBASE_MAP_META" | awk '{print "sha256:" $1}')
+  elif command -v sha256sum >/dev/null 2>&1; then
+    CODEBASE_MAP_DIGEST=$(sha256sum "$CODEBASE_MAP_META" | awk '{print "sha256:" $1}')
+  fi
+  CODEBASE_MAP_FRESHNESS="stale"
+  saved_hash=$(awk '$1 == "git_hash:" {print $2; exit}' "$CODEBASE_MAP_META" 2>/dev/null || true)
+  file_count=$(awk '$1 == "file_count:" {print $2; exit}' "$CODEBASE_MAP_META" 2>/dev/null || true)
+  current_hash=$(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || true)
+  if [[ -n "$current_hash" && "$saved_hash" == "$current_hash" && "$file_count" =~ ^[1-9][0-9]*$ ]]; then
+    CODEBASE_MAP_FRESHNESS="fresh"
+  fi
+fi
+
 if [[ "$SERENA_AVAILABLE" == true ]]; then
   RECOMMENDED_ROUTE="serena"
 elif [[ "$GITNEXUS_AVAILABLE" == true ]]; then
@@ -75,12 +95,21 @@ OUTPUT=$(jq -n \
   --argjson lsp_plugins "$(echo "$LSP_JSON" | jq -c '.plugins // []')" \
   --argjson git_available "$GIT_AVAILABLE" \
   --arg recommended_route "$RECOMMENDED_ROUTE" \
+  --arg map_path "$CODEBASE_MAP_PATH" \
+  --arg map_digest "$CODEBASE_MAP_DIGEST" \
+  --arg map_freshness "$CODEBASE_MAP_FRESHNESS" \
   '{
     serena: {available: $serena_available, reason: $serena_reason},
     gitnexus: {available: $gitnexus_available, reason: $gitnexus_reason, indexed: $gitnexus_indexed},
     lsp: {env_needed: $lsp_env_needed, plugins: $lsp_plugins},
     git: {available: $git_available},
-    recommended_route: $recommended_route
+    recommended_route: $recommended_route,
+    codebase_map: {
+      available: ($map_path != ""),
+      canonical_path: (if $map_path == "" then null else $map_path end),
+      digest: (if $map_digest == "" then null else $map_digest end),
+      freshness: $map_freshness
+    }
   }')
 
 if [[ -d "$PLANNING_DIR" ]]; then
