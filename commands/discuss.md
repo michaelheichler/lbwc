@@ -18,13 +18,13 @@ Use native `Other` exactly as defined by that contract. For an explanation or an
 
 Working directory:
 
-```
+```bash
 !`pwd`
 ```
 
 Plugin root:
 
-```
+```bash
 !`SESSION_KEY="${CLAUDE_SESSION_ID:-default}"; L="/tmp/.lbwc-plugin-root-link-${SESSION_KEY}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; bash "$L/scripts/phase-detect.sh" > "/tmp/.lbwc-phase-detect-${SESSION_KEY}.txt" 2>/dev/null || echo "phase_detect_error=true" > "/tmp/.lbwc-phase-detect-${SESSION_KEY}.txt"; echo "$L"`
 ```
 
@@ -32,7 +32,7 @@ Store the plugin root path output above as `{plugin-root}` for use in script/ref
 
 Phase state:
 
-```
+```bash
 !`SESSION_KEY="${CLAUDE_SESSION_ID:-default}"
 L="/tmp/.lbwc-plugin-root-link-${SESSION_KEY}"
 P="/tmp/.lbwc-phase-detect-${SESSION_KEY}.txt"

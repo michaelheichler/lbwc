@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, AskUserQuestion
 
 Plugin root:
 
-```
+```bash
 !`L="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; echo "$L"`
 ```
 
@@ -22,7 +22,7 @@ Store the plugin root path output above as `{plugin-root}` for use in script and
 
 Config:
 
-```
+```bash
 !`cat .lbwc-planning/config.json 2>/dev/null || echo "No config found -- run /lbwc:init first"`
 ```
 

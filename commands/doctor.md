@@ -12,13 +12,13 @@ allowed-tools: Read, Bash, Glob, Grep, LSP
 
 Working directory:
 
-```
+```bash
 !`pwd`
 ```
 
 Plugin root:
 
-```
+```bash
 !`L="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; echo "$L"`
 ```
 
@@ -146,7 +146,7 @@ Read `temporary_run_*` findings from `doctor-cleanup.sh scan`. PASS when none ex
 
 ## Output Format
 
-```
+```text
 LBWC Doctor v{version}
 
   1. jq installed          {PASS|FAIL} {detail}

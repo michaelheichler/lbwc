@@ -10,29 +10,31 @@ disable-model-invocation: true
 
 ## Shared interaction contract
 
-Read `{LINK}/references/ask-user-question.md` after resolving `{LINK}` in the Context block. Follow it for every bounded decision.
+Read @${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md after resolving `{LINK}` in the Context block. Follow it for every bounded decision.
 
 ## Context
 
 Working directory:
 
-```
+```text
 !`pwd`
 ```
 
 Plugin root and pre-computed state (first line is `LINK`, remaining lines are `PD`):
 
-```
+```bash
 !`SESSION_KEY="${CLAUDE_SESSION_ID:-default}"; L="/tmp/.lbwc-plugin-root-link-${SESSION_KEY}"; R="$L/scripts/resolve-phase-state.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-phase-state.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R"`
 ```
 
 Config:
 
-```
+```bash
 !`cat .lbwc-planning/config.json 2>/dev/null || echo "No config found"`
 ```
 
+```bash
 !`bash "/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/suggest-compact.sh" execute 2>/dev/null || true`
+```
 
 ## Input Parsing
 
@@ -96,7 +98,7 @@ Read `{LINK}/references/vibe-mode-bootstrap.md` and follow it. `{LINK}` is the f
 4. Read the validated phase list from ROADMAP.md. Create `.lbwc-planning/phases/{NN}-{slug}/` directories for each phase.
 5. Update STATE.md by calling bootstrap-state.sh. Extract `PROJECT_NAME` from PROJECT.md, derive `MILESTONE_NAME` from the scope description (step 2), and use the phase count from step 3. The script preserves existing project-level sections (Todos, Decisions, Blockers, Codebase Profile) while restoring the `## Current Phase` section:
 
-   ```
+   ```bash
    bash /tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/bootstrap/bootstrap-state.sh .lbwc-planning/STATE.md "$PROJECT_NAME" "$MILESTONE_NAME" "$PHASE_COUNT"
    ```
 

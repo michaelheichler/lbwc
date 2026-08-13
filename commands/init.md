@@ -17,19 +17,19 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent, LSP
 
 ## Init interaction boundary
 
-Use structured AskUserQuestion for bounded bootstrap/config/setup choices. Use intentional freeform/no-options input for project names, requirements, phases, field corrections, and other high-cardinality user-authored content. If `Other` or `Let me explain...` signals freeform intent, follow the shared contract: ask plain text, wait for the response, process it, then resume structured prompts only if another bounded decision remains.
+Use structured @${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md for bounded bootstrap/config/setup choices. Use intentional freeform/no-options input for project names, requirements, phases, field corrections, and other high-cardinality user-authored content. If `Other` or `Let me explain...` signals freeform intent, follow the shared contract: ask plain text, wait for the response, process it, then resume structured prompts only if another bounded decision remains.
 
 ## Context
 
 Working directory:
 
-```
+```bash
 !`pwd`
 ```
 
 Plugin root:
 
-```
+```bash
 !`L="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; echo "$L"`
 ```
 
@@ -37,23 +37,23 @@ Store the plugin root path output above as `{plugin-root}` for use in script inv
 
 Existing state:
 
-```
+```bash
 !`ls -la .lbwc-planning 2>/dev/null || echo "No .lbwc-planning directory"`
 ```
 
 Project files:
 
-```
+```bash
 !`ls package.json pyproject.toml Cargo.toml go.mod Gemfile build.gradle pom.xml mix.exs 2>/dev/null || echo "No detected project files"`
 ```
 
 Skills:
 
-```
+```bash
 !`if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then _cd="$CLAUDE_CONFIG_DIR"; elif [ -d "$HOME/.config/claude-code" ]; then _cd="$HOME/.config/claude-code"; else _cd="$HOME/.claude"; fi; ls "$_cd/skills/" 2>/dev/null || echo "No global skills"`
 ```
 
-```
+```bash
 !`ls .claude/skills/ 2>/dev/null || echo "No project skills"`
 ```
 
@@ -68,10 +68,9 @@ Skills:
 
 ## Steps
 
-Agent Teams is optional and is not enabled during initialization. `/lbwc:team` owns its explicit consent and restart flow.
+Agent Teams can always be enabled, but it is not enabled by default. The command `/lbwc:team` owns its explicit consent and restart flow.
 
 <!-- Steps 0-4: Infrastructure setup (environment, scaffold, hooks, mapping, summary) -->
-<!-- Steps 5-8: Auto-bootstrap (scenario detection, inference, bootstrap execution, completion) -->
 
 ### Step 0: Environment setup (settings.json)
 
@@ -104,7 +103,7 @@ If declined: display "○ Skipped. Run /lbwc:config to install it later."
 
 **0c. Write settings.json** if changed (single write). Display summary:
 
-```
+```text
 Environment setup complete:
   {✓ or ○} Statusline {add "(restart to activate)" if newly installed}
   ○ Routing refresh deferred until planning scaffold exists
@@ -132,6 +131,7 @@ Read each template from `{plugin-root}/templates/` and write to .lbwc-planning/:
 | .lbwc-planning/REQUIREMENTS.md | `{plugin-root}/templates/REQUIREMENTS.md` |
 | .lbwc-planning/ROADMAP.md | `{plugin-root}/templates/ROADMAP.md` |
 | .lbwc-planning/STATE.md | `{plugin-root}/templates/STATE.md` |
+
 Create `.lbwc-planning/phases/`, then initialize configuration and detected routing as one fail-closed sequence:
 
 ```bash
@@ -280,6 +280,7 @@ Display Phase Banner then file checklist (✓ for each created file).
 
 Then show conditional lines for statusline, codebase mapping, conventions, and skills.
 
+<!-- Steps 5-8: Auto-bootstrap (scenario detection, inference, bootstrap execution, completion) -->
 <!-- Auto-bootstrap flow begins here: seamless continuation from infrastructure setup -->
 
 ### Step 5: Scenario detection
@@ -297,7 +298,7 @@ Detect the initialization scenario based on flags set in earlier steps:
 
 Check conditions in order:
 
-```
+```bash
 if [ "$BROWNFIELD" = "true" ] && [ -d .lbwc-planning/codebase ]; then SCENARIO=BROWNFIELD
 elif [ "$BROWNFIELD" = "true" ]; then SCENARIO=HYBRID
 else SCENARIO=GREENFIELD
@@ -306,9 +307,17 @@ fi
 
 Display the detected scenario:
 
+```text
 - GREENFIELD: `○ Scenario: Greenfield (new project)`
+```
+
+```text
 - BROWNFIELD: `◆ Scenario: Brownfield (existing codebase detected)`
+```
+
+```text
 - HYBRID: `○ Scenario: Hybrid (treating as greenfield, no mapping)`
+```
 
 No user interaction in this step. Proceed immediately to Step 6.
 
@@ -332,7 +341,7 @@ Run inference scripts based on the detected scenario, display results, and confi
 - Capture JSON output to `.lbwc-planning/inference.json` via Bash
 - Parse the JSON and display inferred fields:
 
-  ```
+  ```text
   ◆ Inferred project context:
     Name:         {name.value} (source: {name.source})
     Tech stack:   {tech_stack.value | join(", ")} (source: {tech_stack.source})
@@ -465,7 +474,7 @@ Display `◆ Spawning Architect agent...` followed by `✓ Architect agent compl
 
 Display a banner per @${CLAUDE_PLUGIN_ROOT}/references/lbwc-brand-essentials.md with the title "LBWC Initialization Complete".
 
-```
+```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 LBWC Initialization Complete
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -492,11 +501,10 @@ LBWC Initialization Complete
 
 **Next steps:**
 
-```
+```text
 ➜ Next: Run /lbwc:vibe to start planning your first milestone
   Or:   Run /lbwc:status to review project state
 ```
-
 
 ## Failure and recovery
 
