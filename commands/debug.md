@@ -12,19 +12,19 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, Agent, Skill, LSP,
 
 Working directory:
 
-```
+```bash
 !`pwd`
 ```
 
 Plugin root:
 
-```
+```bash
 !`L="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; echo "$L"`
 ```
 
 Recent commits:
 
-```text
+```bash
 !`git log --oneline -10 2>/dev/null || echo "No git history"`
 ```
 
@@ -32,6 +32,7 @@ Store the plugin root path output above as `{plugin-root}` for use in script inv
 
 @${CLAUDE_PLUGIN_ROOT}/references/agent-spawn-protocol.md
 @${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md
+@${CLAUDE_PLUGIN_ROOT}/references/debug-inline-verification.md
 
 Every Debugger and QA spawn follows `{plugin-root}/references/agent-spawn-protocol.md`. Issue each contract with `scripts/task-contract.sh`, generate it with generic `scripts/agent-generator.sh`, then advance the contract to `dispatched`. The main session owns planning files, Git, verification, and user questions.
 
@@ -77,17 +78,17 @@ Resolve or create the debug session before any investigation. Order of precedenc
 
 1. **Explicit `--session <id>`:** Extract `SESSION_ID`, the token immediately following `--session` in $ARGUMENTS. If `--session` is present but no id follows it, STOP: `"--session requires a session id."` Resume the named session:
 
-   ```bash
-
+  ```bash
   eval "$(bash "{plugin-root}/scripts/debug-session-state.sh" resume .lbwc-planning "$SESSION_ID")"
+  ```
 
-   ```
-   If the session file is missing, STOP with error.
+  If the session file is missing, STOP with error.
 
-2. **`--resume` flag (no explicit session):** Resume the active session or latest unresolved.
-   ```bash
-  eval "$(bash "{plugin-root}/scripts/debug-session-state.sh" get-or-latest .lbwc-planning)"
-   ```
+1. **`--resume` flag (no explicit session):** Resume the active session or latest unresolved.
+
+```bash
+eval "$(bash "{plugin-root}/scripts/debug-session-state.sh" get-or-latest .lbwc-planning)"
+```
 
   If `active_session=none`, STOP "No active debug session to resume. Use `/lbwc:debug --session <id>` to open a specific session, or start one with `/lbwc:debug \"description of the bug or error message\"` or `/lbwc:debug <todo-number>`."
   If `active_session=fallback`, inform user which session was auto-selected (no `.active-session` pointer was set, so the latest unresolved session was chosen automatically).
@@ -98,25 +99,7 @@ Resolve or create the debug session before any investigation. Order of precedenc
    For manual/freeform starts only, create a fresh session from $ARGUMENTS. Strip known flags (`--competing`, `--parallel`, `--serial`) and any `(ref:HASH)` suffix from $ARGUMENTS before computing the slug, these are routing/ref metadata, not part of the bug description.
 
    ```bash
-   BUG_DESC=$(printf '%s' "$ARGUMENTS" | sed -E 's/[[:space:]]*\(ref:[^)]+\)//g' | sed -E 's/(^|[[:space:]])--(competing|parallel|serial)([[:space:]]|$)/ /g' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | tr -s '[:space:]' ' ')
-   SLUG=$(printf '%s' "$BUG_DESC" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//' | head -c 50)
-   MANUAL_REF="${REF_HASH:-none}"
-   MANUAL_DETAIL_CONTEXT=""
-   MANUAL_DETAIL_FILES='[]'
-   if [ "${DETAIL_STATUS:-none}" = "ok" ] && [ -n "${DETAIL_RESULT_JSON:-}" ]; then
-     MANUAL_DETAIL_CONTEXT=$(printf '%s' "$DETAIL_RESULT_JSON" | jq -r '.detail.context // empty' 2>/dev/null || echo "")
-     MANUAL_DETAIL_FILES=$(printf '%s' "$DETAIL_RESULT_JSON" | jq -c '(.detail.files // []) | if type == "array" then . else [] end' 2>/dev/null || printf '[]')
-   fi
-   eval "$(jq -cn \
-     --arg mode "source-todo" \
-     --arg text "$BUG_DESC" \
-     --arg raw_line "none" \
-     --arg ref "$MANUAL_REF" \
-     --arg detail_status "${DETAIL_STATUS:-none}" \
-     --argjson related_files "$MANUAL_DETAIL_FILES" \
-     --arg detail_context "$MANUAL_DETAIL_CONTEXT" \
-     '{mode:$mode, text:$text, raw_line:$raw_line, ref:$ref, detail_status:$detail_status, related_files:$related_files, detail_context:$detail_context}' \
-     | bash "{plugin-root}/scripts/debug-session-state.sh" start-with-source-todo .lbwc-planning "$SLUG")"
+   eval "$(printf '%s' "$ARGUMENTS" | REF_HASH="${REF_HASH:-none}" DETAIL_STATUS="${DETAIL_STATUS:-none}" DETAIL_RESULT_JSON="${DETAIL_RESULT_JSON:-}" bash "{plugin-root}/scripts/debug-start-manual.sh" .lbwc-planning)"
    ```
 
    Keep manual/freeform debug starts on the existing `start-with-source-todo` path. The selected helper owns deterministic selected-todo state mutation and returns pickup presentation fields under `.pickup`.
@@ -314,7 +297,7 @@ If resuming a session with `session_status=complete`: STOP "This debug session i
 
    Read its emitted spawn values and invoke only printed `subagent_type`, `name`, and `model`. The implementation prompt names the exact contract paths, diagnosis, rejected hypotheses, verification commands, and states: implement only those paths, report evidence, do not write planning artifacts, ask user questions, or run Git commands. The implementation prompt MUST begin with exactly one explicit `<skill_activation>` or `<skill_no_activation>` block and must also evaluate available MCP tools relevant to this investigation. Include this exact instruction in the implementation task context: `Also evaluate available MCP tools in your system context relevant to this investigation and note them in the task context.` The main session runs verification and creates the fix commit after it passes. If the report is `already_fixed` or `inconclusive`, do not issue an implementation contract.
 
-5. **Persist to debug session + Clear delegation marker + Present:**
+4. **Persist to debug session + Clear delegation marker + Present:**
 
    <debug_session_persistence>
    After the report-only investigation and any contract-scoped implementation complete, the main session runs verification and, only if it passes, creates the product fix commit. Capture the post-investigation HEAD before classifying the outcome:
@@ -424,288 +407,11 @@ If `INVESTIGATION_OUTCOME=already_fixed`: STOP with `➜ Debug session complete.
 If `INVESTIGATION_OUTCOME=fixed_now` and session status is `qa_pending`: proceed to `<debug_inline_qa>` below (even if discovered issues were displayed above, they are informational only and do not gate the QA lifecycle).
 
 <debug_inline_qa>
-**Inline QA, runs automatically after a fix is committed.**
-
-Read the `auto_uat` config:
-
-```bash
-AUTO_UAT=$(jq -r '.auto_uat // "false"' .lbwc-planning/config.json 2>/dev/null || echo "false")
-```
-
-Resolve effort profile if not already set (needed for tier resolution):
-
-```bash
-if [ -z "${EFFORT_PROFILE:-}" ]; then
-  EFFORT_PROFILE=$(jq -r '.effort // "balanced"' .lbwc-planning/config.json 2>/dev/null || echo "balanced")
-fi
-```
-
-**QA orchestration (absorbed from /lbwc:qa debug-session mode):**
-
-1. Compile QA context:
-
-  ```bash
-  QA_CONTEXT=$(bash "{plugin-root}/scripts/compile-debug-session-context.sh" "$session_file" qa)
-  ```
-
-1. Resolve tier from effort profile: fast=quick, balanced=standard, thorough=deep. Store as `ACTIVE_TIER`. If turbo:
-
-  ```bash
-  bash "{plugin-root}/scripts/debug-session-state.sh" set-status .lbwc-planning uat_pending
-  ```
-
-   Then jump directly to `<debug_inline_uat>` below, skip all remaining QA steps (do not increment QA round).
-
-1. Increment QA round:
-
-  ```bash
-  eval "$(bash "{plugin-root}/scripts/debug-session-state.sh" increment-qa .lbwc-planning)"
-  ```
-
-1. Issue a read-only QA contract and generate it with the generic helper:
-
-  ```bash
-  PROJECT_ROOT=$(pwd)
-  QA_BRIEF="debug-session verification, round {qa_round}"
-  CONTRACT_PATH=$(bash "{plugin-root}/scripts/task-contract.sh" issue "$PROJECT_ROOT" "debug-qa-{session_id}-{qa_round}" --command debug --role qa --team solo --job "$QA_BRIEF") || exit 1
-  TASK_ID=$(basename "$CONTRACT_PATH" .json)
-  bash "{plugin-root}/scripts/agent-generator.sh" qa --job "$QA_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" || exit 1
-  bash "{plugin-root}/scripts/task-contract.sh" state "$PROJECT_ROOT" "$TASK_ID" dispatched >/dev/null || exit 1
-  ```
-
-  Read `Agent-call parameters:` and `SPAWN_READY`. Spawn QA using only printed `subagent_type`, `name`, and `model`. Do not add any other Agent-call fields.
-
-    Before composing the QA task description, evaluate installed skills visible in your system context in two passes. First derive technical domains from session context, errors, files, and bounded enrichment. Prefer those signals over generic stack guesses. If they mention SwiftData markers, select `swiftdata`. Select `core-data` only when the evidence names Core Data APIs.
-    Select all materially helpful direct skills and narrowly adjacent support skills. Do not select only the single most direct skill. The QA prompt MUST begin with exactly one explicit `<skill_activation>` or `<skill_no_activation>` block. Silent omission is invalid. State the skill outcome in your response. Cite bounded enrichment when it influenced the choice.
-    After calling `Skill(...)`, read only relevant follow-up files named by the skill. Do not scan entire skill folders or read unrelated references.
-
-    If one or more skills were preselected, run `bash "{plugin-root}/scripts/extract-skill-follow-up-files.sh" "{all preselected skill names from the activation block}" 2>/dev/null || true` before spawning the inline debug-session QA agent. If the helper prints a `<skill_follow_up_files>` block, paste it immediately after the follow-up-read sentence in the spawned payload. Otherwise omit that block.
-
-  Render the prompt prefix from `{plugin-root}/references/skill-activation-payload.md` with the local `skill_calls`, task-specific `no_skill_reason`, and optional helper-emitted `follow_up_files_block`. Prepend the rendered bytes to the child prompt so the rendered skill outcome tag is its first line. Do not paste the template path, variables, or an unresolved `@` include into the child prompt.
-
-   Task description for debug-session QA:
-
-   ```text
-   Debug session verification. Tier: {ACTIVE_TIER}. Round: {qa_round}.
-
-   This is a debug-session QA round, NOT a phase-scoped verification. You are verifying
-   a standalone debug fix, there are no phase PLAN.md or SUMMARY.md files.
-
-   Session context (issue, investigation, plan, implementation, prior QA rounds):
-   {QA_CONTEXT}
-
-   Verification targets:
-   - The root cause identified in the investigation is correct
-   - The fix addresses the root cause (not just the symptom)
-   - Changed files are correct and complete
-   - No regressions introduced in modified files
-   - Related tests pass
-
-   Output your verdict as PASS, FAIL, or PARTIAL with a checks table.
-   Return a structured qa_verdict inline. Do not write files or run Git commands. The main session validates and persists the round.
-   Format each check as: ID | Description | Status (PASS/FAIL) | Evidence
-   ```
-
-1. Process the QA result:
-   Parse the verdict (PASS/FAIL/PARTIAL) from the QA agent's response.
-
-   Write the QA round to the session file:
-
-   ```bash
-   QA_RESULT_JSON=$(cat <<'ENDJSON'
-   {
-     "mode": "qa",
-     "round": {qa_round},
-     "result": "{PASS|FAIL|PARTIAL}",
-     "checks": [
-       {"id": "{check-id}", "description": "{check description}", "status": "{PASS|FAIL}", "evidence": "{evidence}"}
-     ]
-   }
-   ENDJSON
-   )
-   echo "$QA_RESULT_JSON" | bash "{plugin-root}/scripts/write-debug-session.sh" "$session_file"
-   ```
-
-   Update session status based on result:
-   - PASS → `bash .../debug-session-state.sh set-status .lbwc-planning uat_pending`
-   - FAIL or PARTIAL → `bash .../debug-session-state.sh set-status .lbwc-planning qa_failed`
-
-2. Present debug-session QA result:
-   Per @${CLAUDE_PLUGIN_ROOT}/references/lbwc-brand-essentials.md:
-
-   ```text
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Debug QA: Round {qa_round}
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-     Session:  {session_id}
-     Tier:     {quick|standard|deep}
-     Result:   {✓ PASS | ✗ FAIL | ◆ PARTIAL}
-     Checks:   {passed}/{total}
-     Failed:   {list or "None"}
-
-   ```
-
-**QA failure handling:** If FAIL or PARTIAL:
-
-- Display: `QA found issues. Re-investigating...`
-- Load failure context: `FAILURE_CONTEXT=$(bash .../compile-debug-session-context.sh "$session_file" qa 2>/dev/null || echo "")`
-- Update status to `investigating` via `write-debug-session.sh` (mode=status)
-- Re-enter investigation from Step 3 with the failure context prepended to the bug report (same pattern as `--resume` from `qa_failed`). After the next fix commit, inline QA fires again automatically.
-
-**QA pass:** If PASS, proceed to `<debug_inline_uat>` below.
+Execute the `Inline QA` section of `references/debug-inline-verification.md`. For PASS, continue at `<debug_inline_uat>`. For FAIL or PARTIAL, follow its re-investigation loop.
 </debug_inline_qa>
 
 <debug_inline_uat>
-**Inline UAT, prompt-gated by default (`auto_uat`), runs automatically when `auto_uat=true`.**
-
-Resolve `AUTO_UAT` if not already set (needed when entering via `--resume` from `uat_pending`):
-
-```bash
-if [ -z "${AUTO_UAT:-}" ]; then
-  AUTO_UAT=$(jq -r '.auto_uat // "false"' .lbwc-planning/config.json 2>/dev/null || echo "false")
-fi
-```
-
-**Prompt gate:** If `AUTO_UAT` is not `"true"`, call AskUserQuestion:
-
-```yaml
-question: "QA passed. Run UAT verification now?"
-header: "Debug Session"
-multiSelect: false
-options:
-  - label: "Yes"
-    description: "Run UAT checkpoints inline"
-  - label: "No"
-    description: "Skip, I'll resume later with /lbwc:debug --resume"
-```
-
-**AskUserQuestion is a tool call (NON-NEGOTIABLE):** You MUST invoke AskUserQuestion via the tool_use mechanism, never emit the question parameters as text, YAML, or any other inline format in your response body. If AskUserQuestion appears in your text output instead of as a tool call, the prompt will not be presented to the user and the session will end prematurely. **STOP HERE.** Wait for the AskUserQuestion response before processing the answer.
-
-If the user selects "No": STOP with `➜ Next: /lbwc:debug --resume -- Continue to UAT verification`.
-If the user selects "Yes": proceed.
-If the user provides freeform input: proceed only when the response is clearly affirmative (e.g., "yes", "y", "sure", "go ahead"). If the response is negative or deferring (e.g., "no", "not now", "later", "skip"): treat as "No" and STOP. If ambiguous: ask a brief follow-up to confirm before proceeding.
-
-If `AUTO_UAT` is `"true"`: skip the prompt and proceed directly.
-
-**UAT orchestration (absorbed from /lbwc:verify debug-session mode):**
-
-1. Compile UAT context:
-
-  ```bash
-  UAT_CONTEXT=$(bash "{plugin-root}/scripts/compile-debug-session-context.sh" "$session_file" uat)
-  ```
-
-1. Increment UAT round:
-
-  ```bash
-  eval "$(bash "{plugin-root}/scripts/debug-session-state.sh" increment-uat .lbwc-planning)"
-  ```
-
-1. Generate 1-3 UAT checkpoints from the session context. These must require HUMAN judgment:
-   - Reproduce the original bug, is it fixed?
-   - Check related workflows, any regressions visible?
-   - Verify the fix from the user's perspective
-
-   **Guardrails:** Never ask the user to run automated checks (tests, lint, build commands), those belong in QA. If the fix is purely internal (test-infra, script-only, non-user-facing), fall back to a single lightweight checkpoint: "Does the app still work as expected from your perspective?" rather than generating inapplicable user-facing scenarios.
-
-2. Present checkpoints one at a time using CHECKPOINT + AskUserQuestion:
-
-    **Checkpoint presentation boundary (NON-NEGOTIABLE):** The debug UAT checkpoint loop is conversational and blocking. Each cycle presents exactly one checkpoint, and the CHECKPOINT display plus the `AskUserQuestion` tool_use MUST be emitted in the same assistant response. Treat the checkpoint display and tool call as one atomic presentation step: never split them across turns. A text-only checkpoint is invalid because it gives the user no structured response path and can let the turn end prematurely. Do NOT end the turn after displaying checkpoint text. the only valid pause is waiting for the blocking `AskUserQuestion` response. Do not process an answer, advance to later checkpoints, persist UAT state, or finalize the session until that tool response is available.
-
-   Per @${CLAUDE_PLUGIN_ROOT}/references/lbwc-brand-essentials.md:
-
-    ```text
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      CHECKPOINT {NN}/{total}, Debug Fix Verification
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    {scenario description}
-    ```
-
-    Then call AskUserQuestion. Keep the modal question self-contained because it may cover the surrounding checkpoint prose:
-
-    ```yaml
-    question: "Scenario: {scenario description}\n\nExpected: {expected result}\n\nDoes the behavior match this checkpoint?"
-    header: "UAT"
-    multiSelect: false
-    options:
-      - label: "Pass"
-        description: "Behavior matches expected result"
-      - label: "Skip"
-        description: "Cannot test right now, skip this checkpoint"
-    ```
-
-   **AskUserQuestion is a tool call (NON-NEGOTIABLE).** Invoke it through the tool_use mechanism. Never emit its parameters as text, YAML, or inline response content.
-   If the question appears in text instead of a tool call, the checkpoint will not reach the user. Stop and wait for the user after each checkpoint.
-
-3. Response mapping (same rules as /lbwc:verify. AskUserQuestion automatically provides a freeform "Other" option):
-   - "Pass" → record as passed
-   - "Skip" → record as skipped
-   - Freeform text via "Other" → treat as issue description, infer severity from keywords (crash/broken/error=critical, wrong/missing/bug=major, minor/cosmetic=minor, default=major)
-
-4. After all checkpoints, persist the UAT round:
-
-   ```bash
-   UAT_RESULT_JSON=$(cat <<'ENDJSON'
-   {
-     "mode": "uat",
-     "round": {uat_round},
-     "result": "{pass|issues_found}",
-     "checkpoints": [
-       {"id": "{id}", "description": "{desc}", "result": "pass|skip|issue", "user_response": "{verbatim}"}
-     ],
-     "issues": [
-       {"id": "{id}", "description": "{desc}", "severity": "{level}"}
-     ]
-   }
-   ENDJSON
-   )
-   echo "$UAT_RESULT_JSON" | bash "{plugin-root}/scripts/write-debug-session.sh" "$session_file"
-   ```
-
-5. Update session status:
-   - All checkpoints pass (no issues):
-
-     ```bash
-     bash "{plugin-root}/scripts/debug-session-state.sh" set-status .lbwc-planning complete
-     PG_SCRIPT="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/planning-git.sh"
-     if [ -f "$PG_SCRIPT" ]; then
-       bash "$PG_SCRIPT" commit-boundary "complete debug session" .lbwc-planning/config.json
-     else
-       echo "⚠ LBWC: planning-git.sh unavailable. Skipping planning git boundary commit." >&2
-     fi
-     ```
-
-   - Any issues found → `bash .../debug-session-state.sh set-status .lbwc-planning uat_failed`
-
-6. Present debug-session UAT result:
-   Per @${CLAUDE_PLUGIN_ROOT}/references/lbwc-brand-essentials.md:
-
-   ```text
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Debug UAT: Round {uat_round}
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-     Session:  {session_id}
-     Result:   {✓ COMPLETE | ✗ ISSUES FOUND}
-     Passed:   {N}
-     Issues:   {N}
-
-   ```
-
-**UAT failure handling:** If issues found:
-
-- Display: `UAT found issues. Re-investigating...`
-- Load failure context: `FAILURE_CONTEXT=$(bash .../compile-debug-session-context.sh "$session_file" uat 2>/dev/null || echo "")`
-- Update status to `investigating` via `write-debug-session.sh` (mode=status)
-- Re-enter investigation from Step 3 with the failure context prepended (same pattern as `--resume` from `uat_failed`). After the next fix commit, the inline QA → UAT chain fires again automatically.
-
-**UAT pass:** If all checkpoints pass:
-
-- Move session to completed: the `complete` status set above handles this.
-- Display: `➜ Debug session complete. The fix is verified.`
-- STOP.
+Execute the `Inline UAT` section of `references/debug-inline-verification.md`. Follow its prompt gate, atomic checkpoint tool calls, persistence, failure loop, and completion output exactly.
 </debug_inline_uat>
 
 <debug_session_next_step>
