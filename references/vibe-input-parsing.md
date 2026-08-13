@@ -88,6 +88,7 @@ If flags present: skip confirmation gate (flags express explicit intent).
 ## Path 2: Natural Language Intent (VIBE-IP-03)
 
 If $ARGUMENTS present but no flags detected, interpret user intent:
+- Explicit external plan import or migration keywords (import this plan, migrate .planning, bring in external plans) -> Import mode
 - Discussion keywords (talk, discuss, explore, think about, what about) -> Discuss mode
 - Assumption keywords (assume, assuming, what if, what are you assuming) -> Assumptions mode
 - Planning keywords (plan, scope, break down, decompose, structure) -> Plan mode
@@ -98,6 +99,8 @@ If $ARGUMENTS present but no flags detected, interpret user intent:
 - Ambiguous -> AskUserQuestion with contextual options
 
 Confirm the interpreted intent with AskUserQuestion before executing.
+
+Explicit `--import [path]` routes to Import mode before state detection. Clear natural-language import intent also routes before the uninitialized-project redirect after confirmation. Existing remediation and lifecycle state routes retain their priority when import intent is absent.
 
 ## Path 3: State Detection (VIBE-IP-04)
 
@@ -132,7 +135,8 @@ State detects needs_uat_remediation and enters the mode inline. Step 4 displays 
 
 | Priority | Condition | Mode | Confirmation |
 | --- | --- | --- | --- |
-| 1 | `planning_dir_exists=false` | Init redirect | (redirect, no confirmation) |
+| 0.5 | explicit or confirmed import intent | Import | explicit flag: no confirmation. Natural language: confirm Import mode before execution. |
+| 1 | `planning_dir_exists=false` and no import intent | Init redirect | (redirect, no confirmation) |
 | 2 | `project_exists=false` | Bootstrap | → AskUserQuestion: "No project defined. Set one up?" |
 | 3 | `next_phase_state=needs_uat_remediation` | UAT Remediation | auto_uat=true: no confirmation. auto_uat=false: → AskUserQuestion: "Phase {NN} has unresolved UAT issues. Continue with remediation now?" |
 | 3.5 | `next_phase_state=needs_qa_remediation` | QA Remediation | auto_uat=true: no confirmation. auto_uat=false: → AskUserQuestion: "Phase {NN} has QA failures. Continue with QA remediation?" |

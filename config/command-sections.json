@@ -47,6 +47,9 @@
     "help.md": {
       "required_headings": ["Context", "Behavior"]
     },
+    "import.md": {
+      "required_headings": ["Shared interaction contract", "Context", "Guard", "Preview", "Promotion", "Failure and recovery", "Output Format", "Next Up"]
+    },
     "init.md": {
       "required_headings": ["Shared interaction contract", "Init interaction boundary", "Context", "Guard", "Steps", "Output Format"]
     },

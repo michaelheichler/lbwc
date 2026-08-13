@@ -1,7 +1,7 @@
 ---
 category: lifecycle
-description: "The one command. Detects state and parses intent. Routes to lifecycle modes including bootstrap, scope, plan, execute, verify, discuss, archive, and more."
-argument-hint: "[intent or flags]. Modes: [--plan] [--execute] [--verify] [--discuss] [--assumptions] [--scope] [--add] [--insert] [--remove] [--archive]. Modifiers: [--yolo] [--effort=level] [--skip-qa] [--skip-audit] [--plan=NN] [N]."
+description: "The one command. Detects state and parses intent. Routes to lifecycle modes including import, bootstrap, scope, plan, execute, verify, discuss, archive, and more."
+argument-hint: "[intent or flags]. Modes: [--import [path]] [--plan] [--execute] [--verify] [--discuss] [--assumptions] [--scope] [--add] [--insert] [--remove] [--archive]. Modifiers: [--yolo] [--effort=level] [--skip-qa] [--skip-audit] [--plan=NN] [N]."
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, SendMessage, Skill, LSP
 disable-model-invocation: true
 ---
@@ -63,6 +63,14 @@ Every mode triggers confirmation before executing. Follow the shared interaction
 | `milestone_uat_issues` | "Create remediation phases" | "Start fresh with new work", "Not now" |
 
 ## Modes
+
+### Mode: Import
+
+Explicit `--import [path]` and clear natural-language requests to import, migrate, or bring in external plans route here before Init Redirect. Do not infer import intent from ordinary planning language.
+
+If the project is uninitialized and an external plan source is detected, ask one bounded choice: `Import external plan`, `Start fresh initialization`, or `Cancel`. Import routes to `/lbwc:import`; fresh initialization routes to Init Redirect; cancel leaves project state unchanged.
+
+Read `commands/import.md` and execute that workflow inline in the main session. Preserve any active remediation state because import is an explicit user-selected interruption, not a replacement for the persisted remediation backlog. After promotion, re-run phase detection before selecting the next lifecycle mode.
 
 ### Mode: Init Redirect
 
