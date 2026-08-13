@@ -16,10 +16,82 @@ fail() {
 
 usage() {
   printf '%s\n' 'Usage: lbwc-config.sh <init|migrate|validate|get|set> <planning-dir> [setting] [json-value]' >&2
+  printf '%s\n' '       lbwc-config.sh agent-teams-status --settings PATH' >&2
+  printf '%s\n' '       lbwc-config.sh agent-teams-enable --settings PATH --approved' >&2
 }
 
 require_jq() {
   command -v jq >/dev/null 2>&1 || fail 'jq is required'
+}
+
+agent_teams_status() {
+  local settings_path="$1" setting_value
+  if [ "${CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:-}" = "1" ]; then
+    jq -n '{enabled:true,source:"environment"}'
+    return 0
+  fi
+  if [ -f "$settings_path" ]; then
+    jq -e 'type == "object"' "$settings_path" >/dev/null 2>&1 || fail "settings file is not valid JSON: $settings_path"
+    setting_value=$(jq -r '.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS // empty' "$settings_path")
+    if [ "$setting_value" = "1" ]; then
+      jq -n --arg path "$settings_path" '{enabled:true,source:"settings",settings_path:$path}'
+      return 0
+    fi
+  fi
+  jq -n --arg path "$settings_path" '{enabled:false,source:"none",settings_path:$path}'
+}
+
+agent_teams_enable() {
+  local settings_path="$1" approved="$2" temporary
+  [ "$approved" = true ] || fail 'agent teams setting requires explicit approval'
+  mkdir -p "$(dirname "$settings_path")"
+  [ -f "$settings_path" ] || printf '{}\n' > "$settings_path"
+  jq -e 'type == "object"' "$settings_path" >/dev/null 2>&1 || fail "settings file is not valid JSON: $settings_path"
+  temporary="${settings_path}.lbwc-agent-teams.tmp.${BASHPID:-$$}"
+  jq '.env = (.env // {}) | .env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1"' "$settings_path" > "$temporary" || {
+    rm -f "$temporary"
+    fail "could not write agent teams setting: $settings_path"
+  }
+  mv -f "$temporary" "$settings_path" || {
+    rm -f "$temporary"
+    fail "could not persist agent teams setting: $settings_path"
+  }
+  jq -n --arg path "$settings_path" '{enabled:true,source:"settings",settings_path:$path,restart_required:true,message:"Agent Teams enabled in settings. You must restart Claude Code before running /lbwc:team."}'
+}
+
+global_command() {
+  local command="$1" settings_path="" approved=false
+  shift
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --settings)
+        [ "$#" -ge 2 ] || fail '--settings requires a path'
+        settings_path="$2"
+        shift 2
+        ;;
+      --approved)
+        approved=true
+        shift
+        ;;
+      *)
+        fail "unknown agent teams option: $1"
+        ;;
+    esac
+  done
+  if [ -z "$settings_path" ]; then
+    if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
+      settings_path="$CLAUDE_CONFIG_DIR/settings.json"
+    elif [ -d "$HOME/.config/claude-code" ]; then
+      settings_path="$HOME/.config/claude-code/settings.json"
+    else
+      settings_path="$HOME/.claude/settings.json"
+    fi
+  fi
+  case "$command" in
+    agent-teams-status) [ "$approved" = false ] || fail '--approved is not valid for status'; agent_teams_status "$settings_path" ;;
+    agent-teams-enable) agent_teams_enable "$settings_path" "$approved" ;;
+    *) return 1 ;;
+  esac
 }
 
 parity_defaults_json() {
@@ -398,6 +470,13 @@ prepare_transaction_directory() {
 main() {
   local command="${1:-}" planning_dir="${2:-}"
   require_jq
+  case "$command" in
+    agent-teams-status|agent-teams-enable)
+      shift
+      global_command "$command" "$@"
+      return
+      ;;
+  esac
   [ -n "$command" ] && [ -n "$planning_dir" ] || { usage; exit 1; }
   [ -f "$ROUTING_PATH" ] || fail "routing transaction script is unavailable: $ROUTING_PATH"
   if [ "${LBWC_CONFIG_TRANSACTION_ACTIVE:-0}" != 1 ]; then

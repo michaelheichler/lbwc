@@ -160,6 +160,13 @@ scan_stale_worktrees() {
   done
 }
 
+scan_temporary_runs() {
+  local project_root
+  project_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+  [ -f "$SCRIPT_DIR/cleanup-temporary-agent-runfiles.sh" ] || return 0
+  bash "$SCRIPT_DIR/cleanup-temporary-agent-runfiles.sh" scan --project-root "$project_root"
+}
+
 cleanup_stale_teams() {
   if [ ! -f "$SCRIPT_DIR/clean-stale-teams.sh" ]; then
     log_action "skipped stale teams cleanup: helper unavailable"
@@ -266,6 +273,7 @@ case "$ACTION" in
     scan_process_records
     scan_stale_markers
     scan_stale_worktrees
+    scan_temporary_runs
     ;;
   cleanup)
     log_action "cleanup started"
@@ -274,13 +282,16 @@ case "$ACTION" in
     process_count=$(scan_process_records | wc -l | tr -d ' ')
     marker_count=$(scan_stale_markers | wc -l | tr -d ' ')
     worktree_count=$(scan_stale_worktrees | wc -l | tr -d ' ')
+    temporary_run_count=$(scan_temporary_runs | wc -l | tr -d ' ')
 
     cleanup_stale_teams
     report_process_records
     cleanup_stale_markers
     cleanup_stale_worktrees
+    project_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+    bash "$SCRIPT_DIR/cleanup-temporary-agent-runfiles.sh" cleanup --project-root "$project_root" 2>&1 | while IFS= read -r line; do log_action "$line"; done
 
-    log_action "cleanup complete: teams=$teams_count, process_records=$process_count, markers=$marker_count, worktrees=$worktree_count"
+    log_action "cleanup complete: teams=$teams_count, process_records=$process_count, markers=$marker_count, worktrees=$worktree_count, temporary_runs=$temporary_run_count"
     ;;
   *)
     echo "Usage: $0 {scan|cleanup}" >&2

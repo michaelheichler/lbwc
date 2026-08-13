@@ -123,6 +123,28 @@ teardown() {
   [[ "$output" == *"runtime or communication policy"* ]]
 }
 
+@test "native spawn guard rejects a conflicting model override" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/spawn-override" contract id name
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" spawn-override \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --write-capability directory:.)
+  id=$(basename "$contract" .json)
+  bash "$SCRIPTS_DIR/agent-generator.sh" --native-team web-engineer --job "scope" \
+    --task-id "$id" --contract "$contract" --control-root "$control_root" \
+    --write-capability directory:. >/dev/null
+  name=$(jq -r '.agents | keys[0]' "$control_root/agent-manifest.json")
+  bash "$SCRIPTS_DIR/task-contract.sh" state "$TEST_TEMP_DIR" "$id" dispatched >/dev/null
+
+  run bash -c 'jq -cn --arg name "$1" \
+    '\''{tool_name:"Agent",tool_input:{subagent_type:$name,model:"wrong-model"}}'\'' \
+    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"call-time model override conflicts with generated definition"* ]]
+  [ "$(jq -r --arg name "$name" '.agents[$name].state' "$control_root/agent-manifest.json")" = "registered" ]
+}
+
 @test "build contract serializes task teams within each dependency wave" {
   run grep -F \
     "Within a dependency wave, process tasks in PLAN order and admit exactly one task team at a time." \

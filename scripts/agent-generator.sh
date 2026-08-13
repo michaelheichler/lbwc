@@ -14,6 +14,7 @@ fail() {
 
 usage() {
   printf 'Usage: agent-generator.sh <role> --job <text> --contract <path> --task-id <id> [--exclusive] [--write-allowance <repo-path>] [overrides]\n' >&2
+  printf '       agent-generator.sh --native-team <role> --job <text> --contract <path> --task-id <id> [--write-capability <kind:path>]\n' >&2
   printf '       agent-generator.sh --pair <role> --job <text> --contract <path> --task-id <id> [--exclusive] [--pair-role <role>] [--write-allowance <repo-path>] [overrides]\n' >&2
   printf '       agent-generator.sh --trio <role> --job <text> --contract <path> --task-id <id> [--exclusive] [--write-allowance <repo-path>] [--role-write-allowance <role>:<repo-path>] [overrides]\n' >&2
   exit 1
@@ -26,11 +27,15 @@ is_valid_role() { jq -e --arg role "$1" 'has($role)' "$ROLE_DEFAULTS_PATH" >/dev
 
 PAIR_MODE=""
 TRIO_MODE=""
+NATIVE_TEAM_MODE=""
 if [ "${1:-}" = "--pair" ]; then
   PAIR_MODE=1
   shift
 elif [ "${1:-}" = "--trio" ]; then
   TRIO_MODE=1
+  shift
+elif [ "${1:-}" = "--native-team" ]; then
+  NATIVE_TEAM_MODE=1
   shift
 fi
 ROLE="${1:-}"
@@ -115,6 +120,13 @@ parse_options "$@"
 [ -z "$PAIR_ROLE_ARG" ] || [ -n "$PAIR_MODE" ] || fail "--pair-role is only valid with --pair"
 [ -z "$PAIR_ROLE_ARG" ] || [ -z "$TRIO_MODE" ] || fail "--pair-role is not valid with --trio"
 
+if [ -n "$NATIVE_TEAM_MODE" ]; then
+  for native_token in MODEL EFFORT MAX_TURNS TOOLS DISALLOWED_TOOLS DESCRIPTION PERMISSION_MODE SKILLS MCP_SERVERS MEMORY BACKGROUND ISOLATION COLOR INITIAL_PROMPT; do
+    [ "${OVERRIDES[$native_token]+set}" = set ] || continue
+    fail "native-team definition overrides are not allowed: $native_token"
+  done
+fi
+
 task_write_path_is_safe() {
   case "$1" in
     ''|/*|.|./*|*/.|..|../*|*/..|*/../*|*'//'*) return 1 ;;
@@ -146,6 +158,10 @@ CONFIG_PATH="$PROJECT_ROOT/.lbwc-planning/config.json"
 TEMPLATE_DEFAULTS="$PLUGIN_ROOT/templates/agent-roles/defaults.json"
 [ -f "$TEMPLATE_DEFAULTS" ] || fail "role defaults not found: $TEMPLATE_DEFAULTS"
 AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
+
+if [ -n "$NATIVE_TEAM_MODE" ]; then
+  mkdir -p "$CONTROL_ROOT/generated-agents"
+fi
 
 CONTRACT_ID=""
 CONTRACT_DIGEST=""
@@ -428,8 +444,21 @@ for i in "${!ROLE_WRITE_ALLOWANCE_ROLES[@]}"; do
 done
 
 renderer_args_for_role() {
-  local role="$1" token
+  local role="$1" token native_tools
   RENDER_ARGS=("NAME=$NAME" "JOB=$JOB" "MODEL=${ROLE_MODEL[$role]}" "MAX_TURNS=${ROLE_MAXTURNS[$role]}" "EFFORT=${ROLE_EFFORT[$role]}")
+  if [ -n "$NATIVE_TEAM_MODE" ]; then
+    native_tools=$(jq -r --arg role "$role" '.[$role].tools // ""' "$TEMPLATE_DEFAULTS")
+    if [ -z "$native_tools" ]; then
+      case "$role" in
+        *critic|qa|ux-oracle|deviq) native_tools="Read, Grep, Glob" ;;
+        *) native_tools="Read, Grep, Glob, Write, Edit" ;;
+      esac
+    fi
+    for coordination_tool in SendMessage TaskGet TaskList TaskUpdate; do
+      case ",$native_tools," in *",$coordination_tool,"*) ;; *) native_tools="$native_tools, $coordination_tool" ;; esac
+    done
+    RENDER_ARGS+=("TOOLS=$native_tools")
+  fi
   for token in DESCRIPTION TOOLS DISALLOWED_TOOLS PERMISSION_MODE SKILLS MCP_SERVERS MEMORY BACKGROUND ISOLATION COLOR INITIAL_PROMPT; do
     if [ "${OVERRIDES[$token]+set}" = set ]; then
       RENDER_ARGS+=("$token=${OVERRIDES[$token]}")
@@ -447,6 +476,10 @@ build_overrides_json() {
 
 build_write_allowances_json() {
   local role="$1" json='[]' path i
+  if [ "$CONTRACT_SCHEMA_VERSION" = "3" ]; then
+    jq -c --arg role "$role" '[.capabilities_by_role[$role][]?.path]' "$CONTRACT_PATH"
+    return
+  fi
   if role_is_critic "$role"; then
     printf '%s\n' "$json"
     return
@@ -475,11 +508,20 @@ render_and_install_one() {
     return 1
   fi
   mv -f "$tmp" "$TARGET" || { rm -f "$tmp"; return 1; }
+  if [ -n "$NATIVE_TEAM_MODE" ]; then
+    cp "$TARGET" "$CONTROL_ROOT/generated-agents/$NAME.md"
+  fi
 }
 
 register_entry() {
   local name="$1" role="$2" target="$3" pair_id="$4" pair_role="$5" overrides="$6" allowances="$7" created entry pid_json role_json
+  local tools disallowed_tools permission_mode initial_prompt definition_sha256
   created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  tools=$(grep -m1 '^tools:' "$target" | sed 's/^tools: "//; s/"$//' || true)
+  disallowed_tools=$(grep -m1 '^disallowedTools:' "$target" | sed 's/^disallowedTools: "//; s/"$//' || true)
+  permission_mode=$(grep -m1 '^permissionMode:' "$target" | sed 's/^permissionMode: "//; s/"$//' || true)
+  initial_prompt=$(grep -m1 '^initialPrompt:' "$target" | sed 's/^initialPrompt: "//; s/"$//' || true)
+  definition_sha256=$(shasum -a 256 "$target" | awk '{print $1}')
   pid_json=$([ -n "$pair_id" ] && jq -n --arg v "$pair_id" '$v' || printf 'null')
   role_json=$([ -n "$pair_role" ] && jq -n --arg v "$pair_role" '$v' || printf 'null')
   entry=$(jq -cn \
@@ -490,7 +532,9 @@ register_entry() {
     --arg contract_path "$CONTRACT_PATH" --arg contract_id "$CONTRACT_ID" --arg contract_digest "$CONTRACT_DIGEST" --arg task_id "$TASK_ID" \
     --arg control_root "$CONTROL_ROOT" --arg schema_version "$CONTRACT_SCHEMA_VERSION" --argjson capabilities "$(build_capabilities_json "$role")" \
     --arg runtime_kind "$CONTRACT_RUNTIME_KIND" --arg communication_policy "$CONTRACT_COMMUNICATION_POLICY" \
-    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if $runtime_kind != "" then {runtime_kind:$runtime_kind,communication_policy:$communication_policy} else {} end) + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
+    --arg tools "$tools" --arg disallowed_tools "$disallowed_tools" --arg permission_mode "$permission_mode" \
+    --arg initial_prompt "$initial_prompt" --arg definition_sha256 "$definition_sha256" --arg job "$JOB" \
+    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,tools:$tools,disallowed_tools:$disallowed_tools,permission_mode:$permission_mode,initial_prompt:$initial_prompt,definition_sha256:$definition_sha256,job:$job,definition_authority:"generated-definition",overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if $runtime_kind != "" then {runtime_kind:$runtime_kind,communication_policy:$communication_policy} else {} end) + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
   MANIFEST=$(jq -c --arg name "$name" --argjson entry "$entry" '.agents[$name] = $entry' <<< "$MANIFEST")
 }
 

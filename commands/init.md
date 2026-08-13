@@ -68,6 +68,8 @@ Skills:
 
 ## Steps
 
+Agent Teams is optional and is not enabled during initialization. `/lbwc:team` owns its explicit consent and restart flow.
+
 <!-- Steps 0-4: Infrastructure setup (environment, scaffold, hooks, mapping, summary) -->
 <!-- Steps 5-8: Auto-bootstrap (scenario detection, inference, bootstrap execution, completion) -->
 

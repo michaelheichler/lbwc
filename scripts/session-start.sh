@@ -42,6 +42,14 @@ if [ -x "$SCRIPT_DIR/map-staleness.sh" ]; then
   MAP_STALE_CTX=$(bash "$SCRIPT_DIR/map-staleness.sh" 2>/dev/null) || MAP_STALE_CTX=""
 fi
 
+TEMP_RUN_CLEANUP=""
+if [ -x "$SCRIPT_DIR/cleanup-temporary-agent-runfiles.sh" ]; then
+  PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if [ -n "$PROJECT_ROOT" ]; then
+    TEMP_RUN_CLEANUP=$(bash "$SCRIPT_DIR/cleanup-temporary-agent-runfiles.sh" cleanup --project-root "$PROJECT_ROOT" 2>/dev/null || true)
+  fi
+fi
+
 SWEPT_COUNT=0
 MANIFEST_FILE="$PLANNING_DIR/.agent-manifest.json"
 count_expired() {
@@ -95,6 +103,7 @@ fi
 [ -n "$MAP_STALE_CTX" ] && CTX="$CTX ${MAP_STALE_CTX}"
 [ "$SWEPT_COUNT" -gt 0 ] && CTX="$CTX Swept ${SWEPT_COUNT} stale agent(s) from the manifest."
 [ "$LIFECYCLE_STATUS" -ne 0 ] && [ -n "$AGENT_MANIFEST_STATUS" ] && CTX="$CTX lbwc: agent manifest status ${AGENT_MANIFEST_STATUS}."
+[ -n "$TEMP_RUN_CLEANUP" ] && CTX="$CTX Temporary agent run cleanup inspected retained state."
 
 jq -n --arg ctx "$CTX" '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":$ctx}}'
 exit 0

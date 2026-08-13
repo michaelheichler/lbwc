@@ -145,6 +145,27 @@ validate_entry_contract() {
   return 0
 }
 
+validate_native_call_authority() {
+  local entry="$1" call_input actual expected field
+  jq -e '.runtime_kind == "native-team"' <<< "$entry" >/dev/null 2>&1 || return 0
+  call_input=$(jq -c '.tool_input // {}' <<< "$INPUT") || return 1
+  for field in model maxTurns effort tools; do
+    jq -e --arg field "$field" 'has($field) and .[$field] != null' <<< "$call_input" >/dev/null 2>&1 || continue
+    actual=$(jq -c --arg field "$field" '.[$field]' <<< "$call_input") || return 1
+    case "$field" in
+      model) expected=$(jq -c '.model' <<< "$entry") ;;
+      maxTurns) expected=$(jq -c '.max_turns | tostring' <<< "$entry"); actual=$(jq -c 'tostring' <<< "$actual") ;;
+      effort) expected=$(jq -c '.effort' <<< "$entry") ;;
+      tools) expected=$(jq -c '.tools' <<< "$entry") ;;
+    esac
+    if [ "$actual" != "$expected" ]; then
+      NATIVE_CONFLICT_FIELD="$field"
+      return 32
+    fi
+  done
+  return 0
+}
+
 _mark_manifest_running() {
   local name="$1" manifest="$2" entry="$3" spawn_fields current now updated
   spawn_fields=$(jq -c '{model, maxTurns, permissionMode} | with_entries(select(.value != null))' <<< "$entry" 2>/dev/null) || return 1
@@ -171,6 +192,9 @@ _claim_manifest_spawn_locked() {
   validate_entry_contract "$name" "$entry" "$manifest"
   contract_status=$?
   [ "$contract_status" -eq 0 ] || { [ "$contract_status" -eq 2 ] && return 31; return 30; }
+  validate_native_call_authority "$entry"
+  native_call_status=$?
+  [ "$native_call_status" -eq 0 ] || return "$native_call_status"
 
   blocking=$(find_blocking_open_pair "$manifest" "$name")
   if [ -n "$blocking" ]; then
@@ -218,6 +242,10 @@ manifest_guard() {
       ;;
     31)
       echo "Blocked: generated agent '$SUBAGENT_TYPE' runtime or communication policy does not match its contract." >&2
+      exit 2
+      ;;
+    32)
+      echo "Blocked: call-time ${NATIVE_CONFLICT_FIELD:-value} override conflicts with generated definition." >&2
       exit 2
       ;;
     3)

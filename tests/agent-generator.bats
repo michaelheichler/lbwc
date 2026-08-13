@@ -265,6 +265,46 @@ make_contract() {
   ' "$control_root/agent-manifest.json" >/dev/null
 }
 
+@test "native-team generation renders native capabilities and records definition authority" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/native-definition" contract contract_id name
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" native-definition \
+    --command team --role web-engineer --team solo --job "implement the scoped task" \
+    --control-root "$control_root" --runtime-kind native-team \
+    --communication-policy native-team --write-capability directory:.)
+  contract_id=$(basename "$contract" .json)
+
+  run bash "$SCRIPTS_DIR/agent-generator.sh" --native-team web-engineer \
+    --job "implement the scoped task" --task-id "$contract_id" --contract "$contract" \
+    --control-root "$control_root" --write-capability directory:.
+
+  [ "$status" -eq 0 ]
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-web-engineer-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  grep -F 'SendMessage' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
+  grep -F 'TaskList' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
+  grep -F 'Write' "$TEST_TEMP_DIR/.claude/agents/$name.md" >/dev/null
+  jq -e --arg name "$name" '.agents[$name].definition_sha256 != null and .agents[$name].tools != null' \
+    "$control_root/agent-manifest.json" >/dev/null
+}
+
+@test "native-team generation rejects definition-field overrides" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/native-override" contract contract_id
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" native-override \
+    --command team --role web-engineer --team solo --job "implement the scoped task" \
+    --control-root "$control_root" --write-capability directory:.)
+  contract_id=$(basename "$contract" .json)
+
+  run bash "$SCRIPTS_DIR/agent-generator.sh" --native-team web-engineer \
+    --job "implement the scoped task" --task-id "$contract_id" --contract "$contract" \
+    --control-root "$control_root" --write-capability directory:. --model other-model
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"native-team definition overrides are not allowed"* ]]
+  [ ! -d "$TEST_TEMP_DIR/.claude/agents" ] || [ "$(find "$TEST_TEMP_DIR/.claude/agents" -type f | wc -l | tr -d ' ')" -eq 0 ]
+}
+
 @test "--pair with a pairsWith role prints ENGINEER and CRITIC SPAWN_READY lines" {
   generate --pair python-engineer --job "build a parser"
   [ "$status" -eq 0 ]

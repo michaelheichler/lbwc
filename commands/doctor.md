@@ -140,6 +140,10 @@ Run `bash "{plugin-root}/scripts/rtk-manager.sh" doctor-json 2>/dev/null`.
 
 If `.lbwc-planning/.agent-routing-evidence.jsonl` exists, run `bash "{plugin-root}/scripts/agent-routing-evidence.sh" check` and report its compact summary. PASS when no model mismatches are recorded. WARN when any model mismatch or stale running entry is reported. SKIP when the evidence file is absent.
 
+### 20. Temporary agent runs
+
+Read `temporary_run_*` findings from `doctor-cleanup.sh scan`. PASS when none exist. WARN for active or unreadable retained runs and old terminal runs awaiting cleanup. With `--cleanup`, remove only readable terminal runs older than 72 hours.
+
 ## Output Format
 
 ```
@@ -163,9 +167,10 @@ LBWC Doctor v{version}
  16. CLAUDE.md sections   {PASS|WARN|SKIP}
  17. State consistency    {PASS|WARN|SKIP}
  18. RTK integration      {PASS|WARN|SKIP} {detail}
- 19. Routing evidence     {PASS|WARN|SKIP} {detail}
+  19. Routing evidence     {PASS|WARN|SKIP} {detail}
+  20. Temporary runs       {PASS|WARN} {detail}
 
-Result: {N}/19 passed, {W} warnings, {F} failures
+Result: {N}/20 passed, {W} warnings, {F} failures
 ```
 
 Use checkmark for PASS, warning triangle for WARN, X for FAIL.

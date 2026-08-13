@@ -102,6 +102,9 @@
     "teach.md": {
       "required_headings": ["Purpose", "Main-session boundary", "Guard and state", "Convention structure", "Display contract", "Add a convention", "Remove a convention", "Refresh from the codebase", "Conflict and redundancy rules", "Convention injection", "Failure and recovery", "Verification", "Output style"]
     },
+    "team.md": {
+      "required_headings": ["Context", "Guard", "Steps", "Failure and recovery", "Output Format", "Next Up"]
+    },
     "todo.md": {
       "required_headings": ["Context", "Guard", "Steps", "Output Format"]
     },
