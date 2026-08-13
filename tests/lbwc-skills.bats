@@ -321,8 +321,11 @@ run_skills() {
 @test "skills command keeps installation consent in the main session" {
   COMMAND="$REPO_ROOT/commands/skills.md"
 
-  run grep -F 'name: lbwc:skills' "$COMMAND"
+  run grep -F 'category: supporting' "$COMMAND"
   [ "$status" -eq 0 ]
+  run awk 'NR == 1 {next} /^---$/ {exit} /^name:/' "$COMMAND"
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
   run grep -F 'allowed-tools:' "$COMMAND"
   [ "$status" -eq 0 ]
   run grep -F '  - Read' "$COMMAND"

@@ -1,5 +1,4 @@
 ---
-name: lbwc:report
 category: supporting
 disable-model-invocation: true
 description: Collect redacted local diagnostics, classify a bug or feature, and prepare a GitHub issue.

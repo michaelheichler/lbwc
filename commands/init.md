@@ -1,5 +1,4 @@
 ---
-name: lbwc:init
 category: lifecycle
 disable-model-invocation: true
 description: Set up environment, scaffold .lbwc-planning, detect project context, and bootstrap project-defining files.

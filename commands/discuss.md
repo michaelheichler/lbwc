@@ -1,5 +1,4 @@
 ---
-name: lbwc:discuss
 category: lifecycle
 description: "Start or continue phase discussion to build context before planning."
 argument-hint: "[N] [--assumptions]"

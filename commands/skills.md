@@ -1,5 +1,4 @@
 ---
-name: lbwc:skills
 category: supporting
 disable-model-invocation: true
 description: Inspect installed skills and discover stack-based candidates.

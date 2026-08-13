@@ -1,5 +1,4 @@
 ---
-name: lbwc:update
 category: advanced
 disable-model-invocation: true
 description: Update LBWC to the latest version with automatic cache refresh.

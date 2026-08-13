@@ -5,12 +5,11 @@ setup() {
   COMMAND="$REPO_ROOT/commands/teach.md"
 }
 
-@test "teach command keeps the exact six-key LBWC header contract" {
+@test "teach command keeps the filename-derived LBWC header contract" {
   run awk 'NR == 1 {next} /^---$/ {exit} {print}' "$COMMAND"
 
   [ "$status" -eq 0 ]
   [ "$output" = "$(cat <<'EOF'
-name: lbwc:teach
 category: supporting
 disable-model-invocation: true
 description: View, add, remove, refresh, and reconcile project conventions through the LBWC trusted shell layer.
@@ -21,8 +20,10 @@ EOF
 }
 
 @test "teach command is LBWC scoped and main-session only" {
-  run rg -n 'name: lbwc:teach|# LBWC Teach' "$COMMAND"
+  run rg -n '# LBWC Teach' "$COMMAND"
   [ "$status" -eq 0 ]
+  run rg -n '^name:' "$COMMAND"
+  [ "$status" -eq 1 ]
   run rg -n '\.vbw-planning|/vbw:teach|VBW Teach' "$COMMAND"
   [ "$status" -eq 1 ]
   run rg -n 'main session|AskUserQuestion' "$COMMAND"

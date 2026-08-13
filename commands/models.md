@@ -1,5 +1,4 @@
 ---
-name: lbwc:models
 category: supporting
 description: Inspect and configure detected Claude Code models through lbwc-model.
 argument-hint: '[--json] <refresh|show|activate|set|copy|validate|catalog> [arguments]'

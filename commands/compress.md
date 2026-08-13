@@ -1,5 +1,4 @@
 ---
-name: lbwc:compress
 category: supporting
 disable-model-invocation: true
 description: Compress a natural language file into caveman format to save input tokens. Preserves code blocks, URLs, and structure.

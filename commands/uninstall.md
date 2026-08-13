@@ -1,5 +1,4 @@
 ---
-name: lbwc:uninstall
 category: advanced
 disable-model-invocation: true
 description: Cleanly remove all LBWC traces from the system before plugin uninstall.

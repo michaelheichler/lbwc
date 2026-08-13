@@ -1,5 +1,4 @@
 ---
-name: lbwc:list-todos
 category: supporting
 disable-model-invocation: true
 description: List pending todos from STATE.md with action hints.

@@ -1,5 +1,4 @@
 ---
-name: lbwc:qa
 category: monitoring
 hidden: true
 disable-model-invocation: true

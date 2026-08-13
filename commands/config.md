@@ -1,5 +1,4 @@
 ---
-name: lbwc:config
 category: supporting
 disable-model-invocation: true
 description: View and modify LBWC configuration including effort profile, verification tier, and skill-hook wiring.

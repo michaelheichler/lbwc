@@ -1,5 +1,4 @@
 ---
-name: lbwc:resume
 category: supporting
 disable-model-invocation: true
 description: Restore project context from .lbwc-planning/ state.

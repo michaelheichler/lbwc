@@ -1,5 +1,4 @@
 ---
-name: lbwc:plan
 category: core
 description: Plan one existing phase through the full Vibe Plan protocol.
 argument-hint: "<phase number or name>"

@@ -1,5 +1,4 @@
 ---
-name: lbwc:vibe
 category: lifecycle
 description: "The one command. Detects state and parses intent. Routes to lifecycle modes including bootstrap, scope, plan, execute, verify, discuss, archive, and more."
 argument-hint: "[intent or flags]. Modes: [--plan] [--execute] [--verify] [--discuss] [--assumptions] [--scope] [--add] [--insert] [--remove] [--archive]. Modifiers: [--yolo] [--effort=level] [--skip-qa] [--skip-audit] [--plan=NN] [N]."

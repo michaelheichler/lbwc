@@ -1,5 +1,4 @@
 ---
-name: lbwc:doctor
 category: supporting
 disable-model-invocation: true
 description: Run health checks on LBWC installation and project setup.

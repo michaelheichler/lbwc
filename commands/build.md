@@ -1,5 +1,4 @@
 ---
-name: lbwc:build
 category: lifecycle
 disable-model-invocation: true
 description: Execute a phase PLAN through contract-bound pair or trio agents, one main-session commit per task, and a verified summary.

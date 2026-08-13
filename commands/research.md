@@ -1,5 +1,4 @@
 ---
-name: lbwc:research
 category: advanced
 disable-model-invocation: true
 description: Run standalone research from Scout evidence and main-session synthesis.

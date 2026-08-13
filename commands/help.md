@@ -1,5 +1,4 @@
 ---
-name: lbwc:help
 category: supporting
 disable-model-invocation: true
 description: Display all available LBWC commands with descriptions and usage examples.
@@ -33,9 +32,9 @@ Display the output above verbatim. Do not reformat, summarize, or add commentary
 
 ### With arg: Display specific command details
 
-Read `{plugin-root}/commands/{name}.md` (strip `lbwc:` prefix if present). Display:
+Strip the `lbwc:` prefix from `{name}` if present, validate the remainder as a command slug, then read `{plugin-root}/commands/{name}.md`. Display:
 
-- **Name** and **description** from frontmatter
+- **Name** from the command filename and **description** from frontmatter
 - **Category** from frontmatter
 - **Usage:** `/lbwc:{name} {argument-hint}`
 - **Arguments:** list from argument-hint with brief explanation

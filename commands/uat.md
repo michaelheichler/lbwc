@@ -1,5 +1,4 @@
 ---
-name: lbwc:uat
 category: core
 description: Run the full main-session human UAT checkpoint protocol for a phase.
 argument-hint: "<phase number or name>"

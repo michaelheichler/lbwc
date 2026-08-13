@@ -1,5 +1,4 @@
 ---
-name: lbwc:debug
 category: supporting
 disable-model-invocation: true
 description: Investigate a bug using the Debugger agent's scientific method protocol.

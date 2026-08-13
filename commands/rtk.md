@@ -1,5 +1,4 @@
 ---
-name: lbwc:rtk
 category: supporting
 disable-model-invocation: true
 description: Install, update, verify, and manage optional RTK tool-output compression.

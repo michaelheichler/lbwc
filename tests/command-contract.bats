@@ -19,7 +19,6 @@ write_valid_command() {
   local command_name=$1
   cat > "$FIXTURE/commands/$command_name.md" <<EOF
 ---
-name: lbwc:$command_name
 category: core
 description: Exercise the command contract checker.
 argument-hint: '[target]'
@@ -99,7 +98,7 @@ run_checker() {
   [[ "$output" == *'Command contract passed: 1 commands'* ]]
 }
 
-@test "command-contract rejects missing fields, empty values, and invalid names" {
+@test "command-contract rejects missing fields, empty values, and obsolete names" {
   write_valid_command beta
   write_manifest alpha.md beta.md
   python3 - "$FIXTURE/commands/alpha.md" <<'PY'
@@ -115,7 +114,7 @@ PY
 import sys
 
 path = sys.argv[1]
-text = open(path, encoding="utf-8").read().replace("name: lbwc:beta", "name: alpha")
+text = open(path, encoding="utf-8").read().replace("---\ncategory:", "---\nname: lbwc:beta\ncategory:")
 open(path, "w", encoding="utf-8").write(text)
 PY
 
@@ -124,24 +123,17 @@ PY
   [ "$status" -eq 1 ]
   [[ "$output" == *'alpha.md: empty frontmatter field: category'* ]]
   [[ "$output" == *'alpha.md: missing frontmatter field: argument-hint'* ]]
-  [[ "$output" == *'beta.md: name must start with lbwc:'* ]]
+  [[ "$output" == *'beta.md: frontmatter must not define name'* ]]
 }
 
-@test "command-contract rejects duplicate LBWC command names" {
-  write_valid_command beta
-  write_manifest alpha.md beta.md
-  python3 - "$FIXTURE/commands/beta.md" <<'PY'
-import sys
-
-path = sys.argv[1]
-text = open(path, encoding="utf-8").read().replace("name: lbwc:beta", "name: lbwc:alpha")
-open(path, "w", encoding="utf-8").write(text)
-PY
+@test "command-contract rejects command filenames outside the local slug format" {
+  write_valid_command Beta
+  write_manifest alpha.md Beta.md
 
   run_checker
 
   [ "$status" -eq 1 ]
-  [[ "$output" == *'duplicate command name: lbwc:alpha'* ]]
+  [[ "$output" == *'Beta.md: command filename must match [a-z0-9][a-z0-9-]*.md'* ]]
 }
 
 @test "command-contract rejects unallowlisted legacy identifiers" {

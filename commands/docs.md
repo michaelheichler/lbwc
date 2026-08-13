@@ -1,5 +1,4 @@
 ---
-name: lbwc:docs
 category: core
 description: Run a standalone documentation job through the contracted docs role.
 argument-hint: "<what to document or update>"

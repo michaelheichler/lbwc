@@ -1,5 +1,4 @@
 ---
-name: lbwc:teach
 category: supporting
 disable-model-invocation: true
 description: View, add, remove, refresh, and reconcile project conventions through the LBWC trusted shell layer.

@@ -26,11 +26,9 @@ import glob
 import json
 import re
 import sys
-from collections import Counter
 from pathlib import Path
 
 REQUIRED_FIELDS = (
-    "name",
     "category",
     "description",
     "argument-hint",
@@ -199,9 +197,10 @@ def validate_command(path, root, entry, patterns):
             errors.append(f"{path.name}: missing frontmatter field: {field}")
         elif scalar_is_empty(fields[field]):
             errors.append(f"{path.name}: empty frontmatter field: {field}")
-    name = fields.get("name", "")
-    if name and not re.fullmatch(r"lbwc:[a-z0-9][a-z0-9-]*", name):
-        errors.append(f"{path.name}: name must start with lbwc: and use a command slug")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*\.md", path.name):
+        errors.append(f"{path.name}: command filename must match [a-z0-9][a-z0-9-]*.md")
+    if "name" in fields:
+        errors.append(f"{path.name}: frontmatter must not define name")
     for reference in referenced_paths(text):
         if not reference_exists(root, reference):
             errors.append(f"{path.name}: missing referenced path: {reference}")
@@ -216,7 +215,7 @@ def validate_command(path, root, entry, patterns):
         for contract, pattern in patterns.items():
             if not pattern.search(text):
                 errors.append(f"{path.name}: missing {contract} contract")
-    return name, errors
+    return errors
 
 
 def validate_legacy_identifiers(root, allowlist, allowlist_path):
@@ -259,15 +258,8 @@ def main():
     for filename in sorted(set(section_entries) - command_names):
         errors.append(f"section manifest names a missing command: {filename}")
 
-    discovered_names = []
     for path in command_paths:
-        name, command_errors = validate_command(path, root, section_entries.get(path.name), patterns)
-        if name:
-            discovered_names.append(name)
-        errors.extend(command_errors)
-    for name, count in sorted(Counter(discovered_names).items()):
-        if count > 1:
-            errors.append(f"duplicate command name: {name}")
+        errors.extend(validate_command(path, root, section_entries.get(path.name), patterns))
 
     errors.extend(validate_legacy_identifiers(root, allowlist, allowlist_path))
     unique_errors = sorted(set(errors))

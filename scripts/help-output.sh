@@ -12,11 +12,25 @@ if [ -z "$PLUGIN_ROOT" ] || [ ! -d "$PLUGIN_ROOT" ]; then
 fi
 
 COMMANDS_DIR="$PLUGIN_ROOT/commands"
+PLUGIN_MANIFEST="$PLUGIN_ROOT/.claude-plugin/plugin.json"
 
 if [ ! -d "$COMMANDS_DIR" ]; then
   echo "⚠ Commands directory not found: $COMMANDS_DIR"
   exit 1
 fi
+
+if [ ! -f "$PLUGIN_MANIFEST" ]; then
+  echo "⚠ Plugin manifest not found: $PLUGIN_MANIFEST"
+  exit 1
+fi
+if ! command -v jq >/dev/null 2>&1; then
+  echo "⚠ jq is required to read the plugin manifest"
+  exit 1
+fi
+PLUGIN_NAME=$(jq -er '.name | select(type == "string" and length > 0)' "$PLUGIN_MANIFEST") || {
+  echo "⚠ Plugin manifest has no valid name: $PLUGIN_MANIFEST"
+  exit 1
+}
 
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -28,7 +42,8 @@ done
 for file in "$COMMANDS_DIR"/*.md; do
   [ -f "$file" ] || continue
 
-  name=""
+  slug=${file##*/}
+  slug=${slug%.md}
   description=""
   category=""
   hint=""
@@ -45,7 +60,6 @@ for file in "$COMMANDS_DIR"/*.md; do
     fi
     if [ "$in_frontmatter" -eq 1 ]; then
       case "$line" in
-        name:*) name="${line#name: }" ; name="${name#name:}" ; name="${name# }" ;;
         description:*) description="${line#description: }" ; description="${description#description:}" ; description="${description# }" ; description="${description#\"}" ; description="${description%\"}" ;;
         category:*) category="${line#category: }" ; category="${category#category:}" ; category="${category# }" ;;
         argument-hint:*) hint="${line#argument-hint: }" ; hint="${hint#argument-hint:}" ; hint="${hint# }" ; hint="${hint#\"}" ; hint="${hint%\"}" ;;
@@ -54,13 +68,12 @@ for file in "$COMMANDS_DIR"/*.md; do
     fi
   done < "$file"
 
-  [ -z "$name" ] && continue
   [ "$hidden" = "true" ] && continue
 
   if [ -n "$hint" ]; then
-    entry="  /$name $hint"
+    entry="  /$PLUGIN_NAME:$slug $hint"
   else
-    entry="  /$name"
+    entry="  /$PLUGIN_NAME:$slug"
   fi
   padded=$(printf "%-42s" "$entry")
   display_line="$padded $description"

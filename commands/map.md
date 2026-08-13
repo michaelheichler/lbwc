@@ -1,5 +1,4 @@
 ---
-name: lbwc:map
 category: advanced
 disable-model-invocation: true
 description: Produce a structured codebase map from inline analysis and Scout evidence.

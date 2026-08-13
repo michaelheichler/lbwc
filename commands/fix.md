@@ -1,5 +1,4 @@
 ---
-name: lbwc:fix
 category: supporting
 disable-model-invocation: true
 description: Apply a quick fix or small change with commit discipline. Turbo mode, no planning ceremony.
