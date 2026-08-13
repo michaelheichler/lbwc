@@ -28,14 +28,15 @@ is_valid_role() { jq -e --arg role "$1" 'has($role)' "$ROLE_DEFAULTS_PATH" >/dev
 PAIR_MODE=""
 TRIO_MODE=""
 NATIVE_TEAM_MODE=""
+if [ "${1:-}" = "--native-team" ]; then
+  NATIVE_TEAM_MODE=1
+  shift
+fi
 if [ "${1:-}" = "--pair" ]; then
   PAIR_MODE=1
   shift
 elif [ "${1:-}" = "--trio" ]; then
   TRIO_MODE=1
-  shift
-elif [ "${1:-}" = "--native-team" ]; then
-  NATIVE_TEAM_MODE=1
   shift
 fi
 ROLE="${1:-}"
@@ -154,7 +155,17 @@ else
   CONTROL_ROOT=$(lbwc_control_root_validate "$PROJECT_ROOT/.lbwc-planning" 1) || fail "active planning control root is unavailable"
 fi
 PLANNING_DIR="$CONTROL_ROOT"
-CONFIG_PATH="$PROJECT_ROOT/.lbwc-planning/config.json"
+if [ "$(basename "$CONTROL_ROOT")" = ".lbwc-planning" ]; then
+  CONFIG_PATH="$CONTROL_ROOT/config.json"
+else
+  CONFIG_PATH="$CONTROL_ROOT/routing.json"
+  if [ ! -f "$CONFIG_PATH" ]; then
+    temporary="${CONFIG_PATH}.tmp.${BASHPID:-$$}"
+    jq -cn '{schema_version:1,routing_source:"temporary-control-root",routing:{active_profile:"balanced",profiles:{balanced:{roles:{}}}}}' > "$temporary" \
+      || fail "could not write temporary routing configuration: $CONFIG_PATH"
+    mv -f "$temporary" "$CONFIG_PATH" || { rm -f "$temporary"; fail "could not persist temporary routing configuration: $CONFIG_PATH"; }
+  fi
+fi
 TEMPLATE_DEFAULTS="$PLUGIN_ROOT/templates/agent-roles/defaults.json"
 [ -f "$TEMPLATE_DEFAULTS" ] || fail "role defaults not found: $TEMPLATE_DEFAULTS"
 AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
@@ -297,7 +308,17 @@ resolve_role_settings() {
   settings_script="${LBWC_AGENT_SETTINGS_SCRIPT:-$SCRIPT_DIR/resolve-agent-settings.sh}"
   [ -f "$settings_script" ] || fail "agent settings resolver not found"
 
-  local -a resolver_args=("$role" "$CONFIG_PATH" "$PLUGIN_ROOT")
+  TEMPORARY_CONTROL_ROOT=false
+  if [ "$(basename "$CONTROL_ROOT")" != ".lbwc-planning" ]; then
+    TEMPORARY_CONTROL_ROOT=true
+  fi
+  local -a resolver_args=("$role")
+  if [ "$TEMPORARY_CONTROL_ROOT" = true ]; then
+    resolver_args+=(--routing "$CONFIG_PATH")
+  else
+    resolver_args+=("$CONFIG_PATH")
+  fi
+  resolver_args+=("$PLUGIN_ROOT")
   [ "${OVERRIDES[MODEL]+set}" = set ] && resolver_args+=(--model "${OVERRIDES[MODEL]}")
   [ "${OVERRIDES[EFFORT]+set}" = set ] && resolver_args+=(--effort "${OVERRIDES[EFFORT]}")
   [ "${OVERRIDES[REASONING]+set}" = set ] && resolver_args+=(--reasoning "${OVERRIDES[REASONING]}")
@@ -313,6 +334,7 @@ resolve_role_settings() {
   RESOLVED_REASONING_JSON=""
   parse_resolved_settings "$settings"
   [ -n "$RESOLVED_AGENT_MODEL" ] || fail "resolver omitted the Claude Code model selector for '$role'"
+  [ -n "$RESOLVED_MAX_TURNS" ] || fail "resolver omitted the max turns value for '$role'"
   jq -e 'type == "string" or . == null' <<< "$RESOLVED_REASONING_JSON" >/dev/null 2>&1 \
     || fail "resolver emitted invalid reasoning JSON for '$role'"
 
@@ -445,7 +467,9 @@ done
 
 renderer_args_for_role() {
   local role="$1" token native_tools
-  RENDER_ARGS=("NAME=$NAME" "JOB=$JOB" "MODEL=${ROLE_MODEL[$role]}" "MAX_TURNS=${ROLE_MAXTURNS[$role]}" "EFFORT=${ROLE_EFFORT[$role]}")
+  RENDER_ARGS=("NAME=$NAME" "JOB=$JOB" "MAX_TURNS=${ROLE_MAXTURNS[$role]}")
+  [ -n "${ROLE_MODEL[$role]}" ] || fail "no authoritative model resolved for '$role'"
+  RENDER_ARGS+=("MODEL=${ROLE_MODEL[$role]}" "EFFORT=${ROLE_EFFORT[$role]}")
   if [ -n "$NATIVE_TEAM_MODE" ]; then
     native_tools=$(jq -r --arg role "$role" '.[$role].tools // ""' "$TEMPLATE_DEFAULTS")
     if [ -z "$native_tools" ]; then
@@ -527,7 +551,7 @@ register_entry() {
   entry=$(jq -cn \
     --arg name "$name" --arg role "$role" --arg project_root "$PROJECT_ROOT" \
     --arg definition_path "$target" --arg created_at "$created" \
-    --arg model "${ROLE_MODEL[$role]}" --argjson effort "${ROLE_REASONING_JSON[$role]}" --arg max_turns "${ROLE_MAXTURNS[$role]}" \
+    --arg model "${ROLE_MODEL[$role]}" --argjson effort "${ROLE_REASONING_JSON[$role]:-null}" --arg max_turns "${ROLE_MAXTURNS[$role]}" \
     --argjson overrides "$overrides" --argjson allowances "$allowances" --argjson pair_id "$pid_json" --argjson pair_role "$role_json" \
     --arg contract_path "$CONTRACT_PATH" --arg contract_id "$CONTRACT_ID" --arg contract_digest "$CONTRACT_DIGEST" --arg task_id "$TASK_ID" \
     --arg control_root "$CONTROL_ROOT" --arg schema_version "$CONTRACT_SCHEMA_VERSION" --argjson capabilities "$(build_capabilities_json "$role")" \
