@@ -206,6 +206,21 @@ EOF
   [ "$(find "$CONTROL_ROOT/.runtime" -type f -exec cksum {} \; | sort)" = "$before" ]
 }
 
+@test "tmux doctor: shutdown agents without routes are PASS" {
+  plant_healthy_runtime
+  registry=$(jq '
+    .agents |= map(if .agent_id == "agent-a" then .state = "shutdown" else . end)
+    | .routes |= del(.["agent-a"])
+  ' "$CONTROL_ROOT/.runtime/tmux-bus/registry.json")
+  tmux_runtime_write_registry_route_bundle "$registry"
+
+  run_tmux_doctor
+
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.status' <<<"$output")" = PASS ]
+  [ "$(jq -r '.detail' <<<"$output")" = 'backend=tmux session=lbwc-main panes=1/1 agents=1 running:0 idle:0 failed:0 heartbeats=fresh' ]
+}
+
 @test "doctor resolves the unavailable-runtime preflight helper before invoking it" {
   run grep -c '^!`' "$DOCTOR"
   [ "$status" -eq 0 ]

@@ -396,10 +396,30 @@ command_heartbeat() {
     *) fail "agent lifecycle state is malformed: $agent_id" ;;
   esac
   main_id=$(jq -r '.main.agent_id' <<<"$registry")
-  updated=$(jq --arg id "$agent_id" --arg state "$state" --argjson now "$(tmux_runtime_now_ms)" '.agents |= map(if .agent_id == $id then .state = $state | .heartbeat_at_ms = $now else . end)' <<<"$registry")
-  tmux_runtime_registry_write "$updated"
-  tmux_runtime_lock_release registry
-  command_publish "$main_id" "$agent_id" "$session_id" agent "$capability" heartbeat heartbeat "$(jq -n --arg state "$state" '{state: $state}')" 5000 >/dev/null
+  if [ "$state" = shutdown ]; then
+    tmux_runtime_lock_release registry
+    command_publish "$main_id" "$agent_id" "$session_id" agent "$capability" heartbeat heartbeat "$(jq -n --arg state "$state" '{state: $state}')" 5000 >/dev/null
+    tmux_runtime_lock_acquire registry 5000 30000
+    registry=$(tmux_runtime_registry_read) || fail 'runtime registry is malformed'
+    current_state=$(jq -r --arg id "$agent_id" '.agents[] | select(.agent_id == $id) | .state' <<<"$registry")
+    case "$current_state" in
+      registered|running|idle) ;;
+      failed|shutdown) fail "agent is in a terminal lifecycle state: $agent_id" ;;
+      *) fail "agent lifecycle state is malformed: $agent_id" ;;
+    esac
+    updated=$(jq --arg id "$agent_id" --argjson now "$(tmux_runtime_now_ms)" '
+      .main.agent_id as $main_id
+      | .agents |= map(if .agent_id == $id then .state = "shutdown" | .heartbeat_at_ms = $now else . end)
+      | .routes |= with_entries(.key as $route_id | select($route_id == $main_id or $route_id != $id))
+    ' <<<"$registry")
+    tmux_runtime_write_registry_route_bundle "$updated"
+    tmux_runtime_lock_release registry
+  else
+    updated=$(jq --arg id "$agent_id" --arg state "$state" --argjson now "$(tmux_runtime_now_ms)" '.agents |= map(if .agent_id == $id then .state = $state | .heartbeat_at_ms = $now else . end)' <<<"$registry")
+    tmux_runtime_registry_write "$updated"
+    tmux_runtime_lock_release registry
+    command_publish "$main_id" "$agent_id" "$session_id" agent "$capability" heartbeat heartbeat "$(jq -n --arg state "$state" '{state: $state}')" 5000 >/dev/null
+  fi
   tmux_runtime_lock_release "$heartbeat_lock"
 }
 

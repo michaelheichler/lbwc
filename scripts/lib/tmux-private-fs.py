@@ -315,7 +315,7 @@ def list_json(path: str) -> None:
     try:
         private_directory(dir_fd, path)
         timed: list[tuple[int, str]] = []
-        for name in os.listdir(dir_fd):
+        for name in os.listdir(path):
             if not name.endswith(".json") or name in {".", ".."} or "/" in name:
                 continue
             try:

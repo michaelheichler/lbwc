@@ -375,6 +375,21 @@ publish_main_job() {
   [ "$status" -eq 0 ]
 }
 
+@test "heartbeat shutdown drops the agent route and keeps the registry valid" {
+  fixture_bus
+  plant_agent agent-a child-session-a
+
+  run_bus heartbeat --agent-id agent-a --session-id child-session-a --capability "$AGENT_CAPABILITY" --state shutdown
+
+  [ "$status" -eq 0 ]
+  run jq -e '.agents[] | select(.agent_id == "agent-a") | .state == "shutdown"' "$CONTROL_ROOT/.runtime/tmux-bus/registry.json"
+  [ "$status" -eq 0 ]
+  run jq -e '.routes | keys | sort == ["main-session"]' "$CONTROL_ROOT/.runtime/tmux-bus/registry.json"
+  [ "$status" -eq 0 ]
+  run jq -e '.routes | keys | sort == ["main-session"]' "$CONTROL_ROOT/.runtime/tmux-bus/routing-table.json"
+  [ "$status" -eq 0 ]
+}
+
 @test "persisted record times use epoch milliseconds after a simulated reboot" {
   fixture_bus
   plant_agent agent-a child-session-a

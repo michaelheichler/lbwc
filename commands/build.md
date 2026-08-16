@@ -124,7 +124,7 @@ Before opening a grouping contract, resolve `{PHASE_DIR}` as the selected canoni
 
    This moves runtime state from `ready` to `cleaned`. A failed or blocked build preserves the snapshot for resume. A cleanup failure blocks the terminal transition and must be reported.
 
-When the snapshot resolves `in_process`, use the native Agent path below unchanged. When it resolves `tmux`, follow `references/tmux-spawn-protocol.md` after issuing and generating the same contract.
+When the snapshot resolves `in_process` or `tmux`, use the native Agent path below unchanged. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. Pane spawn is not wired in this destack.
 
 For one wave, take the next task in PLAN order and generate only its current grouping with `--exclusive`, following `@references/agent-spawn-protocol.md`. For a pair or trio, spawn every member of that one grouping together in the same turn. Derive each member's manifest capability from the task's `files` field. Pass source paths through `--write-allowance` for the engineer and test paths through `--role-write-allowance test-dev:<exact-path>` for a non-TDD trio. Give the engineer the task's `name`, `action`, `verify`, and `done` fields verbatim as its brief. Do not ask an agent to declare or summarize file scope. Run the contract open and generator arguments in the preceding section after role selection and before this invocation.
 

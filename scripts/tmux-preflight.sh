@@ -65,6 +65,8 @@ command -v tmux >/dev/null 2>&1 || fail 'tmux is unavailable; install tmux 3.0 o
 command -v claude >/dev/null 2>&1 || fail 'claude is unavailable on PATH; install or expose the Claude Code CLI'
 command -v jq >/dev/null 2>&1 || fail 'jq is unavailable; install jq to manage the tmux registry'
 command -v python3 >/dev/null 2>&1 || fail 'python3 is unavailable; install Python 3 for private tmux runtime verification'
+command -v uuidgen >/dev/null 2>&1 || fail 'uuidgen is unavailable; install uuidgen for tmux message identifiers'
+command -v perl >/dev/null 2>&1 || fail 'perl is unavailable; install perl for tmux runtime clocks'
 
 tmux_version=$(tmux -V 2>/dev/null || true)
 tmux_version_is_supported "$tmux_version" || fail "tmux 3.0 or later is required; found: ${tmux_version:-unreadable}"

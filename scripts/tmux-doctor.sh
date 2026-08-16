@@ -37,7 +37,7 @@ routing_table_valid() {
     and all(.routes | to_entries[]; . as $route | ($route.value | type == "object" and .agent_id == $route.key and (.inbox == $route.key) and ((.session_id == null) or (.session_id | token)) and ((.contract_id == null) or (.contract_id | token)) and (.tmux_target | target)))
     and (.routes[($registry.main.agent_id)].session_id == $registry.main.session_id)
     and (.routes[($registry.main.agent_id)].contract_id == null)
-    and all($registry.agents[]; . as $agent | ($table.routes[$agent.agent_id].session_id == $agent.claude_session_id and $table.routes[$agent.agent_id].contract_id == $agent.contract_id))
+    and all($registry.agents[] | select(.state != "shutdown"); . as $agent | ($table.routes[$agent.agent_id].session_id == $agent.claude_session_id and $table.routes[$agent.agent_id].contract_id == $agent.contract_id))
   ' "$path" >/dev/null 2>&1
 }
 
