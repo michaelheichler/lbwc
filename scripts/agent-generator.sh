@@ -58,6 +58,7 @@ PAIR_ROLE_ARG=""
 EXCLUSIVE_MODE=""
 CONTRACT_PATH=""
 TASK_ID=""
+EXECUTION_BACKEND_OVERRIDE=""
 
 option_token() { agent_field_token "$1"; }
 
@@ -67,6 +68,7 @@ apply_option() {
     --job) JOB="$value" ;;
     --contract|--contract-input) CONTRACT_PATH="$value" ;;
     --task-id|--task-identity) TASK_ID="$value" ;;
+    --execution-backend) EXECUTION_BACKEND_OVERRIDE="$value" ;;
     --control-root) CONTROL_ROOT_ARG="$value" ;;
     --pair-role) PAIR_ROLE_ARG="$value" ;;
     --write-allowance) WRITE_ALLOWANCES+=("$value") ;;
@@ -181,6 +183,8 @@ CONTRACT_CAPABILITIES_JSON='[]'
 CONTRACT_SCHEMA_VERSION=2
 CONTRACT_RUNTIME_KIND=""
 CONTRACT_COMMUNICATION_POLICY=""
+CONTRACT_REQUESTED_BACKEND=""
+CONTRACT_RESOLVED_BACKEND=""
 CONTRACT_CAPABILITY_ARGS_JSON='[]'
 declare -A CONTRACT_ROLE_CAPABILITIES=()
 validate_contract() {
@@ -203,6 +207,11 @@ validate_contract() {
     CONTRACT_CAPABILITIES_JSON=$(jq -ce --arg role "$ROLE" '.capabilities_by_role[$role] | select(type == "array")' <<< "$contract") || fail "contract capabilities are invalid"
     CONTRACT_RUNTIME_KIND=$(jq -r '.runtime_kind // empty' <<< "$contract")
     CONTRACT_COMMUNICATION_POLICY=$(jq -r '.communication_policy // empty' <<< "$contract")
+    CONTRACT_REQUESTED_BACKEND=$(jq -r '.requested_backend // empty' <<< "$contract")
+    CONTRACT_RESOLVED_BACKEND=$(jq -r '.resolved_backend // empty' <<< "$contract")
+    case "$CONTRACT_REQUESTED_BACKEND" in in_process|tmux) ;; *) fail "contract requested backend is invalid" ;; esac
+    case "$CONTRACT_RESOLVED_BACKEND" in in_process|tmux) ;; *) fail "contract resolved backend is invalid" ;; esac
+    [ "$CONTRACT_REQUESTED_BACKEND" = "$CONTRACT_RESOLVED_BACKEND" ] || fail "contract backend resolution is invalid"
     CONTRACT_CAPABILITY_ARGS_JSON=$(printf '%s\n' "${WRITE_CAPABILITIES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0) | (split(":")) | select(length == 2) | {access:"write",kind:.[0],path:.[1]})')
     jq -ne --argjson requested "$CONTRACT_CAPABILITY_ARGS_JSON" --argjson allowed "$CONTRACT_CAPABILITIES_JSON" '$requested == $allowed' >/dev/null || fail "write capabilities do not match contract"
     for contract_role in $(jq -r '.roles[]' <<< "$contract"); do
@@ -401,6 +410,20 @@ elif [ -n "$TRIO_MODE" ]; then
   TEAM_ROLES=("${TRIO_ROLES[@]}")
 fi
 
+validate_execution_backend_override() {
+  [ -n "$EXECUTION_BACKEND_OVERRIDE" ] || return 0
+  case "$EXECUTION_BACKEND_OVERRIDE" in
+    in_process|tmux) ;;
+    *) fail "invalid execution backend override '$EXECUTION_BACKEND_OVERRIDE'" ;;
+  esac
+  [ "$CONTRACT_SCHEMA_VERSION" = "3" ] || fail "execution backend overrides require a schema 3 contract"
+  [ "$EXECUTION_BACKEND_OVERRIDE" = "$CONTRACT_REQUESTED_BACKEND" ] \
+    && [ "$EXECUTION_BACKEND_OVERRIDE" = "$CONTRACT_RESOLVED_BACKEND" ] \
+    || fail "execution backend override conflicts with contract"
+}
+
+validate_execution_backend_override
+
 build_capabilities_json() {
   local role="$1" raw kind path role_capability_index
   if [ "$CONTRACT_SCHEMA_VERSION" != "3" ]; then
@@ -521,6 +544,17 @@ build_write_allowances_json() {
   printf '%s\n' "$json"
 }
 
+execution_metadata_json() {
+  local name="$1" role="$2"
+  jq -cn \
+    --arg role "$role" --arg model "${ROLE_MODEL[$role]}" --argjson effort "${ROLE_REASONING_JSON[$role]:-null}" \
+    --arg max_turns "${ROLE_MAXTURNS[$role]}" --arg contract_id "$CONTRACT_ID" \
+    --arg contract_digest "$CONTRACT_DIGEST" --arg task_identity "$TASK_ID" \
+    --arg requested_backend "$CONTRACT_REQUESTED_BACKEND" --arg resolved_backend "$CONTRACT_RESOLVED_BACKEND" \
+    --arg name "$name" --arg control_root "$CONTROL_ROOT" \
+    '{role:$role,model:$model,effort:$effort,max_turns:$max_turns,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_identity,requested_backend:$requested_backend,resolved_backend:$resolved_backend} + (if $resolved_backend == "tmux" then {tmux_bootstrap:{child_identity:$name,contract_id:$contract_id,control_root:$control_root}} else {} end)'
+}
+
 render_and_install_one() {
   local role="$1" tmp
   NAME=$(choose_name "$role" "$MANIFEST" "$AGENTS_DIR") || return 1
@@ -538,7 +572,7 @@ render_and_install_one() {
 }
 
 register_entry() {
-  local name="$1" role="$2" target="$3" pair_id="$4" pair_role="$5" overrides="$6" allowances="$7" created entry pid_json role_json
+  local name="$1" role="$2" target="$3" pair_id="$4" pair_role="$5" overrides="$6" allowances="$7" created entry pid_json role_json execution_json
   local tools disallowed_tools permission_mode initial_prompt definition_sha256
   created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   tools=$(grep -m1 '^tools:' "$target" | sed 's/^tools: "//; s/"$//' || true)
@@ -548,6 +582,7 @@ register_entry() {
   definition_sha256=$(shasum -a 256 "$target" | awk '{print $1}')
   pid_json=$([ -n "$pair_id" ] && jq -n --arg v "$pair_id" '$v' || printf 'null')
   role_json=$([ -n "$pair_role" ] && jq -n --arg v "$pair_role" '$v' || printf 'null')
+  execution_json=$(execution_metadata_json "$name" "$role")
   entry=$(jq -cn \
     --arg name "$name" --arg role "$role" --arg project_root "$PROJECT_ROOT" \
     --arg definition_path "$target" --arg created_at "$created" \
@@ -558,7 +593,8 @@ register_entry() {
     --arg runtime_kind "$CONTRACT_RUNTIME_KIND" --arg communication_policy "$CONTRACT_COMMUNICATION_POLICY" \
     --arg tools "$tools" --arg disallowed_tools "$disallowed_tools" --arg permission_mode "$permission_mode" \
     --arg initial_prompt "$initial_prompt" --arg definition_sha256 "$definition_sha256" --arg job "$JOB" \
-    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,tools:$tools,disallowed_tools:$disallowed_tools,permission_mode:$permission_mode,initial_prompt:$initial_prompt,definition_sha256:$definition_sha256,job:$job,definition_authority:"generated-definition",overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if $runtime_kind != "" then {runtime_kind:$runtime_kind,communication_policy:$communication_policy} else {} end) + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
+    --argjson execution "$execution_json" \
+    '{name:$name,role:$role,project_root:$project_root,control_root:$control_root,schema_version:($schema_version|tonumber),definition_path:$definition_path,state:"registered",created_at:$created_at,model:$model,effort:$effort,max_turns:$max_turns,tools:$tools,disallowed_tools:$disallowed_tools,permission_mode:$permission_mode,initial_prompt:$initial_prompt,definition_sha256:$definition_sha256,job:$job,definition_authority:"generated-definition",overrides:$overrides,write_allowances:$allowances,capabilities:$capabilities,pair_id:$pair_id,pair_role:$pair_role} + (if ($schema_version | tonumber) == 3 then {execution:$execution} else {} end) + (if $runtime_kind != "" then {runtime_kind:$runtime_kind,communication_policy:$communication_policy} else {} end) + (if $contract_id != "" then {contract_enabled:true,contract_path:$contract_path,contract_id:$contract_id,contract_digest:$contract_digest,task_identity:$task_id} else {} end)')
   MANIFEST=$(jq -c --arg name "$name" --argjson entry "$entry" '.agents[$name] = $entry' <<< "$MANIFEST")
 }
 

@@ -14,7 +14,7 @@ Read @${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md after resolving `{LI
 
 ## Context
 
-Working directory:
+Working directory (store as `{PROJECT_ROOT}`):
 
 ```text
 !`pwd`
@@ -35,6 +35,16 @@ Config:
 ```bash
 !`bash "/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/suggest-compact.sh" execute 2>/dev/null || true`
 ```
+
+## Index freshness gate
+
+Before reading the input parser or selecting a lifecycle mode, run exactly:
+
+```bash
+bash "{LINK}/scripts/indexer-sync.sh" --project-root "{PROJECT_ROOT}"
+```
+
+This is mandatory. Stop before mode selection when the helper exits non-zero.
 
 ## Input Parsing
 
@@ -70,7 +80,7 @@ Every mode triggers confirmation before executing. Follow the shared interaction
 
 Explicit `--import [path]` and clear natural-language requests to import, migrate, or bring in external plans route here before Init Redirect. Do not infer import intent from ordinary planning language.
 
-If the project is uninitialized and an external plan source is detected, ask one bounded choice: `Import external plan`, `Start fresh initialization`, or `Cancel`. Import routes to `/lbwc:import`; fresh initialization routes to Init Redirect; cancel leaves project state unchanged.
+If the project is uninitialized and an external plan source is detected, ask one bounded choice: `Import external plan`, `Start fresh initialization`, or `Cancel`. Import routes to `/lbwc:import`. Fresh initialization routes to Init Redirect. Cancel leaves project state unchanged.
 
 Read `commands/import.md` and execute that workflow inline in the main session. Preserve any active remediation state because import is an explicit user-selected interruption, not a replacement for the persisted remediation backlog. After promotion, re-run phase detection before selecting the next lifecycle mode.
 
@@ -172,6 +182,30 @@ Read `{LINK}/references/vibe-mode-milestone-uat-recovery.md` and follow it. `{LI
 Read `{LINK}/references/vibe-mode-plan.md` and follow it. `{LINK}` is the first line of the plugin-root/state block in the Context output, labeled `first line is LINK`.
 
 ### Mode: Execute
+
+Before loading the execute protocol, resolve `{PHASE_DIR}` as the selected canonical directory below `{PROJECT_ROOT}/.lbwc-planning/phases/`. Its frozen runtime snapshot path is `{PHASE_DIR}/.runtime-snapshot.json`.
+
+1. When that path exists, run exactly:
+
+   ```bash
+   bash "{LINK}/scripts/runtime-snapshot.sh" validate --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}"
+   ```
+
+   On success, use the returned `snapshot.requested_backend`, `snapshot.resolved_backend`, `snapshot.effort`, `snapshot.routing_profile`, `snapshot.routing_roles`, and `snapshot.tmux_execution` as the sole execution authority. Do not resolve again from live configuration. A non-zero result is `backend drift` or malformed runtime state. Stop before contracts, generation, spawning, telemetry, or prompts and preserve all state.
+2. When no snapshot exists, read the validated execution configuration once. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. `agent_execution_mode=ask` asks one bounded execution-mode question before any contract or agent exists. If the user chooses `Cancel spawn`, run exactly:
+
+   ```bash
+   bash "{LINK}/scripts/runtime-snapshot.sh" cancel --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}"
+   ```
+
+   Report the cancellation and stop. This transition writes `{PHASE_DIR}/.runtime-cancelled.json` and creates no snapshot. It does not mutate contracts, manifests, or telemetry. Never fall back to in-process agents.
+3. For requested `tmux`, complete TMUX preflight before freezing. On preflight success, resolved backend is `tmux`. On preflight failure, only `tmux_execution.comms_fallback=fall_back_to_in_process` may resolve to `in_process`. `bus_only` stops without a snapshot. Then run exactly:
+
+   ```bash
+   bash "{LINK}/scripts/runtime-snapshot.sh" freeze --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}" --requested-backend "{REQUESTED_BACKEND}" --resolved-backend "{RESOLVED_BACKEND}"
+   ```
+
+   A `created` or `matched` result moves runtime state to `ready` without changing task contracts. Pass its `snapshot.resolved_backend` to every generator or TMUX dispatch. The helper atomically records schema version, canonical phase, requested and resolved backend, effort, active routing profile and models, complete TMUX settings and restrictions, and the canonical source-config digest.
 
 Read `{LINK}/references/vibe-mode-execute.md` and follow it. `{LINK}` is the first line of the plugin-root/state block in the Context output, labeled `first line is LINK`.
 

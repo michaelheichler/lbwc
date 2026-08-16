@@ -16,6 +16,14 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DEFAULTS_FILE="$SCRIPT_DIR/../config/settings.json"
 CONFIG_FILE="${1:-.lbwc-planning/config.json}"
+SOURCE_CONFIG_FILE="$CONFIG_FILE"
+STAGED_CONFIG_FILE=""
+
+cleanup_staged_config() {
+  if [ -n "$STAGED_CONFIG_FILE" ]; then
+    rm -f "$STAGED_CONFIG_FILE"
+  fi
+}
 
 if [ ! -f "$DEFAULTS_FILE" ]; then
   echo "ERROR: defaults.json not found: $DEFAULTS_FILE" >&2
@@ -39,6 +47,18 @@ if ! jq empty "$CONFIG_FILE" >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! STAGED_CONFIG_FILE=$(mktemp "${SOURCE_CONFIG_FILE}.lbwc-migrate.XXXXXX"); then
+  echo "ERROR: Config migration failed while creating a staging file: $SOURCE_CONFIG_FILE" >&2
+  exit 1
+fi
+if ! cp "$SOURCE_CONFIG_FILE" "$STAGED_CONFIG_FILE"; then
+  rm -f "$STAGED_CONFIG_FILE"
+  echo "ERROR: Config migration failed while staging: $SOURCE_CONFIG_FILE" >&2
+  exit 1
+fi
+trap cleanup_staged_config EXIT
+CONFIG_FILE="$STAGED_CONFIG_FILE"
+
 missing_defaults_count() {
   jq -s '.[0] as $d | .[1] as $c | [$d | keys[] | select($c[.] == null)] | length' "$DEFAULTS_FILE" "$CONFIG_FILE" 2>/dev/null
 }
@@ -50,6 +70,34 @@ apply_update() {
   local tmp
   tmp=$(mktemp)
   if jq "$filter" "$CONFIG_FILE" >"$tmp" 2>/dev/null; then
+    mv "$tmp" "$CONFIG_FILE"
+    return 0
+  fi
+  rm -f "$tmp"
+  return 1
+}
+
+merge_execution_defaults() {
+  local tmp tmux_defaults
+  tmux_defaults=$(jq -c '.tmux_execution // {}' "$DEFAULTS_FILE") || return 1
+  tmp=$(mktemp)
+  if jq --argjson defaults "$tmux_defaults" '
+    if has("tmux_execution") then
+      if (.tmux_execution | type) != "object" then
+        error("tmux_execution must be an object")
+      else
+        .tmux_execution = ($defaults * .tmux_execution)
+        | .tmux_execution |= del(.session_timeout_seconds, .pane_base_index)
+        | if (.tmux_execution.restrictions | type) != "object" then
+            error("tmux_execution.restrictions must be an object")
+          else
+            .tmux_execution.restrictions = ($defaults.restrictions * .tmux_execution.restrictions)
+          end
+      end
+    else
+      .
+    end
+  ' "$CONFIG_FILE" > "$tmp" 2>/dev/null; then
     mv "$tmp" "$CONFIG_FILE"
     return 0
   fi
@@ -178,6 +226,11 @@ elif jq -e 'has("max_remediation_rounds")' "$CONFIG_FILE" >/dev/null 2>&1; then
   fi
 fi
 
+if ! merge_execution_defaults; then
+  echo "ERROR: Config migration failed while merging execution defaults." >&2
+  exit 1
+fi
+
 TMP=$(mktemp)
 if jq --slurpfile defaults "$DEFAULTS_FILE" '$defaults[0] + .' "$CONFIG_FILE" > "$TMP" 2>/dev/null; then
   mv "$TMP" "$CONFIG_FILE"
@@ -187,7 +240,19 @@ else
   exit 1
 fi
 
+if ! jq -c '.tmux_execution' "$CONFIG_FILE" | bash "$SCRIPT_DIR/lbwc-config.sh" validate-tmux-execution-json >/dev/null; then
+  echo "ERROR: Config migration failed (invalid tmux execution configuration): $SOURCE_CONFIG_FILE" >&2
+  exit 1
+fi
+
 MISSING_AFTER=$(missing_defaults_count)
+
+if ! mv "$CONFIG_FILE" "$SOURCE_CONFIG_FILE"; then
+  echo "ERROR: Config migration failed while persisting: $SOURCE_CONFIG_FILE" >&2
+  exit 1
+fi
+STAGED_CONFIG_FILE=""
+
 ADDED_COUNT=$((MISSING_BEFORE - MISSING_AFTER))
 if [ "$ADDED_COUNT" -lt 0 ]; then
   ADDED_COUNT=0

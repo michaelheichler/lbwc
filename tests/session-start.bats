@@ -146,3 +146,126 @@ EOF
   echo "$output" | python3 -c 'import json,sys; json.load(sys.stdin)'
   [[ "$output" == *"lbwc: agent manifest status unavailable."* ]]
 }
+
+fixture_session_bus() {
+  local control_root="$1" hash registry
+  source "$REPO_ROOT/scripts/lib/lbwc-control-root.sh"
+  source "$REPO_ROOT/scripts/lib/tmux-runtime.sh"
+  tmux_runtime_configure "$control_root"
+  tmux_runtime_ensure
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/inboxes"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/outbox"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/outbox/main"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/transactions"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/claims"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/credentials"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/heartbeats"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/locks"
+  MAIN_CAPABILITY=$(tmux_runtime_capability)
+  hash=$(tmux_runtime_capability_hash "$MAIN_CAPABILITY")
+  registry=$(jq -n --arg main main-session --arg hash "$hash" '{
+    schema_version: 2,
+    main: {agent_id: $main, session_id: $main, role: "orchestrator", capability_hash: $hash},
+    tmux: {session: null, orchestrator_target: null, orchestrator_pane: null, topology: "pending", managed_session: false, ownership_token: null},
+    agents: [],
+    routes: {($main): {inbox: $main, tmux_target: null}}
+  }')
+  tmux_runtime_write_registry_route_bundle "$registry"
+  tmux_runtime_initialize_inbox main-session
+}
+
+plant_unbound_agent() {
+  local agent_id="$1" capability="$2" hash registry updated
+  hash=$(tmux_runtime_capability_hash "$capability")
+  registry=$(tmux_runtime_registry_read)
+  updated=$(jq --arg id "$agent_id" --arg hash "$hash" '
+    .agents += [{
+      agent_id: $id, parent_id: .main.agent_id, contract_id: "contract-a", generated_name: $id,
+      tmux_target: "lbwc-test-main:0.1", tmux_pane_id: null, claude_session_id: null,
+      capability_hash: $hash, state: "registered", heartbeat_at_ms: null
+    }]
+    | .routes[$id] = {inbox: $id, tmux_target: "lbwc-test-main:0.1"}
+  ' <<<"$registry")
+  tmux_runtime_write_registry_route_bundle "$updated"
+  tmux_runtime_initialize_inbox "$agent_id"
+}
+
+write_credential() {
+  local agent_id="$1" capability="$2"
+  jq -n --arg agent_id "$agent_id" --arg contract_id contract-a --arg capability "$capability" '{agent_id:$agent_id,contract_id:$contract_id,capability:$capability}' > "$TEST_ROOT/credential.json"
+  python3 "$REPO_ROOT/scripts/lib/tmux-private-fs.py" write-json --root "$TMUX_RUNTIME_BUS_ROOT" --relative "credentials/$agent_id.json" --document "$(cat "$TEST_ROOT/credential.json")"
+}
+
+@test "session-start bind fails when the credential file is missing" {
+  local control_root="$TEST_ROOT/tmux-project/.lbwc-planning"
+  mkdir -p "$control_root"
+  printf '%s\n' '{}' > "$control_root/config.json"
+  fixture_session_bus "$control_root"
+  plant_unbound_agent agent-a 0123456789abcdef0123456789abcdef
+
+  run env LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$control_root" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=actual-child-session bash "$SCRIPT"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"tmux bind failed"* ]]
+}
+
+@test "session-start consumes a one-shot credential and records a heartbeat" {
+  local control_root="$TEST_ROOT/tmux-project/.lbwc-planning" agent_capability
+  mkdir -p "$control_root"
+  printf '%s\n' '{}' > "$control_root/config.json"
+  fixture_session_bus "$control_root"
+  agent_capability='0123456789abcdef0123456789abcdef'
+  plant_unbound_agent agent-a "$agent_capability"
+  write_credential agent-a "$agent_capability"
+
+  run env LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$control_root" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=actual-child-session bash "$SCRIPT"
+
+  [ "$status" -eq 0 ]
+  [ ! -e "$control_root/.runtime/tmux-bus/credentials/agent-a.json" ]
+  run jq -e '.agents[] | select(.agent_id == "agent-a") | .claude_session_id == "actual-child-session" and .state == "running" and (.heartbeat_at_ms | type == "number")' "$control_root/.runtime/tmux-bus/registry.json"
+  [ "$status" -eq 0 ]
+
+  write_credential agent-a "$agent_capability"
+  run env LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$control_root" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=second-child-session bash "$SCRIPT"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"tmux bind failed"* ]]
+}
+
+@test "session-start bind fails on a mismatched credential" {
+  local control_root="$TEST_ROOT/tmux-project/.lbwc-planning"
+  mkdir -p "$control_root"
+  printf '%s\n' '{}' > "$control_root/config.json"
+  fixture_session_bus "$control_root"
+  plant_unbound_agent agent-a 0123456789abcdef0123456789abcdef
+  write_credential agent-a fedcba9876543210fedcba9876543210
+
+  run env LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$control_root" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=actual-child-session bash "$SCRIPT"
+
+  [ "$status" -ne 0 ]
+}
+
+@test "concurrent SessionStart attempts bind a credential at most once" {
+  local control_root="$TEST_ROOT/tmux-project/.lbwc-planning" agent_capability
+  mkdir -p "$control_root"
+  printf '%s\n' '{}' > "$control_root/config.json"
+  fixture_session_bus "$control_root"
+  agent_capability='0123456789abcdef0123456789abcdef'
+  plant_unbound_agent agent-a "$agent_capability"
+  write_credential agent-a "$agent_capability"
+
+  run env SESSION_START="$SCRIPT" CONTROL_ROOT="$control_root" PLANNING_DIR="$PLANNING_DIR" bash -c '
+    LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$CONTROL_ROOT" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=concurrent-child-session bash "$SESSION_START" > "$CONTROL_ROOT/first-session-start.log" 2>&1 &
+    first=$!
+    LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$CONTROL_ROOT" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=concurrent-child-session bash "$SESSION_START" > "$CONTROL_ROOT/second-session-start.log" 2>&1 &
+    second=$!
+    wait "$first"; first_status=$?
+    wait "$second"; second_status=$?
+    { [ "$first_status" -eq 0 ] && [ "$second_status" -ne 0 ]; } || { [ "$first_status" -ne 0 ] && [ "$second_status" -eq 0 ]; }
+  '
+
+  [ "$status" -eq 0 ]
+  [ ! -e "$control_root/.runtime/tmux-bus/credentials/agent-a.json" ]
+  run jq -e '.agents[] | select(.agent_id == "agent-a") | .claude_session_id == "concurrent-child-session"' "$control_root/.runtime/tmux-bus/registry.json"
+  [ "$status" -eq 0 ]
+}
+

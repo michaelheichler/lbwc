@@ -160,6 +160,18 @@ teardown() {
   ' "$TEST_TEMP_DIR/.lbwc-planning/config.json" >/dev/null
 }
 
+@test "activate rejects profile changes while execution is active" {
+  printf '%s\n' '{"status":"executing"}' > "$TEST_TEMP_DIR/.lbwc-planning/.execution-state.json"
+  before=$(shasum -a 256 "$TEST_TEMP_DIR/.lbwc-planning/config.json" | awk '{print $1}')
+
+  run bash "$ROUTING" activate "$TEST_TEMP_DIR/.lbwc-planning" turbo
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"frozen"* ]]
+  after=$(shasum -a 256 "$TEST_TEMP_DIR/.lbwc-planning/config.json" | awk '{print $1}')
+  [ "$before" = "$after" ]
+}
+
 @test "resolve emits the exact active route as stable JSON" {
   bash "$ROUTING" set "$TEST_TEMP_DIR/.lbwc-planning" balanced docs ember-path null >/dev/null
 
@@ -200,6 +212,21 @@ teardown() {
     and .routing.profiles.turbo.roles.architect
       == {model: "removed-route", reasoning: "deliberate", status: "unresolved"}
   ' "$TEST_TEMP_DIR/.lbwc-planning/config.json" >/dev/null
+}
+
+@test "migrate rejects profile changes while execution is active" {
+  jq '.routing.active_profile = "budget"' \
+    "$TEST_TEMP_DIR/.lbwc-planning/config.json" > "$TEST_TEMP_DIR/.lbwc-planning/config.next"
+  mv "$TEST_TEMP_DIR/.lbwc-planning/config.next" "$TEST_TEMP_DIR/.lbwc-planning/config.json"
+  printf '%s\n' '{"status":"executing"}' > "$TEST_TEMP_DIR/.lbwc-planning/.execution-state.json"
+  before=$(shasum -a 256 "$TEST_TEMP_DIR/.lbwc-planning/config.json" | awk '{print $1}')
+
+  run bash "$ROUTING" migrate "$TEST_TEMP_DIR/.lbwc-planning"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"frozen"* ]]
+  after=$(shasum -a 256 "$TEST_TEMP_DIR/.lbwc-planning/config.json" | awk '{print $1}')
+  [ "$before" = "$after" ]
 }
 
 @test "migrate preserves exact legacy role routes and remains idempotent" {
@@ -701,6 +728,7 @@ teardown() {
   original=$(<"$lock/owner")
   rm "$lock/owner"
   rmdir "$lock"
+  mkdir "$TEST_TEMP_DIR/replay-inode-hold"
   mkdir "$lock"
   printf '%s\n' "$original" > "$lock/owner"
 

@@ -17,7 +17,7 @@ PLANNING_DIR=$(lbwc_resolve_control_root "${LBWC_CONTROL_ROOT:-}" "" "$PWD" 2>/d
 IDLE_WAIT_SECONDS=120
 COMMAND="${1:-}"
 case "$COMMAND" in
-  touch|check|idle|sweep) ;;
+  touch|check|idle|sweep|tmux-session-start) ;;
   *) exit 0 ;;
 esac
 
@@ -68,6 +68,32 @@ lifecycle_manifest_failure_status() {
 
 lifecycle_manifest_failure() {
   lifecycle_manifest_error "$(lifecycle_manifest_failure_status)"
+}
+
+tmux_lifecycle_error() {
+  printf 'tmux_lifecycle_status=%s\n' "$1"
+  return 1
+}
+
+tmux_session_start() {
+  local control_root registry agent_id session_id updated now
+  [ -f "$SCRIPT_DIR/lib/tmux-runtime.sh" ] || { tmux_lifecycle_error unavailable; return 1; }
+  . "$SCRIPT_DIR/lib/tmux-runtime.sh" || { tmux_lifecycle_error unavailable; return 1; }
+  control_root="${LBWC_CONTROL_ROOT:-$PLANNING_DIR}"
+  control_root=$(lbwc_control_root_canonical_path "$control_root" 2>/dev/null) || { tmux_lifecycle_error malformed; return 1; }
+  tmux_runtime_configure_existing "$control_root" 2>/dev/null || { tmux_lifecycle_error malformed; return 1; }
+  registry=$(tmux_runtime_registry_read 2>/dev/null) || { tmux_lifecycle_error malformed; return 1; }
+  agent_id="${LBWC_TMUX_AGENT_ID:-}"
+  session_id="${CLAUDE_SESSION_ID:-}"
+  [ -n "$agent_id" ] && [ -n "$session_id" ] || { tmux_lifecycle_error malformed; return 1; }
+  jq -e --arg agent_id "$agent_id" --arg session_id "$session_id" 'any(.agents[]; .agent_id == $agent_id and .claude_session_id == $session_id and .state != "shutdown")' <<<"$registry" >/dev/null 2>&1 || { tmux_lifecycle_error malformed; return 1; }
+  now=$(tmux_runtime_now_ms)
+  tmux_runtime_lock_acquire registry 5000 30000 || { tmux_lifecycle_error unavailable; return 1; }
+  registry=$(tmux_runtime_registry_read) || { tmux_runtime_lock_release registry >/dev/null 2>&1 || true; tmux_lifecycle_error malformed; return 1; }
+  updated=$(jq --arg id "$agent_id" --argjson now "$now" '.agents |= map(if .agent_id == $id then .state = "running" | .heartbeat_at_ms = $now else . end)' <<<"$registry") || { tmux_runtime_lock_release registry >/dev/null 2>&1 || true; tmux_lifecycle_error malformed; return 1; }
+  tmux_runtime_write_registry_route_bundle "$updated" || { tmux_runtime_lock_release registry >/dev/null 2>&1 || true; tmux_lifecycle_error unavailable; return 1; }
+  tmux_runtime_lock_release registry
+  printf 'tmux_lifecycle_status=running\n'
 }
 
 extract_known_agent_name() {
@@ -276,5 +302,6 @@ case "$COMMAND" in
   touch) touch_agent "${2:-start}" ;;
   check|idle) idle_agent ;;
   sweep) sweep_agents ;;
+  tmux-session-start) tmux_session_start || exit $? ;;
 esac
 exit 0

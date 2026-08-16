@@ -243,8 +243,30 @@ teardown() { rm -rf "$ROOT"; }
     and .write_allowances == ["src/web/index.ts", "tests/web"]
     and .runtime_kind == "native-team"
     and .communication_policy == "native-team"
+    and .requested_backend == "in_process"
+    and .resolved_backend == "in_process"
   ' "$contract"
   [ "$status" -eq 0 ]
+}
+
+@test "schema 3 binds validated backend metadata into the contract digest" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/team-backend" contract
+  mkdir -p "$control_root"
+
+  run bash "$SCRIPT" issue "$ROOT" "team-backend" \
+    --command team --role web-engineer --team solo --job "Implement the web scope" \
+    --control-root "$control_root" --requested-backend tmux --resolved-backend tmux \
+    --write-capability directory:src/web
+  [ "$status" -eq 0 ]
+  contract="$output"
+  run jq -e '.schema_version == 3 and .requested_backend == "tmux" and .resolved_backend == "tmux"' "$contract"
+  [ "$status" -eq 0 ]
+
+  jq '.resolved_backend = "in_process"' "$contract" > "$ROOT/tampered-contract.json"
+  mv "$ROOT/tampered-contract.json" "$contract"
+  run bash "$SCRIPT" verify "$contract" "$ROOT"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"contract digest mismatch"* ]]
 }
 
 @test "schema 3 root capability is limited to the team command" {

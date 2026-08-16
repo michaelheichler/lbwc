@@ -1,7 +1,7 @@
 ---
 category: supporting
 disable-model-invocation: true
-description: View and modify LBWC configuration including effort profile, verification tier, and skill-hook wiring.
+description: View and modify LBWC configuration including execution mode, effort profile, verification tier, and skill-hook wiring.
 argument-hint: "[setting value]"
 allowed-tools: Read, Write, Edit, Bash, Glob, AskUserQuestion
 ---
@@ -32,7 +32,7 @@ If no .lbwc-planning/ dir: STOP "Run /lbwc:init first." (check `.lbwc-planning/c
 
 ## Behavior
 
-Agent Teams is process-level Claude Code configuration. `/lbwc:team` checks it through `lbwc-config.sh agent-teams-status`. Enabling requires a main-session confirmation, then `lbwc-config.sh agent-teams-enable --approved`; the command must stop with restart guidance because changing settings cannot enable the current process.
+Agent Teams is process-level Claude Code configuration. `/lbwc:team` checks it through `lbwc-config.sh agent-teams-status`. Enabling requires a main-session confirmation, then `lbwc-config.sh agent-teams-enable --approved`. The command must stop with restart guidance because changing settings cannot enable the current process.
 
 Every ordinary setting mutation runs `bash "{plugin-root}/scripts/lbwc-config.sh" set .lbwc-planning <setting> <value-json>`, followed by `lbwc-config.sh validate`. The only routing setting exposed here is `routing.active_profile`, which mutates through `lbwc-model activate`, not through direct JSON writes.
 
@@ -55,11 +55,12 @@ Present the detected routing state by running `bash "{plugin-root}/scripts/lbwc-
 - options:
   - `Core settings`: Effort, autonomy, planning tracking, auto push
   - `Model profile`: Preset profile or per-agent overrides
+  - `Execution mode`: In-process agents or TMUX split panes
   - `Exit`: Leave config unchanged
 
 Store selection in variable `CONFIG_SECTION`.
 
-Every bounded AskUserQuestion branch below follows `references/ask-user-question.md`: accept direct option intent, accept unambiguous visible option-by-number replies (for example `#1`, `option 2`, or `2`), accept hybrid replies anchored to one visible option number (for example `#2 please`), re-ask only when the reply is ambiguous or invalid for that same question, and do not add an extra visible `Other` option.
+Every bounded AskUserQuestion branch below follows `references/ask-user-question.md`. Accept direct option intent. Accept unambiguous visible option-by-number replies (for example `#1`, `option 2`, or `2`). Accept hybrid replies anchored to one visible option number (for example `#2 please`). Re-ask only when the reply is ambiguous or invalid for that same question. Do not add an extra visible `Other` option.
 
 If `CONFIG_SECTION = "Exit"`:
 
@@ -147,6 +148,23 @@ Store selection in variable `PROFILE_METHOD`.
 - If `PROFILE_METHOD = "Configure each agent individually"`: Proceed to individual agent configuration flow (Round 1 below).
 - If `PROFILE_METHOD = "Model matrix"`: run the model matrix flow below, then continue to Step 4.
 
+**Step 2.8:** If `CONFIG_SECTION = "Execution mode"`, AskUserQuestion with 1 question:
+
+- header: `Agent execution`
+- question: `Where should LBWC run spawned agents?`
+- options:
+  - `In-process agents`: Preserve the current native Agent execution path
+  - `TMUX split panes`: Persist the TMUX execution backend and its restrictions
+  - `Cancel spawn`: Do not spawn agents for this step
+
+Store the selection in variable `EXECUTION_MODE`.
+
+- If `EXECUTION_MODE = "Cancel spawn"`, display `✓ No changes made.` and STOP. Cancel is terminal for the requested spawn. Do not write `in_process` and do not silently fall back to another backend.
+- If `EXECUTION_MODE = "In-process agents"`, run `bash "{plugin-root}/scripts/lbwc-config.sh" set .lbwc-planning agent_execution_mode '"in_process"'`, then validate.
+- If `EXECUTION_MODE = "TMUX split panes"`, run `bash "{plugin-root}/scripts/lbwc-config.sh" set .lbwc-planning tmux_execution.enabled true`, then run `bash "{plugin-root}/scripts/lbwc-config.sh" set .lbwc-planning agent_execution_mode '"tmux"'`, then validate.
+
+The default `agent_execution_mode=ask` and `tmux_execution.enabled=false` preserve the current in-process behavior until a caller presents its execution gate. A caller that presents the gate must treat `Cancel spawn` as cancellation, not as an automatic Option 1 fallback.
+
 **Detected model configuration:**
 
 Run `bash "{plugin-root}/scripts/lbwc-model" --json refresh .lbwc-planning`, then `bash "{plugin-root}/scripts/lbwc-model" --json show .lbwc-planning`. The detected Claude catalog, accepted reasoning values, built-in profiles, active profile, and custom profiles in that output are authoritative. Do not read or write a static model-price, alias, matrix, or reasoning file.
@@ -170,6 +188,13 @@ Run `bash "{plugin-root}/scripts/suggest-next.sh" config` and display.
 ### With arguments: `<setting> <value>`
 
 Validate setting + value. Update config.json. Display ✓ with ➜.
+
+Execution settings use the same transaction and validation path as every other setting:
+
+- `agent_execution_mode` accepts only `in_process`, `tmux`, or `ask`.
+- `tmux_execution.<field>` updates one validated field without replacing the other fields.
+- `set-json` accepts a complete `tmux_execution` object for atomic replacement. The object must contain every documented field and no unknown fields.
+- `tmux_execution.enabled` is false by default and becomes true only after the TMUX option is accepted.
 
 If `setting=max_uat_remediation_rounds`, validate the value before writing:
 
@@ -237,6 +262,19 @@ Note: `auto_commit` controls source-task commits during Execute mode. Planning a
 | visual_format | string | unicode/ascii | unicode |
 | max_tasks_per_plan | number | 1-7 | 5 |
 | prefer_teams | string | always/auto/never | auto |
+| agent_execution_mode | string | in_process/tmux/ask | ask |
+| tmux_execution | object | strict TMUX backend and restriction object | enabled: false |
+| tmux_execution.enabled | boolean | true/false | false |
+| tmux_execution.session_name_prefix | string | ASCII name prefix, 1-32 characters | lbwc |
+| tmux_execution.max_agents | integer | 1-4 | 3 |
+| tmux_execution.attach_policy | string | orchestrator_only/visible_grid | orchestrator_only |
+| tmux_execution.heartbeat_interval_seconds | integer | positive seconds | 30 |
+| tmux_execution.heartbeat_stale_seconds | integer | positive seconds | 120 |
+| tmux_execution.comms_latency_tolerance_ms | integer | positive milliseconds | 5000 |
+| tmux_execution.comms_fallback | string | bus_only/fall_back_to_in_process | bus_only |
+| tmux_execution.cleanup_policy | string | kill_on_complete/keep_panes | kill_on_complete |
+| tmux_execution.layout | string | main-vertical/main-horizontal/tiled/even-horizontal/even-vertical | main-vertical |
+| tmux_execution.restrictions | object | four strict boolean restrictions | see defaults |
 | pipeline_research | boolean | true/false | false |
 | branch_per_milestone | boolean | true/false | false |
 | plain_summary | boolean | true/false | true |
@@ -246,15 +284,15 @@ Note: `auto_commit` controls source-task commits during Execute mode. Planning a
 | qa_skip_agents | array | array of agent role names | ["docs"] |
 | context_compiler | boolean | true/false | true |
 | metrics | boolean | true/false | true |
-| token_budgets | boolean | true/false; validated and persisted as the token-budget flag | true |
-| two_phase_completion | boolean | true/false; validated and persisted as the two-phase completion flag | true |
-| smart_routing | boolean | true/false; validated and persisted as the smart-routing flag | true |
-| validation_gates | boolean | true/false; validated and persisted as the validation-gates flag | true |
-| snapshot_resume | boolean | true/false; validated and persisted as the snapshot/resume flag | true |
-| lease_locks | boolean | true/false; validated and persisted as the lease-lock flag | true |
-| event_recovery | boolean | true/false; validated and persisted as the event-recovery flag | true |
+| token_budgets | boolean | true/false, validated and persisted as the token-budget flag | true |
+| two_phase_completion | boolean | true/false, validated and persisted as the two-phase completion flag | true |
+| smart_routing | boolean | true/false, validated and persisted as the smart-routing flag | true |
+| validation_gates | boolean | true/false, validated and persisted as the validation-gates flag | true |
+| snapshot_resume | boolean | true/false, validated and persisted as the snapshot/resume flag | true |
+| lease_locks | boolean | true/false, validated and persisted as the lease-lock flag | true |
+| event_recovery | boolean | true/false, validated and persisted as the event-recovery flag | true |
 | worktree_isolation | string | off/on | off |
-| monorepo_routing | boolean | true/false; validated and persisted as the monorepo-routing flag | true |
+| monorepo_routing | boolean | true/false, validated and persisted as the monorepo-routing flag | true |
 | require_phase_discussion | boolean | true/false | false |
 | auto_uat | boolean | true/false | false |
 | max_uat_remediation_rounds | boolean/number | false, 0, or positive integer | false |
@@ -267,6 +305,14 @@ Note: `auto_commit` controls source-task commits during Execute mode. Planning a
 | caveman_style | string | none/lite/full/ultra/auto | none |
 | caveman_commit | boolean | true/false | false |
 | caveman_review | boolean | true/false | false |
+
+### Execution Runtime Rules
+
+- During active plan execution, identified by `.execution-state.json` status `running`, `executing`, or `active`, `STATE.md` status `active` or `executing`, or a dispatched or running task contract, the execution backend is frozen.
+- The frozen fields are `agent_execution_mode`, `tmux_execution.max_agents`, `tmux_execution.comms_fallback`, `tmux_execution.restrictions.allow_agent_git`, `effort`, and `routing.active_profile`.
+- `tmux_execution.cleanup_policy` may change for the next teardown. The emergency `agent_execution_mode=in_process` override is accepted only when no running TMUX agents are registered.
+- Invalid or malformed configuration is rejected without replacing the saved file. Migration fills only missing execution defaults and preserves valid existing values.
+- `agent_execution_mode=ask` is a persisted gate, not a fallback instruction. A rejected or cancelled spawn remains cancelled until the caller explicitly starts a different backend.
 
 ### Statusline switches
 

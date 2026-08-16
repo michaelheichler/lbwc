@@ -18,6 +18,15 @@ cp -R "$PLUGIN_ROOT/scripts" "$PLUGIN_ROOT/templates" "$PLUGIN_ROOT/config" "$PL
 GENERATOR="$PLUGIN_FIXTURE/scripts/agent-generator.sh"
 TASK_CONTRACT="$PLUGIN_FIXTURE/scripts/task-contract.sh"
 ROLE_DEFAULTS="$PLUGIN_FIXTURE/templates/agent-roles/defaults.json"
+GENERATOR_BASH=""
+for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash /opt/local/bin/bash \
+  "$(command -v bash 2>/dev/null || true)"; do
+  if [ -x "$candidate" ] && "$candidate" -uc 'declare -A test=()' >/dev/null 2>&1; then
+    GENERATOR_BASH="$candidate"
+    break
+  fi
+done
+[ -n "$GENERATOR_BASH" ] || { printf 'Bash 4+ is required to run agent-generator.sh\n' >&2; exit 1; }
 PASS=0
 FAIL=0
 CONTRACT_SEQUENCE=0
@@ -102,9 +111,11 @@ run_generator() {
     pair) generator_args+=(--pair) ;;
     trio) generator_args+=(--trio) ;;
   esac
-  RUN_OUTPUT=$(cd "$project" && LBWC_AGENT_RANDOM_SEED="$CONTRACT_SEQUENCE" \
-    bash "$GENERATOR" "${generator_args[@]}" "$role" --job "$job" \
-      --contract "$contract" --task-id "$(basename "$contract" .json)" "$@" 2>&1)
+  generator_args+=("$role" --job "$job" \
+    --contract "$contract" --task-id "$(basename "$contract" .json)" "$@")
+  RUN_OUTPUT=$(cd "$project" && PATH="$(dirname "$GENERATOR_BASH"):$PATH" \
+    LBWC_AGENT_RANDOM_SEED="$CONTRACT_SEQUENCE" \
+    "$GENERATOR_BASH" "$GENERATOR" "${generator_args[@]}" 2>&1)
   RUN_RC=$?
 }
 
@@ -211,6 +222,38 @@ check "generated frontmatter omits null effort" "$?"
 jq -e --arg name "$NAME_G" '.agents[$name].effort == null' \
   "$PROJECT_G/.lbwc-planning/.agent-manifest.json" >/dev/null
 check "manifest stores structural default reasoning as null" "$?"
+
+PROJECT_H=$(new_project)
+CONTROL_ROOT_H="$PROJECT_H/.temporary-agent-runfiles/runs/tmux-selection"
+mkdir -p "$CONTROL_ROOT_H"
+CONTRACT_H=$(bash "$TASK_CONTRACT" issue "$PROJECT_H" core-tmux-selection \
+  --command integration-test --role web-engineer --team solo --job "run in tmux" \
+  --control-root "$CONTROL_ROOT_H" --requested-backend tmux --resolved-backend tmux \
+  --write-capability directory:src/web)
+RUN_OUTPUT=$(cd "$PROJECT_H" && PATH="$(dirname "$GENERATOR_BASH"):$PATH" \
+  LBWC_AGENT_RANDOM_SEED=42 \
+  "$GENERATOR_BASH" "$GENERATOR" web-engineer --job "run in tmux" \
+    --contract "$CONTRACT_H" --task-id "$(basename "$CONTRACT_H" .json)" \
+    --control-root "$CONTROL_ROOT_H" --write-capability directory:src/web \
+    --execution-backend tmux 2>&1)
+RUN_RC=$?
+check "schema 3 tmux runtime selection generates an agent" "$RUN_RC"
+NAME_H=$(jq -r '.agents | keys[0] // empty' "$CONTROL_ROOT_H/agent-manifest.json" 2>/dev/null)
+jq -e --arg name "$NAME_H" '
+  .agents[$name].execution.requested_backend == "tmux"
+  and .agents[$name].execution.resolved_backend == "tmux"
+  and .agents[$name].execution.role == .agents[$name].role
+  and .agents[$name].execution.model == .agents[$name].model
+  and .agents[$name].execution.effort == .agents[$name].effort
+  and .agents[$name].execution.max_turns == .agents[$name].max_turns
+  and .agents[$name].execution.contract_id == .agents[$name].contract_id
+  and .agents[$name].execution.contract_digest == .agents[$name].contract_digest
+  and .agents[$name].execution.task_identity == .agents[$name].task_identity
+  and .agents[$name].execution.tmux_bootstrap.child_identity == $name
+  and .agents[$name].execution.tmux_bootstrap.contract_id == .agents[$name].contract_id
+  and .agents[$name].execution.tmux_bootstrap.control_root == .agents[$name].control_root
+' "$CONTROL_ROOT_H/agent-manifest.json" >/dev/null
+check "schema 3 tmux metadata and bootstrap have no drift" "$?"
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

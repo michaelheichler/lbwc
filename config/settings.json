@@ -8,6 +8,25 @@
   "context_compiler": true,
   "max_tasks_per_plan": 5,
   "prefer_teams": "auto",
+  "agent_execution_mode": "ask",
+  "tmux_execution": {
+    "enabled": false,
+    "session_name_prefix": "lbwc",
+    "max_agents": 3,
+    "attach_policy": "orchestrator_only",
+    "heartbeat_interval_seconds": 30,
+    "heartbeat_stale_seconds": 120,
+    "comms_latency_tolerance_ms": 5000,
+    "comms_fallback": "bus_only",
+    "cleanup_policy": "kill_on_complete",
+    "layout": "main-vertical",
+    "restrictions": {
+      "allow_nested_spawn": false,
+      "allow_agent_git": false,
+      "allow_agent_ask_user": false,
+      "require_orchestrator_attach": true
+    }
+  },
   "auto_uat": false,
   "require_phase_discussion": false,
   "rolling_summary": false,

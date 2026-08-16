@@ -34,6 +34,7 @@ LEGAL = {
 STATES = set(LEGAL)
 RUNTIME_KINDS = {"native-team"}
 COMMUNICATION_POLICIES = {"native-team", "critic-relay"}
+EXECUTION_BACKENDS = {"in_process", "tmux"}
 SCHEMA_2_KEYS = {
     "contract_id", "schema_version", "created_by", "project_root",
     "source_kind", "source_path", "source_sha256", "command_name",
@@ -43,7 +44,8 @@ SCHEMA_2_KEYS = {
     "verify", "done", "strategy", "state", "contract_digest",
 }
 SCHEMA_3_KEYS = SCHEMA_2_KEYS | {
-    "capabilities_by_role", "communication_policy", "control_root", "runtime_kind"
+    "capabilities_by_role", "communication_policy", "control_root", "runtime_kind",
+    "requested_backend", "resolved_backend"
 }
 
 
@@ -195,6 +197,8 @@ def parse_options(arguments, require_command=False):
         "role_capabilities": [],
         "runtime_kind": "",
         "communication_policy": "",
+        "requested_backend": "",
+        "resolved_backend": "",
     }
     value_options = {
         "--role": "role",
@@ -205,6 +209,8 @@ def parse_options(arguments, require_command=False):
         "--control-root": "control_root",
         "--runtime-kind": "runtime_kind",
         "--communication-policy": "communication_policy",
+        "--requested-backend": "requested_backend",
+        "--resolved-backend": "resolved_backend",
     }
     index = 0
     while index < len(arguments):
@@ -372,12 +378,22 @@ def command_contract(root, task_name, options):
     if typed and "." in [item["path"] for role_caps in capabilities.values() for item in role_caps] and command != "team":
         fail("repository root capability is only valid for team")
     control_root = resolve_control_root(options["control_root"], root) if typed else None
+    requested_backend = options["requested_backend"] or "in_process"
+    resolved_backend = options["resolved_backend"] or requested_backend
     runtime_kind = options["runtime_kind"] or "native-team"
     communication_policy = options["communication_policy"] or "native-team"
+    if not typed and (options["requested_backend"] or options["resolved_backend"]):
+        fail("execution backends require a schema 3 contract")
     if typed and runtime_kind not in RUNTIME_KINDS:
         fail("invalid runtime_kind")
     if typed and communication_policy not in COMMUNICATION_POLICIES:
         fail("invalid communication_policy")
+    if typed and requested_backend not in EXECUTION_BACKENDS:
+        fail("invalid requested_backend")
+    if typed and resolved_backend not in EXECUTION_BACKENDS:
+        fail("invalid resolved_backend")
+    if typed and requested_backend != resolved_backend:
+        fail("requested_backend and resolved_backend must match")
     contract_id = safe_id("cmd", command, task_name, group)
     contract = {
         "contract_id": contract_id,
@@ -414,6 +430,8 @@ def command_contract(root, task_name, options):
             "communication_policy": communication_policy,
             "control_root": str(control_root),
             "runtime_kind": runtime_kind,
+            "requested_backend": requested_backend,
+            "resolved_backend": resolved_backend,
             "schema_version": 3,
         })
     return with_digest(contract)
@@ -527,7 +545,13 @@ def validate_contract(contract, root, expected_id=None, expected_job=None):
             fail("invalid contract")
         if contract.get("communication_policy") not in COMMUNICATION_POLICIES:
             fail("invalid contract")
-    elif any(key in contract for key in ("capabilities_by_role", "control_root", "runtime_kind", "communication_policy")):
+        if contract.get("requested_backend") not in EXECUTION_BACKENDS:
+            fail("invalid contract")
+        if contract.get("resolved_backend") not in EXECUTION_BACKENDS:
+            fail("invalid contract")
+        if contract["requested_backend"] != contract["resolved_backend"]:
+            fail("invalid contract")
+    elif any(key in contract for key in ("capabilities_by_role", "control_root", "runtime_kind", "communication_policy", "requested_backend", "resolved_backend")):
         fail("invalid contract")
     if contract.get("write_allowances") != allowances[role] or contract.get("files") != flattened:
         fail("invalid contract")

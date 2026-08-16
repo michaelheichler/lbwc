@@ -5,6 +5,34 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLANNING_DIR="${LBWC_PLANNING_DIR:-.lbwc-planning}"
 CANONICAL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
+bind_tmux_bootstrap() {
+  local agent_id contract_id capability control_root actual_session credential
+  [ -z "${LBWC_TMUX_AGENT:-}" ] || [ "${LBWC_TMUX_AGENT}" = '1' ] || { echo 'LBWC: SessionStart tmux agent mode is invalid' >&2; return 1; }
+  [ "${LBWC_TMUX_AGENT:-}" = '1' ] || return 0
+  agent_id="${LBWC_TMUX_AGENT_ID:-}"
+  contract_id="${LBWC_TMUX_CONTRACT_ID:-}"
+  control_root="${LBWC_TMUX_CONTROL_ROOT:-}"
+  actual_session="${CLAUDE_SESSION_ID:-}"
+  for value in "$agent_id" "$contract_id" "$control_root"; do
+    [ -n "$value" ] || { echo 'LBWC: SessionStart tmux bind is missing' >&2; return 1; }
+  done
+  [ -n "$actual_session" ] || { echo 'LBWC: SessionStart cannot bind tmux agent without CLAUDE_SESSION_ID' >&2; return 1; }
+  [[ "$actual_session" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || { echo 'LBWC: SessionStart received an invalid Claude session ID' >&2; return 1; }
+  [[ "$agent_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ && "$contract_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || { echo 'LBWC: SessionStart tmux bind is malformed' >&2; return 1; }
+  source "$CANONICAL_ROOT/scripts/lib/lbwc-control-root.sh"
+  control_root=$(lbwc_control_root_validate "$control_root" 0) || { echo 'LBWC: SessionStart tmux bind control root is invalid' >&2; return 1; }
+  source "$CANONICAL_ROOT/scripts/lib/tmux-runtime.sh"
+  tmux_runtime_configure_existing "$control_root" || { echo 'LBWC: SessionStart tmux runtime is unavailable' >&2; return 1; }
+  credential=$(tmux_runtime_credential_read "$agent_id") || { echo 'LBWC: SessionStart tmux bind failed' >&2; return 1; }
+  capability=$(jq -r '.capability // empty' <<<"$credential")
+  jq -e --arg agent_id "$agent_id" --arg contract_id "$contract_id" --arg capability "$capability" '.agent_id == $agent_id and .contract_id == $contract_id and .capability == $capability' <<<"$credential" >/dev/null 2>&1 || { echo 'LBWC: SessionStart tmux bind is malformed' >&2; return 1; }
+  [[ "$capability" =~ ^[0-9a-f]{32}$ ]] || { echo 'LBWC: SessionStart tmux bind is malformed' >&2; return 1; }
+  bash "$CANONICAL_ROOT/scripts/tmux-bus.sh" --control-root "$control_root" bind --agent-id "$agent_id" --session-id "$actual_session" --capability "$capability" --contract-id "$contract_id" || { echo 'LBWC: SessionStart tmux bind failed' >&2; return 1; }
+  tmux_runtime_credential_delete "$agent_id" || { echo 'LBWC: SessionStart cannot consume the bound tmux credential' >&2; return 1; }
+  bash "$CANONICAL_ROOT/scripts/tmux-bus.sh" --control-root "$control_root" heartbeat --agent-id "$agent_id" --session-id "$actual_session" --capability "$capability" --state running >/dev/null || { echo 'LBWC: SessionStart tmux heartbeat failed' >&2; return 1; }
+  capability=''
+}
+
 if [ -f "$CANONICAL_ROOT/scripts/hook-wrapper.sh" ] && \
   [ -f "$CANONICAL_ROOT/scripts/ensure-plugin-root-link.sh" ] && \
   ! bash "$CANONICAL_ROOT/scripts/ensure-plugin-root-link.sh" \
@@ -17,6 +45,8 @@ if ! command -v jq >/dev/null 2>&1; then
   echo '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"lbwc: jq not found. Install jq (brew install jq / apt install jq) -- quality gates are degraded until then."}}'
   exit 0
 fi
+
+bind_tmux_bootstrap || exit 1
 
 pd_field() {
   printf '%s\n' "$PHASE_OUT" | grep -m1 "^$1=" | sed "s/^[^=]*=//"
