@@ -1,12 +1,17 @@
 # Changelog
 This file records user-visible LBWC releases. Keep the newest entry first.
 ## [1.0.3] - 2026-08-16
-### Added
-- Option 2 tmux spawn for vibe, build, and team: freeze a runtime snapshot, open schema 3 with matching backend flags, and dispatch bind-file children through `scripts/tmux-spawn-group.sh`.
-- Child bus-loop template and native versus tmux execution choice after confirmation. Bind-file identity is the pane identity.
-### Changed
-- Destack of the tmux runtime already shipped on main. This release wires that runtime into the spawn path rather than leaving operators on native-only Agent calls.
-- Interactive smoke rows stay PENDING. Automated coverage cites the spawn driver and command markdown contracts.
+
+### TMUX agent panes
+
+Run teammates as real Claude sessions in their own tmux panes. Your main session stays the orchestrator: visible, in charge, not taken over.
+
+- Each teammate runs in its own tmux pane as a real Claude session.
+- Choose in-process agents or tmux panes. LBWC asks once, or you can save the choice in config.
+- The choice freezes for the phase, so it does not flip mid-run.
+- Cancel a spawn and it stops. Nothing silently falls back to in-process agents.
+- Doctor and status show whether the pane runtime is healthy.
+- Pane messaging lets the lead hand off work and collect results.
 ## [1.0.1] - 2026-08-11
 ### Fixed
 - `AskUserQuestion` freeform handling no longer depends on a duplicated `Other` label. Any answer that is not a listed option now resolves as freeform in one step, matching the native contract.
