@@ -86,6 +86,27 @@ class TmuxPrivateFilesystemTests(unittest.TestCase):
         self.assertEqual(names[0], "name with spaces.json")
         self.assertIn("old.json", names)
 
+    def test_list_json_enumerates_the_opened_directory_fd(self):
+        inbox = os.path.join(self.root, "inbox")
+        decoy = os.path.join(self.root, "decoy")
+        os.mkdir(decoy, 0o700)
+        MODULE.write_json(self.root, "decoy/decoy.json", json.dumps({"n": 2}))
+        original_listdir = MODULE.os.listdir
+
+        def listdir_after_path_swap(target):
+            if target == inbox:
+                os.rename(inbox, inbox + ".orig")
+                os.rename(decoy, inbox)
+            return original_listdir(target)
+
+        names = []
+        with mock.patch.object(MODULE.os, "listdir", side_effect=listdir_after_path_swap):
+            with mock.patch.object(MODULE, "print") as printer:
+                MODULE.list_json(inbox)
+                names = [call.args[0] for call in printer.call_args_list]
+        self.assertIn("job.json", names)
+        self.assertNotIn("decoy.json", names)
+
 
 if __name__ == "__main__":
     unittest.main()
