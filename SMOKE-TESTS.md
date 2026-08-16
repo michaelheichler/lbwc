@@ -19,7 +19,10 @@ This matrix separates automated local proof from scenarios that require a clean 
 | Partial split rollback and attached external-pane preservation | `tests/tmux-orchestrator.bats` | PASS |
 | Watchdog graceful and forced teardown | `tests/tmux-bus-watchdog.bats` | PASS |
 | Snapshot drift | `tests/runtime-snapshot.bats` | PASS |
+| Build and vibe command markdown contracts for schema 3 open flags and explicit tmux vs native branches | `tests/runtime-snapshot.bats` (`build wires schema 3 open flags and an explicit tmux spawn branch`, `vibe execute wires schema 3 open flags and an explicit tmux spawn branch`) | PASS |
+| Team command markdown contract for execution choice and an explicit tmux spawn branch | `tests/team-command.bats` (`team command documents execution choice and an explicit tmux spawn branch`) | PASS |
 | Child SessionStart bind and heartbeat | `tests/session-start.bats` | PASS |
+| TMUX spawn driver builds agents JSON, fails closed without session id, awaits then acks returned message ids | `tests/tmux-spawn-group.bats` | PASS |
 | TMUX doctor missing, malformed, and healthy registry checks | `tests/doctor.bats` | PASS |
 
 A full `bats tests/` count is not claimed here. That invocation was not re-run in this change.

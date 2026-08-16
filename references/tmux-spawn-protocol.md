@@ -1,12 +1,12 @@
 # TMUX Spawn Protocol
 
-Use this protocol only after a frozen runtime snapshot resolves the backend to `tmux`. Native Agent and native team behavior remain authoritative when the snapshot resolves `in_process` or `native`.
+Use this protocol only after a frozen runtime snapshot resolves the backend to `tmux`. Native Agent and native team behavior remain authoritative when the snapshot resolves `in_process` or `native`. Do not silently switch to in-process during this protocol. The only permitted in-process outcome for a tmux request is a snapshot that already froze `comms_fallback` as `fall_back_to_in_process`.
 
-1. Run `tmux-preflight.sh` before issuing a TMUX process. Stop on failure unless the frozen snapshot explicitly resolves the permitted in-process fallback.
-2. Issue the same schema 3 task contract and generate the same definitions used by the native path. Reject generator metadata that disagrees with the snapshot.
-3. Run `tmux-agent-orchestrator.sh provision`, then `split-group`, with the authenticated main capability. The orchestrator creates agent panes only after every runtime record is prepared.
-4. Child panes receive capabilities and binding tokens only through their pane environment. Do not pass credentials through `send-keys`, shell history, prompt text, scrollback, or a bus message.
-5. A child binds exactly once through `session-start.sh`. Publish and acknowledge jobs through `tmux-bus.sh`; read result, error, and heartbeat messages only as the authenticated main orchestrator.
+1. Run `tmux-preflight.sh` before issuing a TMUX process. Stop on failure.
+2. Issue the same schema 3 task contract used by the native path. Generate definitions with `--execution-backend` matching the snapshot. Reject generator metadata that disagrees with the snapshot.
+3. Run `tmux-spawn-group.sh dispatch`. That helper is the main-session spawn driver: it runs `tmux-preflight.sh`, then `tmux-agent-orchestrator.sh provision` and `split-group`, with the authenticated main capability. `split-group` is the product group path. Do not register agents through `tmux-bus.sh`. Do not use `split-agent` as the group spawn path. The orchestrator creates agent panes only after every runtime record is prepared, then launches with `send-keys` of `claude --agent <name>`. `--main-id`, `--orchestrator-session-id`, and `--from-session-id` are the live `CLAUDE_SESSION_ID`. Fail closed when it is empty.
+4. The orchestrator writes a one-shot bind file `credentials/<agent_id>.json` before the pane starts. Pane `-e` is identity only: `LBWC_TMUX_AGENT`, `LBWC_TMUX_AGENT_ID`, `LBWC_TMUX_CONTRACT_ID`, `LBWC_TMUX_CONTROL_ROOT`. Do not put capability or binding material in pane environment. Do not pass credentials through `send-keys`, shell history, prompt text, scrollback, or a bus message.
+5. SessionStart reads the bind file, calls `tmux-bus.sh bind`, then deletes the file. A child binds exactly once. Publish and acknowledge jobs through `tmux-bus.sh`. Read result, error, and heartbeat messages only as the authenticated main orchestrator.
 6. Treat malformed registry, routing, lock, claim, envelope, or binding state as a failure. Do not switch backends or delete runtime state based on malformed data.
 7. On cancellation before provision, create no runtime state. On provision or split failure, call `tmux-agent-orchestrator.sh rollback` with the run id and authenticated main capability. Rollback preserves an externally attached tmux session and shuts down only LBWC-owned panes.
 8. For normal completion, await result delivery, acknowledge messages, transition lifecycle state, then use `kill-agent` or `kill-session` according to the frozen cleanup policy.

@@ -254,6 +254,8 @@ jq -e --arg name "$NAME_H" '
   and .agents[$name].execution.tmux_bootstrap.control_root == .agents[$name].control_root
 ' "$CONTROL_ROOT_H/agent-manifest.json" >/dev/null
 check "schema 3 tmux metadata and bootstrap have no drift" "$?"
+grep -q '## TMUX bus loop' "$PROJECT_H/.claude/agents/$NAME_H.md"
+check "schema 3 tmux definition includes the bus loop" "$?"
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

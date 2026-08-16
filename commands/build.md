@@ -72,16 +72,26 @@ Apply the ponytail discipline read in the required first step to every implement
 
 ## Main-session task contract and telemetry
 
-After selecting the role and grouping, the main session opens one PLAN contract for that grouping. A TDD task has two contracts, `red` and `implementation`. Every other task has one `implementation` contract. The exact generator brief must be passed as `--job` to `open` and to the generator.
+After selecting the role and grouping, the main session opens one PLAN contract for that grouping. A TDD task has two contracts, `red` and `implementation`. Every other task has one `implementation` contract. The exact generator brief must be passed as `--job` to `open` and to the generator. Do not run `open` until Spawn and verify has a validated or frozen snapshot.
+
+Copy snapshot backends into CLI flags. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. When `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so `open` cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags (`open` requires matching backends), then follow the native Agent path.
 
 ```bash
-CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" open "$PLAN_PATH" "{PROJECT_ROOT}" "$TASK_NAME" --role "$ROLE" --team "$TEAM_MODE" --group "$GROUP_NAME" --job "$BRIEF" "${CONTRACT_ALLOWANCE_ARGS[@]}")
+SNAPSHOT_PATH="{PHASE_DIR}/.runtime-snapshot.json"
+CONTROL_ROOT="{PROJECT_ROOT}/.lbwc-planning"
+REQUESTED_BACKEND=$(jq -r '.requested_backend' "$SNAPSHOT_PATH")
+RESOLVED_BACKEND=$(jq -r '.resolved_backend' "$SNAPSHOT_PATH")
+OPEN_BACKEND_ARGS=()
+if [ "$REQUESTED_BACKEND" = "$RESOLVED_BACKEND" ]; then
+  OPEN_BACKEND_ARGS=(--requested-backend "$REQUESTED_BACKEND" --resolved-backend "$RESOLVED_BACKEND" --control-root "$CONTROL_ROOT" --assert-snapshot "$SNAPSHOT_PATH")
+fi
+CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" open "$PLAN_PATH" "{PROJECT_ROOT}" "$TASK_NAME" --role "$ROLE" --team "$TEAM_MODE" --group "$GROUP_NAME" --job "$BRIEF" "${OPEN_BACKEND_ARGS[@]}" "${CONTRACT_ALLOWANCE_ARGS[@]}")
 TASK_ID=$(basename "$CONTRACT_PATH" .json)
 ```
 
 Build `CONTRACT_ALLOWANCE_ARGS` only from the selected PLAN task's `<files>`. Repeat each engineer path as `--write-allowance <path>`. For a non-TDD trio, repeat each exact test path as `--role-write-allowance test-dev:<path>`. Use `qa-author`, `solo`, and only the exact test paths for the `red` contract. Use the selected engineer role, `pair`, and only implementation paths for the later TDD `implementation` contract. The contract writer rejects any allowance not declared in PLAN.
 
-Pass the contract path, task id, job, team mode, and identical allowance arguments to one generator invocation. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
+Pass the contract path, task id, job, team mode, identical allowance arguments, and `--execution-backend "$RESOLVED_BACKEND"` to one generator invocation. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
 
 Advance each grouping contract only from outcomes the main session observes. After successful registration, run `state ... dispatched`. After the manifest shows the admitted members `running`, run `state ... running`. After all reports arrive, run `state ... awaiting_review`. After verification, run `state ... verified`, `blocked`, or `cancelled`. Never advance one grouping from another grouping's outcome or from an unobserved worker claim. Record one bounded telemetry event only after the main session observes the command outcome:
 
@@ -124,9 +134,23 @@ Before opening a grouping contract, resolve `{PHASE_DIR}` as the selected canoni
 
    This moves runtime state from `ready` to `cleaned`. A failed or blocked build preserves the snapshot for resume. A cleanup failure blocks the terminal transition and must be reported.
 
-When the snapshot resolves `in_process` or `tmux`, use the native Agent path below unchanged. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. Pane spawn is not wired in this destack.
+Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above.
 
-For one wave, take the next task in PLAN order and generate only its current grouping with `--exclusive`, following `@references/agent-spawn-protocol.md`. For a pair or trio, spawn every member of that one grouping together in the same turn. Derive each member's manifest capability from the task's `files` field. Pass source paths through `--write-allowance` for the engineer and test paths through `--role-write-allowance test-dev:<exact-path>` for a non-TDD trio. Give the engineer the task's `name`, `action`, `verify`, and `done` fields verbatim as its brief. Do not ask an agent to declare or summarize file scope. Run the contract open and generator arguments in the preceding section after role selection and before this invocation.
+For one wave, take the next task in PLAN order and generate only its current grouping with `--exclusive`, following `@references/agent-spawn-protocol.md` for generator admission. For a pair or trio, admit every member of that one grouping together. Derive each member's manifest capability from the task's `files` field. Pass source paths through `--write-allowance` for the engineer and test paths through `--role-write-allowance test-dev:<exact-path>` for a non-TDD trio. Give the engineer the task's `name`, `action`, `verify`, and `done` fields verbatim as its brief. Do not ask an agent to declare or summarize file scope. Run the contract open and generator arguments in the preceding section after role selection and before this invocation.
+
+If `snapshot.resolved_backend` is `in_process`, keep the native Agent path: spawn every generated name together in the same turn with `Agent(...)` as `@references/agent-spawn-protocol.md` requires.
+
+If `snapshot.resolved_backend` is `tmux`, follow `{LINK}/references/tmux-spawn-protocol.md` on this branch only. Do not call native Agent. After generation and `state ... dispatched`, run the spawn driver. `MAIN_ID` is the live orchestrator session `${CLAUDE_SESSION_ID:-}`. Fail closed when it is empty. The helper builds `--agents` JSON, runs preflight, provision, and `split-group`, publishes `{brief:...}` jobs, awaits result/error, and acks with the `message_id` from await output. On provision or split failure it rolls back.
+
+   ```bash
+   MAIN_ID="${CLAUDE_SESSION_ID:-}"
+   [ -n "$MAIN_ID" ] || { echo "LBWC: CLAUDE_SESSION_ID is required for tmux spawn" >&2; exit 1; }
+   TIMEOUT_MS=$(jq -r '.tmux_execution.comms_latency_tolerance_ms' "$SNAPSHOT_PATH")
+   CONTRACT_DIGEST=$(jq -r '.contract_digest' "$CONTRACT_PATH")
+   bash "{LINK}/scripts/tmux-spawn-group.sh" dispatch --project-root "{PROJECT_ROOT}" --control-root "$CONTROL_ROOT" --main-id "$MAIN_ID" --contract-id "$TASK_ID" --contract-digest "$CONTRACT_DIGEST" --spawn-ready-text "$GENERATOR_OUTPUT" --job "$BRIEF" --timeout-ms "$TIMEOUT_MS"
+   ```
+
+   Observe the helper JSON summary as the grouping reports. Then continue contract state, verification, and commits below. After the grouping is terminal, apply protocol cleanup (`kill-agent` or `kill-session`) from the frozen cleanup policy.
 
 - **TDD red stage:** open the `red` contract before generating solo `qa-author` with `--exclusive`. Pass the same must_haves brief and exact test-path allowances to both calls. Dispatch the contract before spawning. After the tests report and red commit, close its state from observed evidence. Wait until the manifest entry is `used` or `expired`. Then open a separate `implementation` pair contract for the engineer and critic. `test-dev` is not part of a TDD task.
 When a task's pair or trio returns its verdict, observe and record the reports. Advance the contract to `awaiting_review`, then verify the task and advance it to `verified` or to `blocked` or `cancelled` before committing that task's changed files yourself, one commit per task, referencing the task name. Before generating another grouping, read the manifest and wait until every member of the current grouping is `used` or `expired`. A `registered` or `running` member means the grouping is not closed. After each task's verify step, record one `deviq-record.py evidence --phase <phase> --role <engineer-role> --field claim="..." --field check="..." --field result=pass|fail` from the engineer's report. If the paired critic returned BLOCK, also record `deviq-record.py block --phase <phase> --role <critic-role> --field trigger="..." --field consequence="..." --field fix="..." --field status=open`. Continue through the remaining tasks in that wave in PLAN order. Start the next dependency wave only after every task in the current wave is complete. Record command telemetry only after this main-session outcome is observed.
@@ -141,7 +165,7 @@ Report the commits made and the SUMMARY.md path. Tell the user to run `/lbwc:qa 
 
 ## Failure and recovery
 
-A failed contract, generator, worker verdict, verify command, commit, summary validation, or remediation transition blocks the task and its dependents. Preserve accepted predecessor commits and exact contract state. Report the failing task and recovery command. Never create a placeholder summary or bypass exclusive admission.
+A failed contract, generator, tmux preflight, provision, split-group, bus publish/await/ack, worker verdict, verify command, commit, summary validation, or remediation transition blocks the task and its dependents. Preserve accepted predecessor commits and exact contract state. Report the failing task and recovery command. Never create a placeholder summary or bypass exclusive admission.
 
 ## Output Format
 

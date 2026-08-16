@@ -21,19 +21,19 @@ Use structured @${CLAUDE_PLUGIN_ROOT}/references/ask-user-question.md for bounde
 
 ## Context
 
-Working directory:
+Working directory (store as `{PROJECT_ROOT}`):
 
 ```bash
 !`pwd`
 ```
 
-Plugin root:
+Plugin root (self-contained, shell variables do not survive across directives):
 
 ```bash
-!`L="/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; bash "$R" >/dev/null || exit 1; echo "$L"`
+!`SESSION_KEY="${CLAUDE_SESSION_ID:-default}"; L="/tmp/.lbwc-plugin-root-link-${SESSION_KEY}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; LINK=$(bash "$R" --require-script indexer-sync.sh) || exit 1; printf 'Plugin root: %s\n' "$LINK"`
 ```
 
-Store the plugin root path output above as `{plugin-root}` for use in script invocations below. Replace `{plugin-root}` with the literal `Plugin root` value from Context whenever a step below references a script, template, command, or reference file.
+Store the returned `Plugin root` value as `{LINK}` and `{plugin-root}` for every later literal helper invocation. Never guess a plugin path or substitute a missing helper with an inline approximation. Replace `{plugin-root}` with that value whenever a step below references a script, template, command, or reference file.
 
 Existing state:
 
@@ -56,6 +56,16 @@ Skills:
 ```bash
 !`ls .claude/skills/ 2>/dev/null || echo "No project skills"`
 ```
+
+## Index freshness gate
+
+Before environment setup, scaffold, or any bootstrap write, run exactly:
+
+```bash
+bash "{LINK}/scripts/indexer-sync.sh" --project-root "{PROJECT_ROOT}"
+```
+
+This is mandatory. Stop before Guard when the helper exits non-zero.
 
 ## Guard
 

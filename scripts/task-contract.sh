@@ -199,6 +199,7 @@ def parse_options(arguments, require_command=False):
         "communication_policy": "",
         "requested_backend": "",
         "resolved_backend": "",
+        "assert_snapshot": "",
     }
     value_options = {
         "--role": "role",
@@ -211,6 +212,7 @@ def parse_options(arguments, require_command=False):
         "--communication-policy": "communication_policy",
         "--requested-backend": "requested_backend",
         "--resolved-backend": "resolved_backend",
+        "--assert-snapshot": "assert_snapshot",
     }
     index = 0
     while index < len(arguments):
@@ -350,6 +352,68 @@ def with_digest(contract):
     return contract
 
 
+def capabilities_from_allowances(allowances):
+    return {
+        role: [{"access": "write", "kind": "file", "path": path} for path in paths]
+        for role, paths in allowances.items()
+    }
+
+
+def schema3_plan_requested(options):
+    flags = (
+        bool(options["requested_backend"]),
+        bool(options["resolved_backend"]),
+        bool(options["control_root"]),
+    )
+    if any(flags) != all(flags):
+        fail("schema 3 open requires --requested-backend, --resolved-backend, and --control-root")
+    return all(flags)
+
+
+def plan_schema3_fields(options, root, allowances):
+    requested = options["requested_backend"]
+    resolved = options["resolved_backend"]
+    runtime_kind = options["runtime_kind"] or "native-team"
+    communication_policy = options["communication_policy"] or "native-team"
+    if requested not in EXECUTION_BACKENDS:
+        fail("invalid requested_backend")
+    if resolved not in EXECUTION_BACKENDS:
+        fail("invalid resolved_backend")
+    if requested != resolved:
+        fail("requested_backend and resolved_backend must match")
+    if runtime_kind not in RUNTIME_KINDS:
+        fail("invalid runtime_kind")
+    if communication_policy not in COMMUNICATION_POLICIES:
+        fail("invalid communication_policy")
+    return {
+        "capabilities_by_role": capabilities_from_allowances(allowances),
+        "communication_policy": communication_policy,
+        "control_root": str(resolve_control_root(options["control_root"], root)),
+        "runtime_kind": runtime_kind,
+        "requested_backend": requested,
+        "resolved_backend": resolved,
+        "schema_version": 3,
+    }
+
+
+def assert_contract_matches_snapshot(path, contract):
+    try:
+        snapshot = json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError):
+        fail("runtime snapshot is malformed")
+    if not isinstance(snapshot, dict):
+        fail("runtime snapshot is malformed")
+    if contract.get("schema_version") != 3:
+        fail("snapshot assertion requires a schema 3 contract")
+    if (
+        snapshot.get("requested_backend") != contract.get("requested_backend")
+        or snapshot.get("resolved_backend") != contract.get("resolved_backend")
+    ):
+        fail("snapshot backend mismatch")
+    if "control_root" in snapshot and snapshot.get("control_root") != contract.get("control_root"):
+        fail("snapshot backend mismatch")
+
+
 def command_contract(root, task_name, options):
     role = safe_token(options["role"], "role")
     command = safe_token(options["command"], "command")
@@ -451,7 +515,7 @@ def plan_contract(path, root, task_name, options):
         roles, role, primary_paths, options["role_write_allowances"], plan_files
     )
     contract_id = safe_id(phase, path.stem, task_name, *([] if group == "task" else [group]))
-    return with_digest({
+    contract = {
         "contract_id": contract_id,
         "schema_version": 2,
         "created_by": "main",
@@ -479,7 +543,10 @@ def plan_contract(path, root, task_name, options):
         "strategy": selected["strategy"],
         "state": "planned",
         "contract_digest": "",
-    })
+    }
+    if schema3_plan_requested(options):
+        contract.update(plan_schema3_fields(options, root, allowances))
+    return with_digest(contract)
 
 
 def validate_contract(contract, root, expected_id=None, expected_job=None):
@@ -725,14 +792,20 @@ def main():
         except ValueError:
             fail("PLAN escapes project root")
         options = parse_options(sys.argv[5:])
-        create_or_reopen(root, plan_contract(plan, root, sys.argv[4], options))
+        contract = plan_contract(plan, root, sys.argv[4], options)
+        if options["assert_snapshot"]:
+            assert_contract_matches_snapshot(options["assert_snapshot"], contract)
+        create_or_reopen(root, contract)
         return
     if command == "issue":
         if len(sys.argv) < 5:
             fail(USAGE)
         root = canonical_root(sys.argv[2])
         options = parse_options(sys.argv[4:], require_command=True)
-        create_or_reopen(root, command_contract(root, sys.argv[3], options))
+        contract = command_contract(root, sys.argv[3], options)
+        if options["assert_snapshot"]:
+            assert_contract_matches_snapshot(options["assert_snapshot"], contract)
+        create_or_reopen(root, contract)
         return
     if command == "verify":
         if len(sys.argv) not in (4, 6) or (len(sys.argv) == 6 and sys.argv[4] != "--job"):

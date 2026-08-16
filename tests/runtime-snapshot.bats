@@ -193,3 +193,51 @@ freeze_in_process() {
   grep -F 'scripts/runtime-snapshot.sh" cleanup' "$REPO_ROOT/commands/build.md"
   grep -F 'agent-generator.sh --execution-backend' "$REPO_ROOT/commands/build.md"
 }
+
+@test "build wires schema 3 open flags and an explicit tmux spawn branch" {
+  local file="$REPO_ROOT/commands/build.md"
+  grep -F -- '--requested-backend' "$file"
+  grep -F -- '--resolved-backend' "$file"
+  grep -F -- '--control-root' "$file"
+  grep -F -- '--assert-snapshot' "$file"
+  grep -F 'references/tmux-spawn-protocol.md' "$file"
+  grep -F 'tmux-spawn-group.sh" dispatch' "$file"
+  grep -F 'CLAUDE_SESSION_ID' "$file"
+  grep -F 'If `snapshot.resolved_backend` is `in_process`' "$file"
+  grep -F 'If `snapshot.resolved_backend` is `tmux`' "$file"
+  grep -F 'Do not call native Agent.' "$file"
+  ! grep -F 'MAIN_ID=main-session' "$file"
+  ! grep -F '$AGENTS_JSON' "$file"
+  ! grep -F 'Pane spawn is not wired' "$file"
+}
+
+@test "vibe execute wires schema 3 open flags and an explicit tmux spawn branch" {
+  local vibe="$REPO_ROOT/commands/vibe.md"
+  local proto="$REPO_ROOT/references/vibe-mode-execute.md"
+
+  grep -F -- '--assert-snapshot' "$vibe"
+  grep -F 'agent-generator.sh --execution-backend' "$vibe"
+  grep -F 'If `snapshot.resolved_backend` is `in_process`' "$vibe"
+  grep -F 'If `snapshot.resolved_backend` is `tmux`' "$vibe"
+  grep -F 'references/tmux-spawn-protocol.md' "$vibe"
+  grep -F 'Do not call native Agent.' "$vibe"
+  grep -F '.runtime-cancelled.json' "$vibe"
+  ! grep -F 'Pane spawn is not wired' "$vibe"
+
+  grep -F -- '--requested-backend' "$proto"
+  grep -F -- '--resolved-backend' "$proto"
+  grep -F -- '--control-root' "$proto"
+  grep -F -- '--assert-snapshot' "$proto"
+  grep -F 'agent-generator.sh --execution-backend' "$proto"
+  grep -F 'references/tmux-spawn-protocol.md' "$proto"
+  grep -F 'tmux-spawn-group.sh" dispatch' "$proto"
+  grep -F 'CLAUDE_SESSION_ID' "$proto"
+  grep -F 'Spawn path (hard branch)' "$proto"
+  grep -F 'If `snapshot.resolved_backend` is `in_process`' "$proto"
+  grep -F 'If `snapshot.resolved_backend` is `tmux`' "$proto"
+  grep -F 'Do not call native Agent.' "$proto"
+  grep -F '.runtime-cancelled.json' "$proto"
+  ! grep -F 'MAIN_ID=main-session' "$proto"
+  ! grep -F '$AGENTS_JSON' "$proto"
+  ! grep -F 'Pane spawn is not wired' "$proto"
+}
