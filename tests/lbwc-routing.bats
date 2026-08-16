@@ -728,6 +728,7 @@ teardown() {
   original=$(<"$lock/owner")
   rm "$lock/owner"
   rmdir "$lock"
+  mkdir "$TEST_TEMP_DIR/replay-inode-hold"
   mkdir "$lock"
   printf '%s\n' "$original" > "$lock/owner"
 
