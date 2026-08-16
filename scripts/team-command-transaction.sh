@@ -169,6 +169,8 @@ RESOLVED_SCOPES='[]'
 ACTIVE_CONTROL_ROOT=""
 CONTROL_ROOT_KIND="temporary-run"
 AGENT_TEAMS_STATUS='{}'
+CONTRACT_REQUESTED_BACKEND=""
+CONTRACT_RESOLVED_BACKEND=""
 
 canonical_project_root() {
   local candidate="$1"
@@ -339,9 +341,24 @@ read_agent_teams_status() {
 }
 
 require_run_roster() {
+  local contract
   [ -f "$RUN_ROOT/run.json" ] || fail_diag "run state is missing: $RUN_ROOT/run.json"
   EXPECTED_CONTRACT=$(jq -r '.contract_id // empty' "$RUN_ROOT/contract.json" 2>/dev/null) || true
   [ -n "$EXPECTED_CONTRACT" ] || fail_diag 'contract record is missing or unreadable'
+  contract=$(bash "$SCRIPT_DIR/task-contract.sh" read "$PROJECT_ROOT" "$EXPECTED_CONTRACT" 2>/dev/null) \
+    || fail_diag 'contract is missing, stale, or tampered'
+  CONTRACT_REQUESTED_BACKEND=$(jq -r '.requested_backend // empty' <<< "$contract")
+  CONTRACT_RESOLVED_BACKEND=$(jq -r '.resolved_backend // empty' <<< "$contract")
+  case "$CONTRACT_REQUESTED_BACKEND" in in_process|tmux) ;; *) fail_diag 'contract backend metadata is invalid' ;; esac
+  case "$CONTRACT_RESOLVED_BACKEND" in in_process|tmux) ;; *) fail_diag 'contract backend metadata is invalid' ;; esac
+  [ "$CONTRACT_REQUESTED_BACKEND" = "$CONTRACT_RESOLVED_BACKEND" ] || fail_diag 'contract backend metadata is invalid'
+  jq -e --arg contract "$EXPECTED_CONTRACT" --arg requested "$CONTRACT_REQUESTED_BACKEND" --arg resolved "$CONTRACT_RESOLVED_BACKEND" '
+    .schema_version == 3 and .contract_id == $contract
+    and .requested_backend == $requested and .resolved_backend == $resolved
+  ' "$RUN_ROOT/contract.json" >/dev/null || fail_diag 'contract backend metadata does not match the contract'
+  jq -e --arg requested "$CONTRACT_REQUESTED_BACKEND" --arg resolved "$CONTRACT_RESOLVED_BACKEND" '
+    .requested_backend == $requested and .resolved_backend == $resolved
+  ' "$RUN_ROOT/run.json" >/dev/null || fail_diag 'run backend metadata does not match the contract'
   ROSTER_JSON=$(jq -ce '.teammates // [] | map(.name)' "$RUN_ROOT/run.json") \
     || fail_diag 'run state roster is unreadable'
   [ "$(jq 'length' <<< "$ROSTER_JSON")" -ge 1 ] || fail_diag 'run state has no teammates'
@@ -352,6 +369,17 @@ require_run_roster() {
   [ -f "$MANIFEST_PATH" ] || fail_diag "agent manifest is missing: $MANIFEST_PATH"
   jq -e 'type == "object" and (.agents | type == "object")' "$MANIFEST_PATH" >/dev/null \
     || fail_diag 'agent manifest is unreadable'
+  jq -e --argjson roster "$ROSTER_JSON" --arg contract "$EXPECTED_CONTRACT" \
+    --arg requested "$CONTRACT_REQUESTED_BACKEND" --arg resolved "$CONTRACT_RESOLVED_BACKEND" '
+    . as $manifest
+    | all($roster[];
+        ($manifest.agents[.] | type == "object")
+        and $manifest.agents[.].contract_id == $contract
+        and ($manifest.agents[.].execution | type == "object")
+        and $manifest.agents[.].execution.requested_backend == $requested
+        and $manifest.agents[.].execution.resolved_backend == $resolved
+      )
+  ' "$MANIFEST_PATH" >/dev/null || fail_diag 'manifest backend metadata does not match the contract'
 }
 
 case "$ACTION" in
@@ -455,9 +483,14 @@ case "$ACTION" in
     CONTRACT_PATH=$(bash "$SCRIPT_DIR/task-contract.sh" issue "$PROJECT_ROOT" "$RUN_ID" \
       --command team --role "$ROSTER_ENGINEER" --team "$TEAM_MODE" --job "$INSTRUCTION" \
       --control-root "$CONTROL_ROOT" --runtime-kind native-team --communication-policy native-team \
+      --requested-backend in_process --resolved-backend in_process \
       ${capability_args[@]+"${capability_args[@]}"}) \
       || fail_diag 'contract issue failed'
     CONTRACT_ID=$(basename "$CONTRACT_PATH" .json)
+    CONTRACT_JSON=$(bash "$SCRIPT_DIR/task-contract.sh" verify "$CONTRACT_PATH" "$PROJECT_ROOT") \
+      || fail_diag 'contract verification failed'
+    CONTRACT_REQUESTED_BACKEND=$(jq -r '.requested_backend' <<< "$CONTRACT_JSON")
+    CONTRACT_RESOLVED_BACKEND=$(jq -r '.resolved_backend' <<< "$CONTRACT_JSON")
 
     GENERATED=()
     TEAMMATES_JSON='[]'
@@ -496,15 +529,19 @@ case "$ACTION" in
     bash "$SCRIPT_DIR/task-contract.sh" state "$PROJECT_ROOT" "$CONTRACT_ID" dispatched >/dev/null \
       || fail_diag 'contract dispatch failed'
 
-    CONTRACT_RECORD_JSON=$(jq -cn --arg id "$CONTRACT_ID" '{contract_id:$id,status:"dispatched"}')
+    CONTRACT_RECORD_JSON=$(jq -cn --arg id "$CONTRACT_ID" --arg requested "$CONTRACT_REQUESTED_BACKEND" --arg resolved "$CONTRACT_RESOLVED_BACKEND" \
+      '{schema_version:3,contract_id:$id,status:"dispatched",requested_backend:$requested,resolved_backend:$resolved}')
     printf '%s\n' "$CONTRACT_RECORD_JSON" > "$RUN_ROOT/contract.json"
     UPDATED_RUN=$(jq -c --argjson teammates "$TEAMMATES_JSON" --arg contract "$CONTRACT_ID" \
       --arg team_mode "$TEAM_MODE" --arg control_root "$CONTROL_ROOT" \
+      --arg requested_backend "$CONTRACT_REQUESTED_BACKEND" --arg resolved_backend "$CONTRACT_RESOLVED_BACKEND" \
       '.records = (.records // {})
        | .records["contract:\($contract)"] = {kind:"contract",id:$contract,status:"dispatched",updated_at:(now | todate)}
        | .teammates = $teammates
        | .team_mode = $team_mode
        | .control_root = $control_root
+       | .requested_backend = $requested_backend
+       | .resolved_backend = $resolved_backend
        | .updated_at = (now | todate)' "$RUN_ROOT/run.json") \
       || fail_diag 'run state update failed'
     printf '%s\n' "$UPDATED_RUN" > "$RUN_ROOT/run.json"
@@ -519,12 +556,14 @@ case "$ACTION" in
       --arg contract_path "$CONTRACT_PATH" \
       --arg contract_id "$CONTRACT_ID" \
       --arg team_mode "$TEAM_MODE" \
+      --arg requested_backend "$CONTRACT_REQUESTED_BACKEND" --arg resolved_backend "$CONTRACT_RESOLVED_BACKEND" \
       --argjson teammates "$TEAMMATES_JSON" \
       --argjson scopes "$RESOLVED_SCOPES" \
       --arg engineer "$ROSTER_ENGINEER" \
-      '{schema_version:1,run_root:$run_root,control_root:$control_root,
+      '{schema_version:3,run_root:$run_root,control_root:$control_root,
         control_root_kind:$control_root_kind,contract_path:$contract_path,contract_id:$contract_id,
         team_mode:$team_mode,teammates:$teammates,scopes:$scopes,engineer:$engineer,
+         requested_backend:$requested_backend,resolved_backend:$resolved_backend,
         contract_state:"dispatched",task_subject:$contract_id,
         ordered_actions:["agent_spawn","task_create"]}'
     ;;

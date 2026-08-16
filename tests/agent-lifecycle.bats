@@ -168,3 +168,67 @@ EOF
 
   [ "$status" -eq 0 ]
 }
+
+@test "agent-lifecycle: tmux session start fails closed on a malformed runtime registry" {
+  local control_root="$TEST_ROOT/control"
+  mkdir -p "$control_root/.runtime/tmux-bus"
+  printf '{not valid json\n' > "$control_root/.runtime/tmux-bus/registry.json"
+
+  run env \
+    LBWC_CONTROL_ROOT="$control_root" \
+    LBWC_TMUX_AGENT=1 \
+    LBWC_TMUX_AGENT_ID=agent-a \
+    LBWC_TMUX_CONTRACT_ID=contract-a \
+    LBWC_TMUX_CAPABILITY=0123456789abcdef0123456789abcdef \
+    CLAUDE_SESSION_ID=agent-session-a \
+    bash "$SCRIPT" tmux-session-start
+
+  [ "$status" -ne 0 ]
+  [ "$output" = "tmux_lifecycle_status=malformed" ]
+}
+
+@test "agent-lifecycle: tmux session start heartbeats a bound agent" {
+  local control_root="$TEST_ROOT/project/.lbwc-planning" hash registry capability
+  mkdir -p "$control_root"
+  printf '%s\n' '{}' > "$control_root/config.json"
+  source "$REPO_ROOT/scripts/lib/lbwc-control-root.sh"
+  source "$REPO_ROOT/scripts/lib/tmux-runtime.sh"
+  tmux_runtime_configure "$control_root"
+  tmux_runtime_ensure
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/inboxes"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/outbox"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/outbox/main"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/transactions"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/claims"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/credentials"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/heartbeats"
+  tmux_runtime_private_directory "$TMUX_RUNTIME_BUS_ROOT/locks"
+  capability=$(tmux_runtime_capability)
+  hash=$(tmux_runtime_capability_hash "$capability")
+  registry=$(jq -n --arg main main-session --arg hash "$hash" --arg agent_hash "$hash" '{
+    schema_version: 2,
+    main: {agent_id: $main, session_id: $main, role: "orchestrator", capability_hash: $hash},
+    tmux: {session: null, orchestrator_target: null, orchestrator_pane: null, topology: "pending", managed_session: false, ownership_token: null},
+    agents: [{
+      agent_id: "agent-a", parent_id: $main, contract_id: "contract-a", generated_name: "agent-a",
+      tmux_target: "lbwc-test:0.1", tmux_pane_id: null, claude_session_id: "agent-session-a",
+      capability_hash: $agent_hash, state: "registered", heartbeat_at_ms: null
+    }],
+    routes: {($main): {inbox: $main, tmux_target: null}, "agent-a": {inbox: "agent-a", tmux_target: "lbwc-test:0.1"}}
+  }')
+  tmux_runtime_write_registry_route_bundle "$registry"
+  tmux_runtime_initialize_inbox main-session
+  tmux_runtime_initialize_inbox agent-a
+
+  run env \
+    LBWC_CONTROL_ROOT="$control_root" \
+    LBWC_TMUX_AGENT=1 \
+    LBWC_TMUX_AGENT_ID=agent-a \
+    CLAUDE_SESSION_ID=agent-session-a \
+    bash "$SCRIPT" tmux-session-start
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "tmux_lifecycle_status=running" ]
+  run jq -e '.agents[] | select(.agent_id == "agent-a") | .state == "running" and (.heartbeat_at_ms | type == "number")' "$control_root/.runtime/tmux-bus/registry.json"
+  [ "$status" -eq 0 ]
+}

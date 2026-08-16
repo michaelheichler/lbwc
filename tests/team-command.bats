@@ -146,6 +146,8 @@ record_full_roster() {
     and .roles == ["web-engineer", "web-code-critic"]
     and .runtime_kind == "native-team"
     and .communication_policy == "native-team"
+    and .requested_backend == "in_process"
+    and .resolved_backend == "in_process"
     and .state == "dispatched"
     and .capabilities_by_role["web-engineer"] == [{access:"write",kind:"directory",path:"src"}]
     and .capabilities_by_role["web-code-critic"] == []
@@ -161,6 +163,37 @@ record_full_roster() {
     ' "$manifest" >/dev/null
     [ -f "$PROJECT/.claude/agents/$name.md" ]
   done < <(jq -r '.teammates[].name' <<< "$output")
+}
+
+@test "prepare derives backend records from the contract before native spawn" {
+  prepare_run run-backend --scope src
+
+  jq -e '
+    .schema_version == 3
+    and .requested_backend == "in_process"
+    and .resolved_backend == "in_process"
+    and .ordered_actions == ["agent_spawn", "task_create"]
+  ' <<< "$output" >/dev/null
+  jq -e '
+    .requested_backend == "in_process"
+    and .resolved_backend == "in_process"
+    and (.teammates | length) == 2
+  ' "$RUN_ROOT/run.json" >/dev/null
+  jq -e '
+    .requested_backend == "in_process"
+    and .resolved_backend == "in_process"
+  ' "$RUN_ROOT/contract.json" >/dev/null
+}
+
+@test "spawn-payload rejects backend sidecar drift from the contract" {
+  prepare_run run-backend-drift --scope src
+  jq '.resolved_backend = "tmux"' "$RUN_ROOT/run.json" > "$TEST_ROOT/run.json"
+  mv "$TEST_ROOT/run.json" "$RUN_ROOT/run.json"
+
+  run bash "$TRANSACTION" spawn-payload --project-root "$PROJECT" --run-root "$RUN_ROOT"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"backend metadata does not match the contract"* ]]
 }
 
 @test "prepare with --test-dev issues a trio contract and registers three teammates" {
@@ -247,7 +280,7 @@ record_full_roster() {
   run bash "$TRANSACTION" spawn-payload --project-root "$PROJECT" --run-root "$RUN_ROOT"
 
   [ "$status" -ne 0 ]
-  [[ "$output" == *"not spawn-ready"* ]]
+  [[ "$output" == *"manifest backend metadata does not match the contract"* ]]
 }
 
 @test "record-spawn tracks the roster and blocks unknown or unclaimed teammates" {

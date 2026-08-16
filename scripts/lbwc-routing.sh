@@ -458,7 +458,7 @@ copy_profile() {
 }
 
 activate_profile() {
-  local planning_dir="$1" profile="$2" catalog config updated
+  local planning_dir="$1" profile="$2" catalog config updated profile_json
   validate_profile "$profile"
   catalog="$planning_dir/claude-capabilities.json"
   config="$planning_dir/config.json"
@@ -466,6 +466,9 @@ activate_profile() {
   validate_current_catalog "$catalog"
   validate_config_file "$config"
   validate_routing_shape "$config"
+  profile_json=$(jq -cn --arg profile "$profile" '$profile') || fail 'could not encode routing profile'
+  bash "$SCRIPT_DIR/lbwc-config.sh" assert-execution-setting-writable \
+    "$planning_dir" routing.active_profile "$profile_json"
   updated=$(jq -c --arg profile "$profile" '.routing.active_profile = $profile' "$config") \
     || fail 'could not activate routing profile'
   atomic_write_config "$planning_dir" "$updated"
@@ -504,7 +507,7 @@ check_route_value() {
 }
 
 migrate_routes() {
-  local planning_dir="$1" catalog config migrated role
+  local planning_dir="$1" catalog config migrated role profile profile_json
   catalog="$planning_dir/claude-capabilities.json"
   config="$planning_dir/config.json"
   acquire_config_lock "$planning_dir"
@@ -514,6 +517,12 @@ migrate_routes() {
     [ -n "$role" ] || continue
     validate_role "$role"
   done < <(jq -r '(.roles // {}) | if type == "object" then keys[] else empty end' "$config")
+  profile=$(jq -r '(.routing.active_profile // .model_profile // "balanced") | if . == "budget" then "turbo" else . end' "$config") \
+    || fail 'could not resolve migrated routing profile'
+  validate_profile "$profile"
+  profile_json=$(jq -cn --arg profile "$profile" '$profile') || fail 'could not encode routing profile'
+  bash "$SCRIPT_DIR/lbwc-config.sh" assert-execution-setting-writable \
+    "$planning_dir" routing.active_profile "$profile_json"
   migrated=$(jq -c --slurpfile catalog "$catalog" '
     def normalized_profile($value): if $value == "budget" then "turbo" else $value end;
     def normalized_cell($cell):

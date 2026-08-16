@@ -6,6 +6,7 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "maxTurns": 50,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "debugger": {
@@ -14,6 +15,7 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "maxTurns": 40,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "coding-dijkstra": {
@@ -22,6 +24,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 50,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "coding-dijkstra-critic"
   },
@@ -32,6 +35,7 @@
     "tools": "Read, Grep, Glob, SendMessage, TaskGet, TaskList, TaskUpdate",
     "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "coding-dijkstra"
   },
@@ -41,6 +45,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 50,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "python-critic"
   },
@@ -51,6 +56,7 @@
     "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
     "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "python-engineer"
   },
@@ -60,6 +66,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 50,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "web-code-critic"
   },
@@ -70,6 +77,7 @@
     "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
     "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "web-engineer"
   },
@@ -80,6 +88,7 @@
     "tools": "Read, Grep, Glob, SendMessage, TaskGet, TaskList, TaskUpdate",
     "disallowedTools": "Task, TaskCreate, Agent, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "docs": {
@@ -89,6 +98,7 @@
     "memory": "project",
     "permissionMode": "acceptEdits",
     "maxTurns": 30,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "lead": {
@@ -99,6 +109,7 @@
     "disallowedTools": "AskUserQuestion",
     "pairsWith": "lead-critic",
     "maxTurns": 50,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "lead-critic": {
@@ -108,6 +119,7 @@
     "tools": "Read, Grep, Glob, Bash, SendMessage, TaskGet, TaskList, TaskUpdate",
     "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session.",
     "pairsWith": "lead"
   },
@@ -117,6 +129,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, NotebookEdit, Bash",
     "maxTurns": 30,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "qa": {
@@ -125,6 +138,7 @@
     "permissionMode": "plan",
     "disallowedTools": "Task, Write, Edit, NotebookEdit, ExitPlanMode, AskUserQuestion",
     "maxTurns": 20,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "scout": {
@@ -133,6 +147,7 @@
     "permissionMode": "plan",
     "disallowedTools": "Edit, NotebookEdit, Task, TaskCreate, Agent, AskUserQuestion",
     "maxTurns": 30,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "test-dev": {
@@ -141,6 +156,7 @@
     "permissionMode": "acceptEdits",
     "disallowedTools": "Task, TaskCreate, Agent, AskUserQuestion, Bash",
     "maxTurns": 40,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "deviq": {
@@ -150,6 +166,7 @@
     "memory": "project",
     "permissionMode": "plan",
     "maxTurns": 15,
+    "executionBackend": "in_process",
     "initialPrompt": "Never call AskUserQuestion. If a human decision is required, return {\"type\":\"user_decision_required\",\"question\":\"clear user question\",\"response_shape\":\"bounded choices or freeform\"} to the main session."
   },
   "trios": {

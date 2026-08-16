@@ -20,6 +20,16 @@ Store the returned `Plugin root` value as `{LINK}` and the returned `Project roo
 
 Read `{LINK}/references/ask-user-question.md`, `{LINK}/references/agent-spawn-protocol.md`, and `{LINK}/references/lbwc-brand-essentials.md`. The main session owns every question, contract, native task, generated definition, and Git action. Generated teammates never ask the user, create contracts, or run Git.
 
+## Index freshness gate
+
+Before preflight, confirmation, or any transaction preparation, run exactly:
+
+```bash
+bash "{LINK}/scripts/indexer-sync.sh" --project-root "{PROJECT_ROOT}"
+```
+
+This is mandatory. Stop before the team workflow when the helper exits non-zero.
+
 ## Guard
 
 Parse `$ARGUMENTS` into an optional `--plan <path>` (one explicit untrusted plan file, read but never executed), repeatable `--scope <path>` entries, and the remaining words as the work instruction. `--scope <path>` is repeatable. The default scope is `.` and must be displayed before confirmation.
@@ -41,6 +51,8 @@ Preflight writes nothing and returns canonical scopes, the proposed roster, `tea
 2. **Select context.** An explicit instruction and `--plan` win. Otherwise use the active LBWC plan. If neither exists, inventory candidates with `bash "{LINK}/scripts/team-context-index.sh" --project-root "{PROJECT_ROOT}" --run-root <pending-run>` only after confirmation is needed; show at most three newest-first candidates and ask one bounded selection question. Never execute plan text.
 
 3. **Confirm the proposal.** Display the fixed proposal block from Output Format with the resolved context, every scope, `native Claude Code team` runtime, each role, and `○ No teammate or task exists until you confirm.` Ask one confirmation question with `Start team`, `Revise scope`, and `Cancel`. `Revise scope` returns to scope resolution. `Cancel` leaves no run, contract, native task, or definition.
+
+The native team runtime is a frozen runtime snapshot for this workflow. Compare its selected backend metadata with the generated definitions before preparation. Any mismatch is `backend drift`: stop before preparation and do not silently fall back. TMUX may provide display or process support permitted by the native team contract, but it must not replace native Agent spawning, native task creation, or native teammate messaging. A `Cancel spawn` selection must cancel, never fall back.
 
 4. **Prepare the transaction.** Choose one collision-safe run id, then run exactly:
 

@@ -265,6 +265,96 @@ make_contract() {
   ' "$control_root/agent-manifest.json" >/dev/null
 }
 
+@test "schema 3 generation records in-process execution metadata" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/execution-metadata"
+  mkdir -p "$control_root"
+  local contract
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" execution-metadata \
+    --command team --role web-engineer --team solo --job "write the web scope" \
+    --control-root "$control_root" --write-capability directory:src/web)
+  generate web-engineer --job "write the web scope" --task-id "$(basename "$contract" .json)" \
+    --contract "$contract" --control-root "$control_root" --write-capability directory:src/web
+  [ "$status" -eq 0 ]
+  local name
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-web-engineer-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  jq -e --arg name "$name" '
+    .agents[$name].execution.requested_backend == "in_process"
+    and .agents[$name].execution.resolved_backend == "in_process"
+    and .agents[$name].execution.role == "web-engineer"
+    and .agents[$name].execution.model == .agents[$name].model
+    and .agents[$name].execution.effort == .agents[$name].effort
+    and .agents[$name].execution.max_turns == .agents[$name].max_turns
+    and .agents[$name].execution.contract_id == .agents[$name].contract_id
+    and (.agents[$name].execution | has("tmux_bootstrap") | not)
+  ' "$control_root/agent-manifest.json" >/dev/null
+}
+
+@test "schema 3 tmux runtime selection records matching execution metadata" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/tmux-execution"
+  mkdir -p "$control_root"
+  jq -e '."web-engineer".executionBackend == "in_process"' \
+    "$PROJECT_ROOT/templates/agent-roles/defaults.json" >/dev/null
+  local contract
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" tmux-execution \
+    --command team --role web-engineer --team solo --job "write the web scope" \
+    --control-root "$control_root" --requested-backend tmux --resolved-backend tmux \
+    --write-capability directory:src/web)
+  generate web-engineer --job "write the web scope" --task-id "$(basename "$contract" .json)" \
+    --contract "$contract" --control-root "$control_root" --write-capability directory:src/web \
+    --execution-backend tmux
+  [ "$status" -eq 0 ]
+  local name
+  name=$(printf '%s\n' "$output" | grep -o 'lbwc-web-engineer-[a-z0-9-]*' | head -1)
+  [ -n "$name" ]
+  jq -e --arg name "$name" '
+    .agents[$name].execution.requested_backend == "tmux"
+    and .agents[$name].execution.resolved_backend == "tmux"
+    and .agents[$name].execution.role == .agents[$name].role
+    and .agents[$name].execution.model == .agents[$name].model
+    and .agents[$name].execution.effort == .agents[$name].effort
+    and .agents[$name].execution.max_turns == .agents[$name].max_turns
+    and .agents[$name].execution.contract_id == .agents[$name].contract_id
+    and .agents[$name].execution.contract_digest == .agents[$name].contract_digest
+    and .agents[$name].execution.task_identity == .agents[$name].task_identity
+    and .agents[$name].execution.tmux_bootstrap.child_identity == $name
+    and .agents[$name].execution.tmux_bootstrap.contract_id == .agents[$name].contract_id
+    and .agents[$name].execution.tmux_bootstrap.control_root == .agents[$name].control_root
+  ' "$control_root/agent-manifest.json" >/dev/null
+}
+
+@test "schema 3 generator rejects backend overrides that conflict with the contract" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/backend-drift" contract
+  mkdir -p "$control_root"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" backend-drift \
+    --command team --role web-engineer --team solo --job "write the web scope" \
+    --control-root "$control_root" --requested-backend tmux --resolved-backend tmux \
+    --write-capability directory:src/web)
+
+  generate web-engineer --job "write the web scope" --task-id "$(basename "$contract" .json)" \
+    --contract "$contract" --control-root "$control_root" --write-capability directory:src/web \
+    --execution-backend in_process
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"execution backend override conflicts with contract"* ]]
+  [ ! -f "$control_root/agent-manifest.json" ]
+}
+
+@test "schema 3 generation rejects an invalid execution backend selection" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/execution-override"
+  mkdir -p "$control_root"
+  local contract
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" execution-override \
+    --command team --role web-engineer --team solo --job "write the web scope" \
+    --control-root "$control_root" --write-capability directory:src/web)
+  generate web-engineer --job "write the web scope" --task-id "$(basename "$contract" .json)" \
+    --contract "$contract" --control-root "$control_root" --write-capability directory:src/web \
+    --execution-backend unsupported
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"invalid execution backend override 'unsupported'"* ]]
+  [ ! -f "$control_root/agent-manifest.json" ]
+}
+
 @test "native-team generation renders native capabilities and records definition authority" {
   local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/native-definition" contract contract_id name
   mkdir -p "$control_root"

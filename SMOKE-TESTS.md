@@ -13,7 +13,24 @@ This matrix separates automated local proof from scenarios that require a clean 
 | Generated definition owns model, effort, maxTurns, tools, and role instructions | `tests/agent-generator.bats`, spawn override rejection | PASS |
 | Authoritative context discovery avoids `.lbwc-planning` creation | `tests/team-context-index.bats` | PASS |
 | Import staging preserves source and canonical artifacts until explicit promotion | `tests/plan-import.bats`, import command tests | PASS |
-| Full local suite | `bats tests/` | PASS, 1,189 of 1,189 |
+| Configuration defaults, TMUX preflight, and runtime-snapshot cancel | `tests/lbwc-execution-config.bats`, `tests/tmux-preflight.bats`, `tests/runtime-snapshot.bats` | PASS |
+| TMUX bus job, result, acknowledgement, heartbeat, and malformed-registry rejection | `tests/tmux-bus.bats` | PASS |
+| Detached provision, authenticated status, routes, panes, and kill-session cleanup | `tests/tmux-orchestrator.bats` | PASS |
+| Partial split rollback and attached external-pane preservation | `tests/tmux-orchestrator.bats` | PASS |
+| Watchdog graceful and forced teardown | `tests/tmux-bus-watchdog.bats` | PASS |
+| Snapshot drift | `tests/runtime-snapshot.bats` | PASS |
+| Child SessionStart bind and heartbeat | `tests/session-start.bats` | PASS |
+| TMUX doctor missing, malformed, and healthy registry checks | `tests/doctor.bats` | PASS |
+
+A full `bats tests/` count is not claimed here. That invocation was not re-run in this change.
+
+## TMUX Smoke Scope
+
+| Scenario | Evidence | Status |
+| --- | --- | --- |
+| Attached topology `attached-existing-tmux`, sibling agent pane, and external-session preservation | `tests/tmux-orchestrator.bats` | PASS |
+| Rollback after a later split allocation fails | `tests/tmux-orchestrator.bats` | PASS |
+| Watchdog stale-agent notification, repeat-check deduplication, and lifecycle cleanup | `tests/tmux-bus-watchdog.bats` | PASS |
 
 ## Interactive Claude Code
 

@@ -15,9 +15,10 @@ fail() {
 }
 
 usage() {
-  printf '%s\n' 'Usage: lbwc-config.sh <init|migrate|validate|get|set> <planning-dir> [setting] [json-value]' >&2
+  printf '%s\n' 'Usage: lbwc-config.sh <init|migrate|validate|get|set|set-json> <planning-dir> [setting] [json-value]' >&2
   printf '%s\n' '       lbwc-config.sh default-config' >&2
   printf '%s\n' '       lbwc-config.sh validate-config-json (reads JSON on stdin)' >&2
+  printf '%s\n' '       lbwc-config.sh validate-tmux-execution-json (reads JSON on stdin)' >&2
   printf '%s\n' '       lbwc-config.sh agent-teams-status --settings PATH' >&2
   printf '%s\n' '       lbwc-config.sh agent-teams-enable --settings PATH --approved' >&2
 }
@@ -153,7 +154,7 @@ config_path() {
 resolve_known_system_alias() {
   local current="$1" target
   case "$current" in
-    /var|/var/*)
+    /var|"/var/"*)
       [ -L /var ] || {
         printf '%s\n' "$current"
         return 0
@@ -173,7 +174,7 @@ resolve_known_system_alias() {
 
 assert_no_symbolic_links() {
   local current="$1" parent
-  if [[ "$current" != /* ]]; then
+  if [[ "$current" != "/"* ]]; then
     current="$(pwd -P)/$current"
   fi
   current=$(resolve_known_system_alias "$current")
@@ -222,6 +223,7 @@ validate_config_json() {
     def effort: type == "string" and IN("thorough", "balanced", "fast", "turbo");
     def autonomy: type == "string" and IN("cautious", "standard", "confident", "pure-vibe");
     def verification_tier: type == "string" and IN("quick", "standard", "deep");
+    def positive_integer: type == "number" and . > 0 and . == floor;
     def role_name:
       . as $name | type == "string" and ($roles | index($name) != null);
     def turn_limit:
@@ -245,11 +247,40 @@ validate_config_json() {
       and (.verification_tier | verification_tier);
     def exact_keys($allowed):
       (keys - $allowed | length) == 0;
+    def tmux_restrictions:
+      type == "object"
+      and exact_keys([
+        "allow_nested_spawn", "allow_agent_git", "allow_agent_ask_user", "require_orchestrator_attach"
+      ])
+      and (.allow_nested_spawn | type == "boolean")
+      and (.allow_agent_git | type == "boolean")
+      and (.allow_agent_ask_user | type == "boolean")
+      and (.require_orchestrator_attach | type == "boolean");
+    def tmux_execution:
+      type == "object"
+      and exact_keys([
+        "enabled", "session_name_prefix", "max_agents",
+        "attach_policy", "heartbeat_interval_seconds",
+        "heartbeat_stale_seconds", "comms_latency_tolerance_ms", "comms_fallback",
+        "cleanup_policy", "layout", "restrictions"
+      ])
+      and (.enabled | type == "boolean")
+      and (.session_name_prefix | type == "string" and test("^[A-Za-z][A-Za-z0-9_-]{0,31}$"))
+      and (.max_agents | type == "number" and . >= 1 and . <= 4 and . == floor)
+      and (.attach_policy | type == "string" and IN("orchestrator_only", "visible_grid"))
+      and (.heartbeat_interval_seconds | positive_integer)
+      and (.heartbeat_stale_seconds | positive_integer)
+      and (.comms_latency_tolerance_ms | positive_integer)
+      and (.comms_fallback | type == "string" and IN("bus_only", "fall_back_to_in_process"))
+      and (.cleanup_policy | type == "string" and IN("kill_on_complete", "keep_panes"))
+      and (.layout | type == "string" and IN("main-vertical", "main-horizontal", "tiled", "even-horizontal", "even-vertical"))
+      and (.restrictions | tmux_restrictions);
     type == "object"
     and exact_keys([
       "schema_version", "effort", "autonomy", "auto_commit", "planning_tracking", "auto_push",
       "verification_tier", "skill_suggestions", "auto_install_skills", "discovery_questions",
       "discussion_mode", "context_compiler", "visual_format", "max_tasks_per_plan", "prefer_teams",
+      "agent_execution_mode", "tmux_execution",
       "pipeline_research", "branch_per_milestone", "plain_summary", "active_profile", "custom_profiles",
       "agent_max_turns", "qa_skip_agents", "auto_uat", "require_phase_discussion", "rolling_summary",
       "metrics", "token_budgets", "two_phase_completion", "smart_routing", "validation_gates",
@@ -273,6 +304,8 @@ validate_config_json() {
     and (.visual_format | type == "string" and IN("unicode", "ascii"))
     and (.max_tasks_per_plan | type == "number" and . > 0 and . == floor)
     and (.prefer_teams | type == "string" and IN("always", "auto", "never"))
+    and (.agent_execution_mode | type == "string" and IN("in_process", "tmux", "ask"))
+    and (.tmux_execution | tmux_execution)
     and (.pipeline_research | type == "boolean")
     and (.branch_per_milestone | type == "boolean")
     and (.plain_summary | type == "boolean")
@@ -328,6 +361,19 @@ validate_or_fail() {
   validate_config_json "$value" || fail 'invalid configuration'
 }
 
+validate_tmux_execution_json() {
+  local tmux_execution default_config config
+  tmux_execution=$(cat)
+  jq -e 'type == "object"' <<< "$tmux_execution" >/dev/null 2>&1 \
+    || fail 'invalid tmux execution configuration'
+  default_config=$(migrate_config_json '{}') || fail 'could not build default configuration'
+  config=$(jq -cn --argjson defaults "$default_config" --argjson tmux_execution "$tmux_execution" \
+    '$defaults | .tmux_execution = $tmux_execution') \
+    || fail 'could not build tmux execution validation configuration'
+  validate_config_json "$config" || fail 'invalid tmux execution configuration'
+  printf '%s\n' "$tmux_execution"
+}
+
 read_existing_config() {
   local path="$1"
   assert_no_symbolic_links "$path"
@@ -361,6 +407,9 @@ migrate_config_json() {
     | .routing.profiles.quality.roles = (.routing.profiles.quality.roles // {})
     | .routing.profiles.balanced.roles = (.routing.profiles.balanced.roles // {})
     | .routing.profiles.turbo.roles = (.routing.profiles.turbo.roles // {})
+    | .tmux_execution = (($defaults.tmux_execution // {}) * (.tmux_execution // {}))
+    | .tmux_execution |= del(.session_timeout_seconds, .pane_base_index)
+    | .tmux_execution.restrictions = (($defaults.tmux_execution.restrictions // {}) * (.tmux_execution.restrictions // {}))
     | .routing.active_profile = (
         if $existing.routing.active_profile? != null
         then normalized_profile($existing.routing.active_profile)
@@ -419,13 +468,78 @@ validate_config_file() {
 
 setting_is_writable() {
   case "$1" in
-    effort|autonomy|auto_commit|planning_tracking|auto_push|verification_tier|skill_suggestions|auto_install_skills|discovery_questions|discussion_mode|context_compiler|visual_format|max_tasks_per_plan|prefer_teams|pipeline_research|branch_per_milestone|plain_summary|active_profile|custom_profiles|agent_max_turns|qa_skip_agents|auto_uat|require_phase_discussion|rolling_summary|metrics|token_budgets|two_phase_completion|smart_routing|validation_gates|snapshot_resume|lease_locks|event_recovery|worktree_isolation|monorepo_routing|debug_logging|statusline_hide_limits|statusline_hide_limits_for_api_key|statusline_hide_agent_in_tmux|statusline_collapse_agent_in_tmux|caveman_style|caveman_commit|caveman_review|max_uat_remediation_rounds|routing.active_profile)
+    effort|autonomy|auto_commit|planning_tracking|auto_push|verification_tier|skill_suggestions|auto_install_skills|discovery_questions|discussion_mode|context_compiler|visual_format|max_tasks_per_plan|prefer_teams|agent_execution_mode|tmux_execution|tmux_execution.enabled|tmux_execution.session_name_prefix|tmux_execution.max_agents|tmux_execution.attach_policy|tmux_execution.heartbeat_interval_seconds|tmux_execution.heartbeat_stale_seconds|tmux_execution.comms_latency_tolerance_ms|tmux_execution.comms_fallback|tmux_execution.cleanup_policy|tmux_execution.layout|tmux_execution.restrictions.allow_nested_spawn|tmux_execution.restrictions.allow_agent_git|tmux_execution.restrictions.allow_agent_ask_user|tmux_execution.restrictions.require_orchestrator_attach|pipeline_research|branch_per_milestone|plain_summary|active_profile|custom_profiles|agent_max_turns|qa_skip_agents|auto_uat|require_phase_discussion|rolling_summary|metrics|token_budgets|two_phase_completion|smart_routing|validation_gates|snapshot_resume|lease_locks|event_recovery|worktree_isolation|monorepo_routing|debug_logging|statusline_hide_limits|statusline_hide_limits_for_api_key|statusline_hide_agent_in_tmux|statusline_collapse_agent_in_tmux|caveman_style|caveman_commit|caveman_review|max_uat_remediation_rounds|routing.active_profile)
       return 0
       ;;
     *)
       return 1
       ;;
   esac
+}
+
+plan_execution_is_active() {
+  local planning_dir="$1" execution_state="$1/.execution-state.json" state_file="$1/STATE.md" contract_path
+  if [ -f "$execution_state" ] && jq -e '.status | IN("running", "executing", "active")' "$execution_state" >/dev/null 2>&1; then
+    return 0
+  fi
+  if [ -f "$state_file" ] && grep -Eq '^[[:space:]]*Status:[[:space:]]*(active|executing)[[:space:]]*$' "$state_file"; then
+    return 0
+  fi
+  for contract_path in "$planning_dir/.contracts/tasks/"*.json; do
+    [ -f "$contract_path" ] || continue
+    if jq -e '.state | IN("dispatched", "running")' "$contract_path" >/dev/null 2>&1; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+running_tmux_agents_exist() {
+  local planning_dir="$1" registry="$1/.runtime/tmux-bus/registry.json"
+  [ -f "$registry" ] || return 1
+  jq -e '
+    type == "object"
+    and (.agents | type == "array")
+    and all(.agents[];
+      type == "object"
+      and (.state | type == "string" and IN("registered", "running", "idle", "failed", "shutdown"))
+    )
+  ' "$registry" >/dev/null 2>&1 || return 2
+  jq -e '[.agents[] | select(.state == "running")] | length > 0' "$registry" >/dev/null 2>&1
+}
+
+execution_setting_is_frozen() {
+  local planning_dir="$1" setting="$2" value="$3" registry_status=0
+  plan_execution_is_active "$planning_dir" || return 1
+  case "$setting" in
+    agent_execution_mode)
+      if [ "$value" = '"in_process"' ]; then
+        running_tmux_agents_exist "$planning_dir" || registry_status=$?
+        case "$registry_status" in
+          0) return 0 ;;
+          1) return 1 ;;
+          *) return 0 ;;
+        esac
+      fi
+      return 0
+      ;;
+    tmux_execution.cleanup_policy|statusline_hide_agent_in_tmux|statusline_collapse_agent_in_tmux)
+      return 1
+      ;;
+    tmux_execution|tmux_execution.*|effort|routing.active_profile)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+assert_execution_setting_is_writable() {
+  local planning_dir="$1" setting="$2" value="$3"
+  if execution_setting_is_frozen "$planning_dir" "$setting" "$value"; then
+    fail "execution configuration is frozen while a plan is active: $setting"
+  fi
 }
 
 get_setting() {
@@ -438,17 +552,19 @@ get_setting() {
 }
 
 set_setting() {
-  local planning_dir="$1" setting="$2" literal="$3" path reported_path existing updated
+  local planning_dir="$1" setting="$2" literal="$3" path reported_path planning_root existing updated
   setting_is_writable "$setting" || fail "setting is not writable: $setting"
   jq -e 'type' <<< "$literal" >/dev/null 2>&1 || fail 'setting value is not valid JSON'
   assert_no_symbolic_links "$planning_dir"
   [ -d "$planning_dir" ] || fail "planning directory does not exist: $planning_dir"
   reported_path=$(config_path "$planning_dir")
   enter_planning_dir "$planning_dir"
+  planning_root=$(pwd -P)
   acquire_lock
   path="config.json"
   existing=$(read_existing_config "$path")
   validate_or_fail "$existing"
+  assert_execution_setting_is_writable "$planning_root" "$setting" "$literal"
   updated=$(jq -c --arg setting "$setting" --argjson value "$literal" 'setpath($setting | split("."); $value)' <<< "$existing") || fail 'could not update configuration'
   validate_or_fail "$updated"
   atomic_write "$path" "$updated"
@@ -494,6 +610,11 @@ main() {
       printf '%s\n' "$stdin_config"
       return
       ;;
+    validate-tmux-execution-json)
+      [ "$#" -eq 1 ] || { usage; exit 1; }
+      validate_tmux_execution_json
+      return
+      ;;
   esac
   [ -n "$command" ] && [ -n "$planning_dir" ] || { usage; exit 1; }
   [ -f "$ROUTING_PATH" ] || fail "routing transaction script is unavailable: $ROUTING_PATH"
@@ -516,7 +637,13 @@ main() {
       [ "$#" -eq 3 ] || { usage; exit 1; }
       get_setting "$planning_dir" "$3"
       ;;
-    set)
+    assert-execution-setting-writable)
+      [ "$#" -eq 4 ] || { usage; exit 1; }
+      setting_is_writable "$3" || fail "setting is not writable: $3"
+      jq -e 'type' <<< "$4" >/dev/null 2>&1 || fail 'setting value is not valid JSON'
+      assert_execution_setting_is_writable "$planning_dir" "$3" "$4"
+      ;;
+    set|set-json)
       [ "$#" -eq 4 ] || { usage; exit 1; }
       set_setting "$planning_dir" "$3" "$4"
       ;;
