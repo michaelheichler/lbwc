@@ -93,7 +93,7 @@ TASK_ID=$(basename "$CONTRACT_PATH" .json)
 
 Build `CONTRACT_ALLOWANCE_ARGS` only from the selected PLAN task's `<files>`. Repeat each engineer path as `--write-allowance <path>`. For a non-TDD trio, repeat each exact test path as `--role-write-allowance test-dev:<path>`. Use `qa-author`, `solo`, and only the exact test paths for the `red` contract. Use the selected engineer role, `pair`, and only implementation paths for the later TDD `implementation` contract. The contract writer rejects any allowance not declared in PLAN.
 
-Pass the contract path, task id, job, team mode, identical allowance arguments, and `--execution-backend "$RESOLVED_BACKEND"` to one generator invocation. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
+Pass the contract path, task id, job, team mode, and identical allowance arguments to one generator invocation. Pass `--execution-backend "$RESOLVED_BACKEND"` only when `OPEN_BACKEND_ARGS` is non-empty so the generator matches a schema 3 contract. Schema 2 native generation without a freeze, and the frozen `comms_fallback` case, must omit that override. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
 
 Advance each grouping contract only from outcomes the main session observes. After successful registration, run `state ... dispatched`. After the manifest shows the admitted members `running`, run `state ... running`. After all reports arrive, run `state ... awaiting_review`. After verification, run `state ... verified`, `blocked`, or `cancelled`. Never advance one grouping from another grouping's outcome or from an unobserved worker claim. Record one bounded telemetry event only after the main session observes the command outcome:
 
@@ -127,7 +127,7 @@ Before opening a grouping contract, resolve `{PHASE_DIR}` as the selected canoni
    bash "{LINK}/scripts/runtime-snapshot.sh" freeze --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}" --requested-backend "{REQUESTED_BACKEND}" --resolved-backend "{RESOLVED_BACKEND}"
    ```
 
-   A `created` or `matched` result moves runtime state to `ready` and does not alter a task contract. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. The helper atomically records schema version, canonical phase, requested and resolved backend, effort, active routing profile and models, complete TMUX settings and restrictions, and the canonical source-config digest.
+   A `created` or `matched` result moves runtime state to `ready` and does not alter a task contract. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Schema 2 generation omits `--execution-backend`. The helper atomically records schema version, canonical phase, requested and resolved backend, effort, active routing profile and models, complete TMUX settings and restrictions, and the canonical source-config digest.
 4. When the summary has been written and validated after every task reaches its terminal state, run exactly:
 
    ```bash
@@ -136,7 +136,7 @@ Before opening a grouping contract, resolve `{PHASE_DIR}` as the selected canoni
 
    This moves runtime state from `ready` to `cleaned`. A failed or blocked build preserves the snapshot for resume. A cleanup failure blocks the terminal transition and must be reported.
 
-Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above.
+Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above. Schema 2 generation omits `--execution-backend`.
 
 For one wave, take the next task in PLAN order and generate only its current grouping with `--exclusive`, following `@references/agent-spawn-protocol.md` for generator admission. For a pair or trio, admit every member of that one grouping together. Derive each member's manifest capability from the task's `files` field. Pass source paths through `--write-allowance` for the engineer and test paths through `--role-write-allowance test-dev:<exact-path>` for a non-TDD trio. Give the engineer the task's `name`, `action`, `verify`, and `done` fields verbatim as its brief. Do not ask an agent to declare or summarize file scope. Run the contract open and generator arguments in the preceding section after role selection and before this invocation.
 

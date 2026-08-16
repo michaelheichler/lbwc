@@ -207,6 +207,7 @@ freeze_in_process() {
   grep -F 'If `snapshot.resolved_backend` is `in_process`' "$file"
   grep -F 'If `snapshot.resolved_backend` is `tmux`' "$file"
   grep -F 'Do not call native Agent.' "$file"
+  grep -F 'Schema 2 generation omits `--execution-backend`' "$file"
   ! grep -F 'MAIN_ID=main-session' "$file"
   ! grep -F '$AGENTS_JSON' "$file"
   ! grep -F 'Pane spawn is not wired' "$file"
@@ -218,6 +219,7 @@ freeze_in_process() {
 
   grep -F -- '--assert-snapshot' "$vibe"
   grep -F 'agent-generator.sh --execution-backend' "$vibe"
+  grep -F 'Schema 2 generation omits `--execution-backend`' "$vibe"
   grep -F 'If `snapshot.resolved_backend` is `in_process`' "$vibe"
   grep -F 'If `snapshot.resolved_backend` is `tmux`' "$vibe"
   grep -F 'references/tmux-spawn-protocol.md' "$vibe"
@@ -231,6 +233,7 @@ freeze_in_process() {
   grep -F -- '--assert-snapshot' "$proto"
   grep -F '[ -f "$SNAPSHOT_PATH" ]' "$proto"
   grep -F 'agent-generator.sh --execution-backend' "$proto"
+  grep -F 'Schema 2 generation omits `--execution-backend`' "$proto"
   grep -F 'references/tmux-spawn-protocol.md' "$proto"
   grep -F 'tmux-spawn-group.sh" dispatch' "$proto"
   grep -F 'CLAUDE_SESSION_ID' "$proto"

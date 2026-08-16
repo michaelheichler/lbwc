@@ -67,9 +67,9 @@ CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" open "$PLAN_PATH" "{PROJE
 TASK_ID=$(basename "$CONTRACT_PATH" .json)
 ```
 
-Pass the contract path, task id, job, team mode, identical allowance arguments, and `--execution-backend "$RESOLVED_BACKEND"` to one generator invocation. Append `--execution-backend "$RESOLVED_BACKEND"` to the `agent-generator.sh` call in `execute-protocol.md`. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
+Pass the contract path, task id, job, team mode, and identical allowance arguments to one generator invocation. Pass `--execution-backend "$RESOLVED_BACKEND"` only when `OPEN_BACKEND_ARGS` is non-empty so the generator matches a schema 3 contract. Schema 2 native generation without a freeze, and the frozen `comms_fallback` case, must omit that override. Append `--execution-backend "$RESOLVED_BACKEND"` to the `agent-generator.sh` call in `execute-protocol.md` only in that schema 3 case. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
 
-Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above.
+Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above. Schema 2 generation omits `--execution-backend`.
 
 If `snapshot.resolved_backend` is `in_process`, keep the native Agent path: spawn every generated name together in the same turn with `Agent(...)` as `@references/agent-spawn-protocol.md` requires. Do not run `tmux-spawn-group.sh`.
 

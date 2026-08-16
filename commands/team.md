@@ -89,7 +89,7 @@ For requested `tmux`, complete preflight before freezing. On success resolve `tm
 bash "{LINK}/scripts/runtime-snapshot.sh" freeze --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}" --requested-backend "{REQUESTED_BACKEND}" --resolved-backend "{RESOLVED_BACKEND}"
 ```
 
-A `created` or `matched` result moves runtime state to `ready` and does not alter a task contract. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation.
+A `created` or `matched` result moves runtime state to `ready` and does not alter a task contract. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Schema 2 generation omits `--execution-backend`.
 
 Copy snapshot backends into CLI flags only when `{PHASE_DIR}/.runtime-snapshot.json` exists. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. Native `in_process` with no freeze must not `jq` a missing snapshot: leave `OPEN_BACKEND_ARGS` empty and keep the selected `in_process` backends. When the snapshot exists and `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so the schema 3 team contract cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags, then follow the native Agent path.
 

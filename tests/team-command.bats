@@ -104,6 +104,7 @@ record_full_roster() {
   grep -F -- '--control-root' "$command"
   grep -F -- '--assert-snapshot' "$command"
   grep -F 'agent-generator.sh --execution-backend' "$command"
+  grep -F 'Schema 2 generation omits `--execution-backend`' "$command"
   grep -F 'references/tmux-spawn-protocol.md' "$command"
   grep -F 'tmux-spawn-group.sh" dispatch' "$command"
   grep -F 'CLAUDE_SESSION_ID' "$command"

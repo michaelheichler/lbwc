@@ -209,7 +209,7 @@ Before loading the execute protocol, resolve `{PHASE_DIR}` as the selected canon
 
 Copy snapshot backends into CLI flags. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. When `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so `open` cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags (`open` requires matching backends), then follow the native Agent path.
 
-Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above.
+Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above. Schema 2 generation omits `--execution-backend`.
 
 If `snapshot.resolved_backend` is `in_process`, keep the native Agent path in `{LINK}/references/vibe-mode-execute.md`.
 
