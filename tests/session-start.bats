@@ -221,6 +221,8 @@ write_credential() {
   run env LBWC_TMUX_AGENT=1 LBWC_TMUX_AGENT_ID=agent-a LBWC_TMUX_CONTRACT_ID=contract-a LBWC_TMUX_CONTROL_ROOT="$control_root" LBWC_PLANNING_DIR="$PLANNING_DIR" CLAUDE_SESSION_ID=actual-child-session bash "$SCRIPT"
 
   [ "$status" -eq 0 ]
+  [[ "$output" == *"lbwc tmux bind:"* ]]
+  [[ "$output" == *"0123456789abcdef0123456789abcdef"* ]]
   [ ! -e "$control_root/.runtime/tmux-bus/credentials/agent-a.json" ]
   run jq -e '.agents[] | select(.agent_id == "agent-a") | .claude_session_id == "actual-child-session" and .state == "running" and (.heartbeat_at_ms | type == "number")' "$control_root/.runtime/tmux-bus/registry.json"
   [ "$status" -eq 0 ]

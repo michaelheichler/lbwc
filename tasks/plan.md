@@ -1,8 +1,10 @@
 # Implementation Plan: TMUX Destack and Fault Fixes
 
+**Status:** Destack tasks 1-17 are DONE. Spawn wiring is a follow-on section at the bottom of this file (T1-T7).
+
 ## Overview
 
-Secondary plan on top of Option 2. Destack the tmux runtime (no hash hell, no dual writers, no heartbeat daemon) and fix the 12 direct faults. Spawn wiring for vibe/build/team stays on the original Option 2 plan. This document is the `/build` copy of the destack plan. Do not treat it as spawn-wiring work.
+Secondary plan on top of Option 2. Destack the tmux runtime (no hash hell, no dual writers, no heartbeat daemon) and fix the 12 direct faults. This destack body is historical. Spawn wiring for vibe/build/team is the follow-on section, not open destack work.
 
 Count: 12 faults + 10 destack points = 20. `--cancel` is both F1 and OE10, so unique work items are 19. All 20 labels are covered below.
 
@@ -473,7 +475,7 @@ Destack points:
 - All 20 labels mapped and done
 - `rg 'LBWC_TMUX_TEST_|bootstrap_binding|messaging_socket|registry-route|--cancel' scripts/` is empty
 - `bats tests/tmux-*.bats tests/session-start.bats tests/agent-lifecycle.bats tests/statusline.bats tests/doctor.bats tests/runtime-snapshot.bats tests/lbwc-execution-config.bats`
-- Original Option 2 plan still owns vibe/build/team spawn wiring
+- Original Option 2 plan still owns vibe/build/team spawn wiring. See the follow-on section. Destack itself does not reopen that work.
 
 ## Out of scope
 
@@ -491,3 +493,15 @@ Destack points:
 | Doctor 1-20 is product UI | High | Adding a 21st check is forbidden. Helper under check 20 only. |
 | GitNexus impact | Med | Run `impact` on `tmux_runtime_lock_release`, `provision`, `command_init`, `bind_tmux_bootstrap` before edits. Warn on HIGH/CRITICAL. |
 | `contract_digest` | High | Do not touch it. That is core LBWC, not tmux hash hell. |
+
+## Spawn wiring (follow-on, DONE)
+
+Destack is closed. Remaining Option 2 work was live spawn: schema 3 contracts from the frozen snapshot, destack-correct protocol text, then vibe/build/team dispatch through provision and split-group when the user chooses tmux.
+
+- **T1 DONE:** `task-contract.sh open` writes schema 3 from CLI flags plus `--assert-snapshot`. Tests in `tests/task-contract.bats`.
+- **T2 DONE:** `references/tmux-spawn-protocol.md` rewritten to destack bind-file + split-group.
+- **T3 DONE:** `commands/build.md` tmux branch: open flags, provision, split-group, bus.
+- **T4 DONE:** vibe execute + `references/vibe-mode-execute.md` use the same tmux dispatch.
+- **T5 DONE:** Team: user chooses native vs tmux fresh pane sessions.
+- **T6 DONE:** `indexer-sync.sh` wired into `commands/init.md`.
+- **T7 DONE:** Interactive Claude Code SMOKE rows stay PENDING. Automated table cites `tests/runtime-snapshot.bats` markdown contracts and `tests/team-command.bats` execution-choice. No `/tmp` PASS claims. No interactive PASS without consumer-session evidence.

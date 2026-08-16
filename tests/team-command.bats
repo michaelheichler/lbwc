@@ -91,6 +91,33 @@ record_full_roster() {
   grep -F -- 'Do not edit Claude Code native team configuration' "$command"
 }
 
+@test "team command documents execution choice and an explicit tmux spawn branch" {
+  command="$REPO_ROOT/commands/team.md"
+
+  grep -F 'agent_execution_mode=ask' "$command"
+  grep -F 'Native team' "$command"
+  grep -F 'TMUX panes' "$command"
+  grep -F 'Cancel spawn' "$command"
+  grep -F 'Do not replace native teams' "$command"
+  grep -F -- '--requested-backend' "$command"
+  grep -F -- '--resolved-backend' "$command"
+  grep -F -- '--control-root' "$command"
+  grep -F -- '--assert-snapshot' "$command"
+  grep -F 'agent-generator.sh --execution-backend' "$command"
+  grep -F 'Schema 2 generation omits `--execution-backend`' "$command"
+  grep -F 'references/tmux-spawn-protocol.md' "$command"
+  grep -F 'tmux-spawn-group.sh" dispatch' "$command"
+  grep -F 'CLAUDE_SESSION_ID' "$command"
+  grep -F 'If `snapshot.resolved_backend` is `in_process`' "$command"
+  grep -F 'If `snapshot.resolved_backend` is `tmux`' "$command"
+  grep -F 'Do not call native Agent.' "$command"
+  grep -F 'Do not run `prepare`' "$command"
+  grep -F 'Choose one collision-safe run id, then issue' "$command"
+  grep -F '[ -f "$SNAPSHOT_PATH" ]' "$command"
+  ! grep -F 'MAIN_ID=main-session' "$command"
+  ! grep -F '$AGENTS_JSON' "$command"
+}
+
 @test "team command is registered in the command section contract" {
   jq -e '.commands["team.md"].required_headings == ["Context","Guard","Steps","Failure and recovery","Output Format","Next Up"]' \
     "$REPO_ROOT/config/command-sections.json" >/dev/null

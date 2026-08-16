@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLANNING_DIR="${LBWC_PLANNING_DIR:-.lbwc-planning}"
 CANONICAL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
+TMUX_BIND_JSON=""
+
 bind_tmux_bootstrap() {
   local agent_id contract_id capability control_root actual_session credential
   [ -z "${LBWC_TMUX_AGENT:-}" ] || [ "${LBWC_TMUX_AGENT}" = '1' ] || { echo 'LBWC: SessionStart tmux agent mode is invalid' >&2; return 1; }
@@ -30,6 +32,7 @@ bind_tmux_bootstrap() {
   bash "$CANONICAL_ROOT/scripts/tmux-bus.sh" --control-root "$control_root" bind --agent-id "$agent_id" --session-id "$actual_session" --capability "$capability" --contract-id "$contract_id" || { echo 'LBWC: SessionStart tmux bind failed' >&2; return 1; }
   tmux_runtime_credential_delete "$agent_id" || { echo 'LBWC: SessionStart cannot consume the bound tmux credential' >&2; return 1; }
   bash "$CANONICAL_ROOT/scripts/tmux-bus.sh" --control-root "$control_root" heartbeat --agent-id "$agent_id" --session-id "$actual_session" --capability "$capability" --state running >/dev/null || { echo 'LBWC: SessionStart tmux heartbeat failed' >&2; return 1; }
+  TMUX_BIND_JSON=$(jq -cn --arg agent_id "$agent_id" --arg session_id "$actual_session" --arg control_root "$control_root" --arg capability "$capability" '{agent_id:$agent_id,session_id:$session_id,control_root:$control_root,capability:$capability,role:"agent"}')
   capability=''
 }
 
@@ -129,6 +132,7 @@ else
   fi
 fi
 
+[ -n "${TMUX_BIND_JSON:-}" ] && CTX="$CTX lbwc tmux bind: ${TMUX_BIND_JSON}."
 [ -n "$MAP_TOOLS_ROUTE" ] && CTX="$CTX Map tools route: ${MAP_TOOLS_ROUTE}."
 [ -n "$MAP_STALE_CTX" ] && CTX="$CTX ${MAP_STALE_CTX}"
 [ "$SWEPT_COUNT" -gt 0 ] && CTX="$CTX Swept ${SWEPT_COUNT} stale agent(s) from the manifest."

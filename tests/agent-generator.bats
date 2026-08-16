@@ -321,6 +321,7 @@ make_contract() {
     and .agents[$name].execution.tmux_bootstrap.contract_id == .agents[$name].contract_id
     and .agents[$name].execution.tmux_bootstrap.control_root == .agents[$name].control_root
   ' "$control_root/agent-manifest.json" >/dev/null
+  grep -F '## TMUX bus loop' "$TEST_TEMP_DIR/.claude/agents/$name.md"
 }
 
 @test "schema 3 generator rejects backend overrides that conflict with the contract" {

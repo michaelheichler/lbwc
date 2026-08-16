@@ -561,7 +561,7 @@ render_and_install_one() {
   TARGET="$AGENTS_DIR/$NAME.md"
   renderer_args_for_role "$role"
   tmp="${TARGET}.tmp.${BASHPID:-$$}"
-  if ! bash "$SCRIPT_DIR/render-agent-template.sh" "$role" "${RENDER_ARGS[@]}" > "$tmp"; then
+  if ! CONTRACT_RESOLVED_BACKEND="$CONTRACT_RESOLVED_BACKEND" bash "$SCRIPT_DIR/render-agent-template.sh" "$role" "${RENDER_ARGS[@]}" > "$tmp"; then
     rm -f "$tmp"
     return 1
   fi

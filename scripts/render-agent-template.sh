@@ -139,3 +139,7 @@ if grep -qE '\{\{[A-Z_][A-Z0-9_]*\}\}' <<< "$filtered_check"; then
   fail "unresolved template token"
 fi
 printf '%s' "$filtered"
+if [ "${CONTRACT_RESOLVED_BACKEND:-}" = tmux ]; then
+  printf '\n'
+  cat "$TEMPLATE_DIR/tmux-bus-loop.md"
+fi

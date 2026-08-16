@@ -9,9 +9,14 @@ preserves state and reports the documented Next Up command.
 
 **Execute-mode invariant:** Parallel execution is only valid when dependency-aware routing finds real parallel delegate work and the live tool set can create real team-scoped teammates. If routing selects serialized subagents, turbo/internal direct, or real team semantics cannot be established, execute mode must fall back to explicit non-team execution. Never simulate a team with background `Agent` spawns that lack `team_name`.
 
-Read `/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/references/execute-protocol.md` and follow it.
+**Spawn path (hard branch):** After the frozen snapshot exists, choose exactly one spawn path. A main session must not do both.
 
-This mode delegates entirely to the protocol file. **Orchestrator read-scope:** Do NOT read product source files. Your job is orchestration: read plans, check summaries, and spawn Dev for remaining work. If you need product-code understanding to route or sequence, delegate that to Dev.
+- If `snapshot.resolved_backend` is `tmux`: do not follow `execute-protocol.md` native Agent spawn. After generation and `state ... dispatched`, run `scripts/tmux-spawn-group.sh dispatch` as documented below.
+- If `snapshot.resolved_backend` is `in_process`: follow `execute-protocol.md` native Agent spawn. Do not run the tmux spawn driver.
+
+Read `/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/references/execute-protocol.md` for plan loading, contracts, verification, and commits. Use its Agent spawn steps only on the `in_process` branch.
+
+**Orchestrator read-scope:** Do NOT read product source files. Your job is orchestration: read plans, check summaries, and spawn Dev for remaining work. If you need product-code understanding to route or sequence, delegate that to Dev.
 
 Before reading:
 **Step 0, pre-normalize filenames:**
@@ -39,7 +44,46 @@ Before reading:
    ```
   Parse the JSON output. If `status` is `"ok"`, include the detail in the Dev task description: `Extended context (from todo detail): {detail.context value}. Related files: {detail.files, comma-separated, or omit if empty}.` If `status` is `"not_found"` or `"error"`, run `bash /tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/todo-lifecycle.sh detail-warning {hash}` and continue without detail. Do not block. This provides the executing agent with the rich context that motivated the work item.
 
-Then Read the protocol file and execute Steps 2-5 as written.
+Then freeze or validate the runtime snapshot as in Frozen snapshot spawn dispatch. Cancel remains the snapshot helper in Execute mode: it only writes `{PHASE_DIR}/.runtime-cancelled.json`. After the snapshot exists, take the hard spawn branch above. On `in_process`, read the protocol file and execute Steps 2-5 including Agent spawn. On `tmux`, use the protocol for non-spawn steps only and dispatch through the spawn driver.
+
+## Frozen snapshot spawn dispatch
+
+This is the same dispatch as `/lbwc:build`. `{PHASE_DIR}` and `{PROJECT_ROOT}` are already resolved by Execute mode. `{LINK}` is the plugin root from Context. Cite `{LINK}/references/tmux-spawn-protocol.md` on the tmux branch. Do not invent a second orchestrator.
+
+Copy snapshot backends into CLI flags only when `{PHASE_DIR}/.runtime-snapshot.json` exists. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. Native `in_process` with no freeze must not `jq` a missing snapshot: leave `OPEN_BACKEND_ARGS` empty and keep the selected `in_process` backends. When the snapshot exists and `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so `open` cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags (`open` requires matching backends), then follow the native Agent path.
+
+```bash
+SNAPSHOT_PATH="{PHASE_DIR}/.runtime-snapshot.json"
+CONTROL_ROOT="{PROJECT_ROOT}/.lbwc-planning"
+OPEN_BACKEND_ARGS=()
+if [ -f "$SNAPSHOT_PATH" ]; then
+  REQUESTED_BACKEND=$(jq -r '.requested_backend' "$SNAPSHOT_PATH")
+  RESOLVED_BACKEND=$(jq -r '.resolved_backend' "$SNAPSHOT_PATH")
+  if [ "$REQUESTED_BACKEND" = "$RESOLVED_BACKEND" ]; then
+    OPEN_BACKEND_ARGS=(--requested-backend "$REQUESTED_BACKEND" --resolved-backend "$RESOLVED_BACKEND" --control-root "$CONTROL_ROOT" --assert-snapshot "$SNAPSHOT_PATH")
+  fi
+fi
+CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" open "$PLAN_PATH" "{PROJECT_ROOT}" "$TASK_NAME" --role "$ROLE" --team "$TEAM_MODE" --group "$GROUP_NAME" --job "$BRIEF" "${OPEN_BACKEND_ARGS[@]}" "${CONTRACT_ALLOWANCE_ARGS[@]}")
+TASK_ID=$(basename "$CONTRACT_PATH" .json)
+```
+
+Pass the contract path, task id, job, team mode, and identical allowance arguments to one generator invocation. Pass `--execution-backend "$RESOLVED_BACKEND"` only when `OPEN_BACKEND_ARGS` is non-empty so the generator matches a schema 3 contract. Schema 2 native generation without a freeze, and the frozen `comms_fallback` case, must omit that override. Append `--execution-backend "$RESOLVED_BACKEND"` to the `agent-generator.sh` call in `execute-protocol.md` only in that schema 3 case. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
+
+Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above. Schema 2 generation omits `--execution-backend`.
+
+If `snapshot.resolved_backend` is `in_process`, keep the native Agent path: spawn every generated name together in the same turn with `Agent(...)` as `@references/agent-spawn-protocol.md` requires. Do not run `tmux-spawn-group.sh`.
+
+If `snapshot.resolved_backend` is `tmux`, follow `{LINK}/references/tmux-spawn-protocol.md` on this branch only. Do not call native Agent. After generation and `state ... dispatched`, run the spawn driver. `MAIN_ID` is the live orchestrator session `${CLAUDE_SESSION_ID:-}`. Fail closed when it is empty.
+
+   ```bash
+   MAIN_ID="${CLAUDE_SESSION_ID:-}"
+   [ -n "$MAIN_ID" ] || { echo "LBWC: CLAUDE_SESSION_ID is required for tmux spawn" >&2; exit 1; }
+   TIMEOUT_MS=$(jq -r '.tmux_execution.comms_latency_tolerance_ms' "$SNAPSHOT_PATH")
+   CONTRACT_DIGEST=$(jq -r '.contract_digest' "$CONTRACT_PATH")
+   bash "{LINK}/scripts/tmux-spawn-group.sh" dispatch --project-root "{PROJECT_ROOT}" --control-root "$CONTROL_ROOT" --main-id "$MAIN_ID" --contract-id "$TASK_ID" --contract-digest "$CONTRACT_DIGEST" --spawn-ready-text "$GENERATOR_OUTPUT" --job "$BRIEF" --timeout-ms "$TIMEOUT_MS"
+   ```
+
+   Observe the helper JSON summary as the grouping reports. Then continue contract state, verification, and commits from `execute-protocol.md`. After the grouping is terminal, apply protocol cleanup (`kill-agent` or `kill-session`) from the frozen cleanup policy.
 
 ## Phase 3 Helper Dependencies
 

@@ -207,6 +207,14 @@ Before loading the execute protocol, resolve `{PHASE_DIR}` as the selected canon
 
    A `created` or `matched` result moves runtime state to `ready` without changing task contracts. Pass its `snapshot.resolved_backend` to every generator or TMUX dispatch. The helper atomically records schema version, canonical phase, requested and resolved backend, effort, active routing profile and models, complete TMUX settings and restrictions, and the canonical source-config digest.
 
+Copy snapshot backends into CLI flags. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. When `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so `open` cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags (`open` requires matching backends), then follow the native Agent path.
+
+Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation that follows a schema 3 open. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above. Schema 2 generation omits `--execution-backend`.
+
+If `snapshot.resolved_backend` is `in_process`, keep the native Agent path in `{LINK}/references/vibe-mode-execute.md`.
+
+If `snapshot.resolved_backend` is `tmux`, `{LINK}/references/vibe-mode-execute.md` follows `{LINK}/references/tmux-spawn-protocol.md` on this branch only. Do not call native Agent. Do not invent a second orchestrator. Do not follow execute-protocol Agent spawn on this branch.
+
 Read `{LINK}/references/vibe-mode-execute.md` and follow it. `{LINK}` is the first line of the plugin-root/state block in the Context output, labeled `first line is LINK`.
 
 ### Mode: Verify
@@ -237,7 +245,7 @@ If the new detector output selects the next unbuilt phase, run its Plan mode and
 
 ## Failure and recovery
 
-A failed root resolver, detector, contract issue, generator call, artifact validation, state transition, or planning Git helper stops the current mode. Report the exact failing command boundary and preserve existing state. Never create placeholder plans, summaries, verification, or UAT files to make detection advance. Recovery re-runs `/lbwc:vibe` after the named blocker is corrected. If a bounded user dialog is dismissed, keep the decision pending and stop all dependent work.
+A failed root resolver, detector, contract issue, generator call, tmux preflight, provision, split-group, bus publish/await/ack, artifact validation, state transition, or planning Git helper stops the current mode. Report the exact failing command boundary and preserve existing state. Never create placeholder plans, summaries, verification, or UAT files to make detection advance. Recovery re-runs `/lbwc:vibe` after the named blocker is corrected. If a bounded user dialog is dismissed, keep the decision pending and stop all dependent work.
 
 ## Output Format
 

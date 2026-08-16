@@ -311,3 +311,144 @@ teardown() { rm -rf "$ROOT"; }
   [ "$status" -ne 0 ]
   [[ "$output" == *"communication_policy"* ]]
 }
+
+@test "open writes schema 3 when backend and control-root flags are set" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/plan-schema3"
+  mkdir -p "$control_root"
+
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root"
+  [ "$status" -eq 0 ]
+  local contract="$output"
+  control_root=$(cd -P "$control_root" && pwd -P)
+  [ "$contract" = "$control_root/contracts/tasks/$(basename "$contract")" ]
+  run jq -e --arg root "$control_root" '
+    .schema_version == 3
+    and .source_kind == "plan"
+    and .requested_backend == "tmux"
+    and .resolved_backend == "tmux"
+    and .control_root == $root
+    and .runtime_kind == "native-team"
+    and .communication_policy == "native-team"
+    and .capabilities_by_role["coding-dijkstra"] == [
+      {access:"write",kind:"file",path:"src/contract.py"},
+      {access:"write",kind:"file",path:"tests/task-contract.bats"}
+    ]
+    and .write_allowances == ["src/contract.py", "tests/task-contract.bats"]
+  ' "$contract"
+  [ "$status" -eq 0 ]
+}
+
+@test "open without backend flags still writes schema 2" {
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract"
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .schema_version == 2
+    and (has("requested_backend") | not)
+    and (has("resolved_backend") | not)
+    and (has("control_root") | not)
+  ' "$output"
+  [ "$status" -eq 0 ]
+}
+
+@test "open rejects a partial schema 3 flag set before writing" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/plan-partial"
+  mkdir -p "$control_root"
+
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend tmux --resolved-backend tmux
+  [ "$status" -ne 0 ]
+  [ ! -d "$ROOT/.lbwc-planning/.contracts/tasks" ] || [ -z "$(find "$ROOT/.lbwc-planning/.contracts/tasks" -type f -print -quit)" ]
+  [ ! -d "$control_root/contracts/tasks" ] || [ -z "$(find "$control_root/contracts/tasks" -type f -print -quit 2>/dev/null)" ]
+
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" --control-root "$control_root"
+  [ "$status" -ne 0 ]
+}
+
+@test "open --assert-snapshot compares flags and does not copy snapshot backends" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/plan-assert"
+  mkdir -p "$control_root"
+  control_root=$(cd -P "$control_root" && pwd -P)
+  local snapshot="$ROOT/runtime-snapshot.json"
+  jq -n --arg root "$control_root" '{
+    requested_backend: "tmux",
+    resolved_backend: "tmux",
+    control_root: $root
+  }' > "$snapshot"
+
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root" \
+    --assert-snapshot "$snapshot"
+  [ "$status" -eq 0 ]
+  run jq -e '.schema_version == 3 and .requested_backend == "tmux" and .resolved_backend == "tmux"' "$output"
+  [ "$status" -eq 0 ]
+
+  jq '.requested_backend = "in_process" | .resolved_backend = "in_process"' "$snapshot" > "$ROOT/snapshot-mismatch.json"
+  mv "$ROOT/snapshot-mismatch.json" "$snapshot"
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root" \
+    --assert-snapshot "$snapshot" --group mismatch
+  [ "$status" -ne 0 ]
+  [ ! -e "$control_root/contracts/tasks/09-PLAN-write-contract-mismatch.json" ]
+
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend in_process --resolved-backend in_process --control-root "$control_root" \
+    --assert-snapshot "$snapshot" --group copied
+  [ "$status" -eq 0 ]
+  run jq -e '.requested_backend == "in_process" and .resolved_backend == "in_process"' "$output"
+  [ "$status" -eq 0 ]
+}
+
+@test "issue --assert-snapshot compares flags and does not copy snapshot backends" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/team-assert"
+  mkdir -p "$control_root"
+  control_root=$(cd -P "$control_root" && pwd -P)
+  local snapshot="$ROOT/team-runtime-snapshot.json"
+  jq -n --arg root "$control_root" '{
+    requested_backend: "tmux",
+    resolved_backend: "tmux",
+    control_root: $root
+  }' > "$snapshot"
+
+  run bash "$SCRIPT" issue "$ROOT" "team-assert" \
+    --command team --role web-engineer --team solo --job "Implement the web scope" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root" \
+    --assert-snapshot "$snapshot" --write-capability directory:src/web
+  [ "$status" -eq 0 ]
+  run jq -e '.schema_version == 3 and .requested_backend == "tmux" and .resolved_backend == "tmux"' "$output"
+  [ "$status" -eq 0 ]
+
+  jq '.requested_backend = "in_process" | .resolved_backend = "in_process"' "$snapshot" > "$ROOT/team-snapshot-mismatch.json"
+  mv "$ROOT/team-snapshot-mismatch.json" "$snapshot"
+  run bash "$SCRIPT" issue "$ROOT" "team-assert-mismatch" \
+    --command team --role web-engineer --team solo --job "Implement the web scope" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root" \
+    --assert-snapshot "$snapshot" --write-capability directory:src/web
+  [ "$status" -ne 0 ]
+  [ ! -e "$control_root/contracts/tasks/"*team-assert-mismatch* ]
+}
+
+@test "open --assert-snapshot accepts a freeze snapshot that omits control_root" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/freeze-shape"
+  mkdir -p "$control_root"
+  control_root=$(cd -P "$control_root" && pwd -P)
+  local snapshot="$ROOT/freeze-shaped-snapshot.json"
+  jq -n '{
+    requested_backend: "tmux",
+    resolved_backend: "tmux"
+  }' > "$snapshot"
+
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root" \
+    --assert-snapshot "$snapshot" --group freeze-shape
+  [ "$status" -eq 0 ]
+  run jq -e '.schema_version == 3 and .requested_backend == "tmux" and .resolved_backend == "tmux"' "$output"
+  [ "$status" -eq 0 ]
+
+  jq '.resolved_backend = "in_process"' "$snapshot" > "$ROOT/freeze-mismatch.json"
+  mv "$ROOT/freeze-mismatch.json" "$snapshot"
+  run bash "$SCRIPT" open "$PLAN" "$ROOT" "write contract" \
+    --requested-backend tmux --resolved-backend tmux --control-root "$control_root" \
+    --assert-snapshot "$snapshot" --group freeze-mismatch
+  [ "$status" -ne 0 ]
+}
