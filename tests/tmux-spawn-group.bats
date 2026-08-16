@@ -129,6 +129,12 @@ EOF
   ' <<<"$output" >/dev/null
 }
 
+@test "build-agents rejects duplicate generated names" {
+  run bash "$HELPER" build-agents --names worker-a,worker-a --contract-id contract-1 --contract-digest digest-1
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"duplicate generated agent name"* ]]
+}
+
 @test "build-agents parses SPAWN_READY generator output" {
   run bash "$HELPER" build-agents --contract-id contract-1 --contract-digest digest-1 \
     --spawn-ready-text $'ENGINEER: SPAWN_READY lbwc-web-engineer-aaaa\nCRITIC: SPAWN_READY lbwc-web-code-critic-bbbb\n'

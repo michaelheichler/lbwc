@@ -91,16 +91,18 @@ bash "{LINK}/scripts/runtime-snapshot.sh" freeze --planning-dir "{PROJECT_ROOT}/
 
 A `created` or `matched` result moves runtime state to `ready` and does not alter a task contract. Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backend` invocation.
 
-Copy snapshot backends into CLI flags. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. When `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so the schema 3 team contract cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags, then follow the native Agent path.
+Copy snapshot backends into CLI flags only when `{PHASE_DIR}/.runtime-snapshot.json` exists. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. Native `in_process` with no freeze must not `jq` a missing snapshot: leave `OPEN_BACKEND_ARGS` empty and keep the selected `in_process` backends. When the snapshot exists and `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so the schema 3 team contract cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags, then follow the native Agent path.
 
 ```bash
 SNAPSHOT_PATH="{PHASE_DIR}/.runtime-snapshot.json"
 CONTROL_ROOT="{PROJECT_ROOT}/.lbwc-planning"
-REQUESTED_BACKEND=$(jq -r '.requested_backend' "$SNAPSHOT_PATH")
-RESOLVED_BACKEND=$(jq -r '.resolved_backend' "$SNAPSHOT_PATH")
 OPEN_BACKEND_ARGS=()
-if [ "$REQUESTED_BACKEND" = "$RESOLVED_BACKEND" ]; then
-  OPEN_BACKEND_ARGS=(--requested-backend "$REQUESTED_BACKEND" --resolved-backend "$RESOLVED_BACKEND" --control-root "$CONTROL_ROOT" --assert-snapshot "$SNAPSHOT_PATH")
+if [ -f "$SNAPSHOT_PATH" ]; then
+  REQUESTED_BACKEND=$(jq -r '.requested_backend' "$SNAPSHOT_PATH")
+  RESOLVED_BACKEND=$(jq -r '.resolved_backend' "$SNAPSHOT_PATH")
+  if [ "$REQUESTED_BACKEND" = "$RESOLVED_BACKEND" ]; then
+    OPEN_BACKEND_ARGS=(--requested-backend "$REQUESTED_BACKEND" --resolved-backend "$RESOLVED_BACKEND" --control-root "$CONTROL_ROOT" --assert-snapshot "$SNAPSHOT_PATH")
+  fi
 fi
 ```
 
@@ -147,7 +149,7 @@ bash "{LINK}/scripts/team-command-transaction.sh" complete --project-root "{PROJ
 bash "{LINK}/scripts/team-command-transaction.sh" summary --project-root "{PROJECT_ROOT}" --run-root "$RUN_ROOT"
 ```
 
-6. **Tmux path.** Run this path only when `snapshot.resolved_backend` is `tmux`. Do not call native Agent. Do not create a native shared task. Do not run `prepare`. Issue one schema 3 team contract for the whole roster (`pair` or `trio`, never `solo` for a multi-role roster). Copy snapshot backends into `issue` flags as `OPEN_BACKEND_ARGS` above. Repeat each resolved scope as `--role-write-capability "$ENGINEER_ROLE:directory:$SCOPE"`.
+6. **Tmux path.** Run this path only when `snapshot.resolved_backend` is `tmux`. Do not call native Agent. Do not create a native shared task. Do not run `prepare`. Choose one collision-safe run id, then issue one schema 3 team contract for the whole roster (`pair` or `trio`, never `solo` for a multi-role roster). Copy snapshot backends into `issue` flags as `OPEN_BACKEND_ARGS` above. Repeat each resolved scope as `--role-write-capability "$ENGINEER_ROLE:directory:$SCOPE"`.
 
 ```bash
 CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" issue "{PROJECT_ROOT}" "$RUN_ID" --command team --role "$ENGINEER_ROLE" --team "$TEAM_MODE" --job "$INSTRUCTION" --runtime-kind native-team --communication-policy native-team "${OPEN_BACKEND_ARGS[@]}" ${CAPABILITY_ARGS[@]+"${CAPABILITY_ARGS[@]}"})

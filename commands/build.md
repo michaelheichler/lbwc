@@ -74,16 +74,18 @@ Apply the ponytail discipline read in the required first step to every implement
 
 After selecting the role and grouping, the main session opens one PLAN contract for that grouping. A TDD task has two contracts, `red` and `implementation`. Every other task has one `implementation` contract. The exact generator brief must be passed as `--job` to `open` and to the generator. Do not run `open` until Spawn and verify has a validated or frozen snapshot.
 
-Copy snapshot backends into CLI flags. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. When `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so `open` cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags (`open` requires matching backends), then follow the native Agent path.
+Copy snapshot backends into CLI flags only when `{PHASE_DIR}/.runtime-snapshot.json` exists. Control root is `{PROJECT_ROOT}/.lbwc-planning`, the freeze `--planning-dir`. Native `in_process` with no freeze must not `jq` a missing snapshot: leave `OPEN_BACKEND_ARGS` empty and keep the selected `in_process` backends. When the snapshot exists and `snapshot.requested_backend` equals `snapshot.resolved_backend`, pass those values plus `--control-root` and `--assert-snapshot` so `open` cannot disagree with the snapshot. When they differ, that is the already-frozen `comms_fallback` case: omit the schema 3 backend flags (`open` requires matching backends), then follow the native Agent path.
 
 ```bash
 SNAPSHOT_PATH="{PHASE_DIR}/.runtime-snapshot.json"
 CONTROL_ROOT="{PROJECT_ROOT}/.lbwc-planning"
-REQUESTED_BACKEND=$(jq -r '.requested_backend' "$SNAPSHOT_PATH")
-RESOLVED_BACKEND=$(jq -r '.resolved_backend' "$SNAPSHOT_PATH")
 OPEN_BACKEND_ARGS=()
-if [ "$REQUESTED_BACKEND" = "$RESOLVED_BACKEND" ]; then
-  OPEN_BACKEND_ARGS=(--requested-backend "$REQUESTED_BACKEND" --resolved-backend "$RESOLVED_BACKEND" --control-root "$CONTROL_ROOT" --assert-snapshot "$SNAPSHOT_PATH")
+if [ -f "$SNAPSHOT_PATH" ]; then
+  REQUESTED_BACKEND=$(jq -r '.requested_backend' "$SNAPSHOT_PATH")
+  RESOLVED_BACKEND=$(jq -r '.resolved_backend' "$SNAPSHOT_PATH")
+  if [ "$REQUESTED_BACKEND" = "$RESOLVED_BACKEND" ]; then
+    OPEN_BACKEND_ARGS=(--requested-backend "$REQUESTED_BACKEND" --resolved-backend "$RESOLVED_BACKEND" --control-root "$CONTROL_ROOT" --assert-snapshot "$SNAPSHOT_PATH")
+  fi
 fi
 CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" open "$PLAN_PATH" "{PROJECT_ROOT}" "$TASK_NAME" --role "$ROLE" --team "$TEAM_MODE" --group "$GROUP_NAME" --job "$BRIEF" "${OPEN_BACKEND_ARGS[@]}" "${CONTRACT_ALLOWANCE_ARGS[@]}")
 TASK_ID=$(basename "$CONTRACT_PATH" .json)

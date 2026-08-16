@@ -48,8 +48,11 @@ collect_names() {
     done < <(parse_spawn_ready_names "$from_text")
   fi
   [ "${#NAMES[@]}" -gt 0 ] || fail 'no SPAWN_READY names supplied'
+  declare -A seen_names=()
   for name in "${NAMES[@]}"; do
     require_token "$name" 'generated agent name'
+    [ -z "${seen_names[$name]:-}" ] || fail 'duplicate generated agent name'
+    seen_names[$name]=1
   done
 }
 

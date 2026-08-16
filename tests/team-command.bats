@@ -111,6 +111,8 @@ record_full_roster() {
   grep -F 'If `snapshot.resolved_backend` is `tmux`' "$command"
   grep -F 'Do not call native Agent.' "$command"
   grep -F 'Do not run `prepare`' "$command"
+  grep -F 'Choose one collision-safe run id, then issue' "$command"
+  grep -F '[ -f "$SNAPSHOT_PATH" ]' "$command"
   ! grep -F 'MAIN_ID=main-session' "$command"
   ! grep -F '$AGENTS_JSON' "$command"
 }
