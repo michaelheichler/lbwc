@@ -1,6 +1,6 @@
 # Changelog
 This file records user-visible LBWC releases. Keep the newest entry first.
-## [1.1.0] - 2026-08-16
+## [1.0.3] - 2026-08-16
 ### Added
 - Option 2 tmux spawn for vibe, build, and team: freeze a runtime snapshot, open schema 3 with matching backend flags, and dispatch bind-file children through `scripts/tmux-spawn-group.sh`.
 - Child bus-loop template and native versus tmux execution choice after confirmation. Bind-file identity is the pane identity.
