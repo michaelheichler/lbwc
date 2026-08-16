@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "lbwc-marketplace",
   "description": "LBWC zero-trust orchestration for Claude Code.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "owner": {
     "name": "Michael Heichler",
     "url": "https://github.com/michaelheichler"
@@ -12,7 +12,7 @@
       "name": "lbwc",
       "source": ".",
       "description": "Plan, build, QA, and UAT orchestration with shell-enforced generated-agent boundaries.",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "author": {
         "name": "Michael Heichler"
       },

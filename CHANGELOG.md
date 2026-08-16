@@ -1,5 +1,12 @@
 # Changelog
 This file records user-visible LBWC releases. Keep the newest entry first.
+## [1.1.0] - 2026-08-16
+### Added
+- Option 2 tmux spawn for vibe, build, and team: freeze a runtime snapshot, open schema 3 with matching backend flags, and dispatch bind-file children through `scripts/tmux-spawn-group.sh`.
+- Child bus-loop template and native versus tmux execution choice after confirmation. Bind-file identity is the pane identity.
+### Changed
+- Destack of the tmux runtime already shipped on main. This release wires that runtime into the spawn path rather than leaving operators on native-only Agent calls.
+- Interactive smoke rows stay PENDING. Automated coverage cites the spawn driver and command markdown contracts.
 ## [1.0.1] - 2026-08-11
 ### Fixed
 - `AskUserQuestion` freeform handling no longer depends on a duplicated `Other` label. Any answer that is not a listed option now resolves as freeform in one step, matching the native contract.
