@@ -3,7 +3,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "AskUserQuestion|Agent|TaskCreate|TaskUpdate|Write|Edit|NotebookEdit|Bash",
+        "matcher": "AskUserQuestion|Agent|TaskCreate|TaskUpdate|Write|Edit|NotebookEdit|Bash|Skill|SendMessage",
         "hooks": [
           {
             "type": "command",

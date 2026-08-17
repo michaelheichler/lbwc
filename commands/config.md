@@ -32,7 +32,7 @@ If no .lbwc-planning/ dir: STOP "Run /lbwc:init first." (check `.lbwc-planning/c
 
 ## Behavior
 
-Agent Teams is process-level Claude Code configuration. `/lbwc:team` checks it through `lbwc-config.sh agent-teams-status`. Enabling requires a main-session confirmation, then `lbwc-config.sh agent-teams-enable --approved`. The command must stop with restart guidance because changing settings cannot enable the current process.
+Agent Teams is process-level Claude Code configuration. `/lbwc:team` checks it through `lbwc-config.sh agent-teams-check`, which reads Claude Code `settings.json`. Enabling requires a main-session confirmation, then `lbwc-config.sh agent-teams-enable --approved`. The command must stop with restart guidance because changing settings cannot enable the current process.
 
 Every ordinary setting mutation runs `bash "{plugin-root}/scripts/lbwc-config.sh" set .lbwc-planning <setting> <value-json>`, followed by `lbwc-config.sh validate`. The only routing setting exposed here is `routing.active_profile`, which mutates through `lbwc-model activate`, not through direct JSON writes.
 

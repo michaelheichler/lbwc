@@ -235,9 +235,10 @@ class UserQuestionGuardTest(unittest.TestCase):
         response["tool_input"] = {
             "answers": {"Which review pace should this project use?": "Careful"}
         }
-        self.assertIn("state changed", self.hook(response, "posttool") or "")
+        self.assertIsNone(self.hook(response, "posttool"))
+        self.assertEqual(self.store().record(self.session_id)["status"], "cancelled")
         stop = self.hook({"session_id": self.session_id, "cwd": str(self.root)}, "stop")
-        self.assertIn("state changed", stop or "")
+        self.assertIsNone(stop)
 
     def test_stale_state_blocks_freeform_answer(self) -> None:
         routing = self.planning_dir / "routing.json"
@@ -252,7 +253,8 @@ class UserQuestionGuardTest(unittest.TestCase):
                 "Which review pace should this project use?": "Use a calm but complete review."
             }
         }
-        self.assertIn("state changed", self.hook(response, "posttool") or "")
+        self.assertIsNone(self.hook(response, "posttool"))
+        self.assertEqual(self.store().record(self.session_id)["status"], "cancelled")
 
     def test_changed_state_replaces_a_stale_pending_question(self) -> None:
         self.assertIsNone(
@@ -374,7 +376,8 @@ class UserQuestionGuardTest(unittest.TestCase):
         event = question_event(self.session_id, self.root)
         self.assertIsNone(self.hook(event, "pretool"))
         stop = self.hook({"session_id": self.session_id, "cwd": str(self.root)}, "stop")
-        self.assertIn("pending", stop or "")
+        self.assertIsNone(stop)
+        self.assertEqual(self.store().record(self.session_id)["status"], "cancelled")
 
     def test_hooks_register_each_user_decision_lifecycle_event(self) -> None:
         config = json.loads(HOOKS_CONFIG.read_text(encoding="utf-8"))
@@ -402,6 +405,92 @@ class UserQuestionGuardTest(unittest.TestCase):
             for hook in entry["hooks"]
         ]
         self.assertTrue(any("session-stop.sh" in command for command in stop_commands))
+        matchers = [
+            entry.get("matcher", "")
+            for entry in config["hooks"]["PreToolUse"]
+        ]
+        self.assertTrue(
+            any(
+                "Agent" in matcher
+                and "Skill" in matcher
+                and "SendMessage" in matcher
+                for matcher in matchers
+            )
+        )
+
+    def test_cancelled_question_resumes_normally(self) -> None:
+        self.assertIsNone(
+            self.hook(question_event(self.session_id, self.root), "pretool")
+        )
+        cancelled = question_event(self.session_id, self.root)
+        cancelled["is_error"] = True
+        cancelled["tool_input"] = {}
+        self.assertIsNone(self.hook(cancelled, "posttool"))
+        self.assertEqual(self.store().record(self.session_id)["status"], "cancelled")
+        qa = {
+            "session_id": self.session_id,
+            "cwd": str(self.root),
+            "tool_name": "Agent",
+            "tool_input": {"subagent_type": "qa"},
+        }
+        self.assertIsNone(self.hook(qa, "pretool"))
+        skill = dict(qa)
+        skill["tool_name"] = "Skill"
+        skill["tool_input"] = {"skill": "qa"}
+        self.assertIsNone(self.hook(skill, "pretool"))
+        killed_qa_stop = self.hook(
+            {"session_id": self.session_id, "cwd": str(self.root)}, "stop"
+        )
+        self.assertIsNone(killed_qa_stop)
+        self.assertIsNone(self.hook(qa, "pretool"))
+
+    def test_missing_answer_cancels_and_resumes_normally(self) -> None:
+        self.assertIsNone(
+            self.hook(question_event(self.session_id, self.root), "pretool")
+        )
+        empty = question_event(self.session_id, self.root)
+        empty["tool_input"] = {}
+        self.assertIsNone(self.hook(empty, "posttool"))
+        mutation = {
+            "session_id": self.session_id,
+            "cwd": str(self.root),
+            "tool_name": "Write",
+            "tool_input": {"file_path": "src/app.py", "content": "x"},
+        }
+        self.assertIsNone(self.hook(mutation, "pretool"))
+        inspection = {
+            "session_id": self.session_id,
+            "cwd": str(self.root),
+            "tool_name": "Read",
+            "tool_input": {"file_path": "src/app.py"},
+        }
+        self.assertIsNone(self.hook(inspection, "pretool"))
+        self.assertIsNone(
+            self.hook(question_event(self.session_id, self.root), "pretool")
+        )
+
+    def test_new_prompt_acknowledges_cancelled_decision(self) -> None:
+        self.assertIsNone(
+            self.hook(question_event(self.session_id, self.root), "pretool")
+        )
+        self.assertIsNone(
+            self.hook({"session_id": self.session_id, "cwd": str(self.root)}, "stop")
+        )
+        self.assertEqual(self.store().record(self.session_id)["status"], "cancelled")
+        prompt = {
+            "session_id": self.session_id,
+            "cwd": str(self.root),
+            "prompt": "Continue from a new instruction.",
+        }
+        self.assertIsNone(self.hook(prompt, "prompt"))
+        self.assertEqual(self.store().record(self.session_id)["status"], "resolved")
+        qa = {
+            "session_id": self.session_id,
+            "cwd": str(self.root),
+            "tool_name": "Agent",
+            "tool_input": {"subagent_type": "qa"},
+        }
+        self.assertIsNone(self.hook(qa, "pretool"))
 
     def test_generated_roles_deny_questions_and_return_the_handoff_shape(self) -> None:
         defaults = json.loads(ROLE_DEFAULTS.read_text(encoding="utf-8"))

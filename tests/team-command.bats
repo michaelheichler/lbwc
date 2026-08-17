@@ -56,12 +56,54 @@ record_full_roster() {
 }
 
 @test "agent teams status reports disabled without changing settings" {
-  run env CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
     bash "$SCRIPT" agent-teams-status --settings "$SETTINGS"
 
   [ "$status" -eq 0 ]
   jq -e '.enabled == false and .source == "none"' <<< "$output" >/dev/null
   [ "$(jq -c . "$SETTINGS")" = "{}" ]
+}
+
+@test "agent teams check is RED when settings omit the teams flag" {
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+    bash "$SCRIPT" agent-teams-check --settings "$SETTINGS"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "TEAM CHECK IS NOT ENABLED." ]
+}
+
+@test "agent teams check is GREEN when user settings enable the teams flag" {
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' > "$SETTINGS"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+    bash "$SCRIPT" agent-teams-check --settings "$SETTINGS"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK." ]
+}
+
+@test "agent teams check is GREEN when project settings enable the teams flag" {
+  mkdir -p "$PROJECT/.claude" "$TEST_ROOT/claude"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' \
+    > "$PROJECT/.claude/settings.json"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
+    bash "$SCRIPT" agent-teams-check --project-root "$PROJECT"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK." ]
+}
+
+@test "agent teams check stays RED on an explicit empty settings pin even if project is enabled" {
+  mkdir -p "$PROJECT/.claude"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' \
+    > "$PROJECT/.claude/settings.json"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+    bash "$SCRIPT" agent-teams-check --settings "$SETTINGS" --project-root "$PROJECT"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "TEAM CHECK IS NOT ENABLED." ]
 }
 
 @test "agent teams enable requires explicit approval" {
@@ -89,6 +131,12 @@ record_full_roster() {
   grep -F -- 'No contract, native task, generated definition, or teammate exists until confirmation.' "$command"
   grep -F -- 'Never pass `team_name`' "$command"
   grep -F -- 'Do not edit Claude Code native team configuration' "$command"
+  grep -F 'TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK.' "$command"
+  grep -F 'TEAM CHECK IS NOT ENABLED.' "$command"
+  grep -F 'do not ask whether team agents should be enabled' "$command"
+  grep -F 'agent-teams-check --project-root' "$command"
+  grep -F 'lbwc-model" refresh' "$command"
+  grep -F 'lbwc-routing.sh check' "$command"
 }
 
 @test "team command documents execution choice and an explicit tmux spawn branch" {
@@ -400,13 +448,13 @@ record_full_roster() {
   [[ "$output" == *"$CONTRACT_ID=dispatched"* ]]
 }
 
-@test "team context directive is self-contained and resolves plugin root, project root, and status with LINK unset" {
+@test "team context directive is self-contained and resolves plugin root, project root, and RED team check with LINK unset" {
   command="$REPO_ROOT/commands/team.md"
   directive=$(awk '/^!`/{sub(/^!`/,""); sub(/`$/,""); print; exit}' "$command")
   [ -n "$directive" ]
   [[ "$directive" != *'${LINK}'* ]]
 
-  run env -u LINK -u PROJECT_ROOT -u AGENT_TEAMS_STATUS \
+  run env -u LINK -u PROJECT_ROOT -u AGENT_TEAMS_CHECK -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
     CLAUDE_PLUGIN_ROOT="$REPO_ROOT" \
     CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
     LBWC_SETTINGS_PATH="$SETTINGS" \
@@ -415,12 +463,28 @@ record_full_roster() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"Plugin root: "* ]]
   [[ "$output" == *"Project root: "* ]]
-  [[ "$output" == *"Agent Teams status: "* ]]
-  status_json=$(printf '%s\n' "$output" | awk '/^Agent Teams status: /{sub(/^Agent Teams status: /,""); flag=1} flag{print}')
-  jq -e '.enabled == false and .source == "none"' <<< "$status_json" >/dev/null
+  [[ "$output" == *"TEAM CHECK IS NOT ENABLED."* ]]
+  [[ "$output" != *"TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK."* ]]
   [ ! -e "$PROJECT/.temporary-agent-runfiles" ]
   [ ! -e "$PROJECT/.lbwc-planning" ]
   [ "$(jq -c . "$SETTINGS")" = "{}" ]
+}
+
+@test "team context directive is GREEN when Claude Code settings already enable agent teams" {
+  command="$REPO_ROOT/commands/team.md"
+  directive=$(awk '/^!`/{sub(/^!`/,""); sub(/`$/,""); print; exit}' "$command")
+  mkdir -p "$TEST_ROOT/claude"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' \
+    > "$TEST_ROOT/claude/settings.json"
+
+  run env -u LINK -u PROJECT_ROOT -u AGENT_TEAMS_CHECK -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+    CLAUDE_PLUGIN_ROOT="$REPO_ROOT" \
+    CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
+    bash -c "cd \"$PROJECT\" && $directive"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK."* ]]
+  [[ "$output" != *"TEAM CHECK IS NOT ENABLED."* ]]
 }
 
 @test "team command uses literal {LINK} and {PROJECT_ROOT} placeholders outside the first directive" {

@@ -245,7 +245,7 @@ If the new detector output selects the next unbuilt phase, run its Plan mode and
 
 ## Failure and recovery
 
-A failed root resolver, detector, contract issue, generator call, tmux preflight, provision, split-group, bus publish/await/ack, artifact validation, state transition, or planning Git helper stops the current mode. Report the exact failing command boundary and preserve existing state. Never create placeholder plans, summaries, verification, or UAT files to make detection advance. Recovery re-runs `/lbwc:vibe` after the named blocker is corrected. If a bounded user dialog is dismissed, keep the decision pending and stop all dependent work.
+A failed root resolver, detector, contract issue, generator call, tmux preflight, provision, split-group, bus publish/await/ack, artifact validation, state transition, or planning Git helper stops the current mode. Report the exact failing command boundary and preserve existing state. Never create placeholder plans, summaries, verification, or UAT files to make detection advance. Recovery re-runs `/lbwc:vibe` after the named blocker is corrected. If a bounded user dialog is dismissed or killed, clear the pending decision and resume normally.
 
 ## Output Format
 

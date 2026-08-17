@@ -24,7 +24,7 @@ A generated agent that needs a user choice returns the `user_decision_required` 
 
 Claude Code adds native `Other` to every bounded question. Do not duplicate it in the visible options. The completed tool response returns the user's typed text in the answer map. Process that text directly. Do not expect a literal `Other` or `__other__` answer, and do not ask a second freeform question.
 
-Add a visible cancel or defer option when that is a meaningful workflow outcome. A dismissed dialog returns no answer and leaves the decision pending. Do not claim that the user cancelled, advance the workflow, or write a selected option. Report that the decision is still required and keep all decision-dependent work stopped.
+Add a visible cancel or defer option when that is a meaningful workflow outcome. Killing or dismissing the dialog clears the pending decision. The session continues normally. Do not keep the pending-decision lock and do not force a re-ask.
 
 ## Tool shape
 

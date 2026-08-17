@@ -21,11 +21,14 @@ make_claude_fixture() {
     '91.7.3 (Fixture Code)' \
     'careful, brisk, exhaustive' \
     '[{id:"claude-amber-route",family:"amber",display_name:"Amber Route"},{id:"claude-violet-route",family:"violet",display_name:"Violet Route"}]' \
-    ''
+    '' \
+    '' \
+    '' \
+    '["amber","violet"]'
 }
 
 write_claude_fixture() {
-  local binary="$1" version="$2" efforts="$3" models_json="$4" associations="$5" unrelated_table="${6:-}" inspection_marker="${7:-}"
+  local binary="$1" version="$2" efforts="$3" models_json="$4" associations="$5" unrelated_table="${6:-}" inspection_marker="${7:-}" host_enum="${8:-}"
   mkdir -p "$(dirname "$binary")"
   cat > "$binary" <<EOF
 #!/usr/bin/env bash
@@ -49,6 +52,7 @@ exit 0
 : 'models:$models_json'
 : '$unrelated_table'
 : '$associations'
+: '$host_enum'
 EOF
   chmod +x "$binary"
 }
@@ -83,8 +87,17 @@ extract_init_bootstrap() {
     and (.source.detected_at | type == "string" and length > 0)
     and .models == [
       {selector:"claude-amber-route", label:"Amber Route", description:"Amber Route"},
-      {selector:"claude-violet-route", label:"Violet Route", description:"Violet Route"}
+      {selector:"claude-violet-route", label:"Violet Route", description:"Violet Route"},
+      {selector:"amber", label:"amber", description:"amber"},
+      {selector:"violet", label:"violet", description:"violet"}
     ]
+    and .host_agent_enum == ["amber", "violet"]
+    and .agent_model_ids == {
+      "claude-amber-route":"amber",
+      "claude-violet-route":"violet",
+      "amber":"amber",
+      "violet":"violet"
+    }
     and .reasoning.scope == "global"
     and .reasoning.accepted_values == ["careful", "brisk", "exhaustive"]
     and .reasoning.model_associations == {}
@@ -108,7 +121,9 @@ extract_init_bootstrap() {
   run jq -e '
     .models == [
       {selector:"claude-copper-one", label:"Copper One", description:"Copper One"},
-      {selector:"claude-silver-two", label:"Silver Two", description:"Silver Two"}
+      {selector:"claude-silver-two", label:"Silver Two", description:"Silver Two"},
+      {selector:"copper", label:"copper", description:"copper"},
+      {selector:"silver", label:"silver", description:"silver"}
     ]
     and .reasoning.accepted_values == ["reflective", "rapid", "expansive"]
   ' "$PLANNING_DIR/claude-capabilities.json"
@@ -154,7 +169,7 @@ extract_init_bootstrap() {
   run jq -e --arg previous "$first_fingerprint" '
     .source.sha256 != $previous
     and .source.version == "91.7.4 (Fixture Code)"
-    and [.models[].selector] == ["claude-indigo"]
+    and [.models[].selector] == ["claude-indigo", "indigo"]
     and .reasoning.accepted_values == ["patient", "direct"]
   ' "$PLANNING_DIR/claude-capabilities.json"
   [ "$status" -eq 0 ]
@@ -197,7 +212,8 @@ extract_init_bootstrap() {
   [ "$status" -eq 0 ]
   run jq -e '
     .models == [
-      {selector:"claude-maple", label:"Maple", description:"Maple"}
+      {selector:"claude-maple", label:"Maple", description:"Maple"},
+      {selector:"maple", label:"maple", description:"maple"}
     ]
   ' "$PLANNING_DIR/claude-capabilities.json"
   [ "$status" -eq 0 ]
@@ -216,7 +232,7 @@ extract_init_bootstrap() {
   run env CLAUDE_CODE_EXECPATH="$binary" bash "$SCRIPT" refresh "$PLANNING_DIR"
 
   [ "$status" -eq 0 ]
-  run jq -e '.models == [{selector:"claude-maple", label:"Maple", description:"Maple"}]' "$PLANNING_DIR/claude-capabilities.json"
+  run jq -e '.models == [{selector:"claude-maple", label:"Maple", description:"Maple"},{selector:"maple", label:"maple", description:"maple"}]' "$PLANNING_DIR/claude-capabilities.json"
   [ "$status" -eq 0 ]
 }
 

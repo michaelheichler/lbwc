@@ -260,8 +260,12 @@ resolve_routing() {
     catalog_json=$(bash "$SCRIPT_DIR/claude-capabilities.sh" refresh-from-binary "$binary_path") \
       || fail "could not extract capability catalog from $binary_path"
     CATALOG_JSON="$catalog_json"
-    ROUTING_MODEL=$(jq -r '.models[] | select(.selector | contains("sonnet")) | .selector' <<< "$catalog_json" | head -1)
-    [ -n "$ROUTING_MODEL" ] || fail "no sonnet model selector in capability catalog"
+    ROUTING_MODEL=$(jq -r '
+      if (.host_agent_enum | type == "array" and length > 0) then .host_agent_enum[0]
+      else .models[0].selector
+      end
+    ' <<< "$catalog_json")
+    [ -n "$ROUTING_MODEL" ] && [ "$ROUTING_MODEL" != "null" ] || fail "no model selector in capability catalog"
     ROUTING_REASONING_JSON=$(jq -c '.reasoning.accepted_values[] | select(. == "high")' <<< "$catalog_json" | head -1)
     [ -n "$ROUTING_REASONING_JSON" ] || fail "no high reasoning value in capability catalog"
     ROUTING_EFFORT="high"
