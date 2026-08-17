@@ -1,5 +1,18 @@
 # Changelog
 This file records user-visible LBWC releases. Keep the newest entry first.
+## [1.0.4] - 2026-08-17
+
+### Teams that follow Claude, and questions you can close
+
+Starting a team now follows your Claude settings and the models this Claude actually offers.
+
+- If Agent Teams is already on, you are not asked again.
+- A project setting that turns teams off wins over a personal setting that turns them on.
+- A broken extra settings file is skipped. A file you pointed at on purpose still has to be valid.
+- Close a choice dialog and work continues. The session is not stuck, and it is not pushed into a review you did not ask for.
+- Teammates use the model names this Claude lists, including extra names from a router you installed.
+- Starting a team refreshes that list so the short names Claude already uses are accepted.
+
 ## [1.0.3] - 2026-08-16
 
 ### TMUX agent panes
