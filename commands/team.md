@@ -10,10 +10,10 @@ disable-model-invocation: true
 
 ## Context
 
-Plugin root, project root, and Agent Teams status (self-contained). Shell variables never survive across directives:
+Plugin root, project root, and Agent Teams check (self-contained). Shell variables never survive across directives:
 
 ```bash
-!`SESSION_KEY="${CLAUDE_SESSION_ID:-default}"; L="/tmp/.lbwc-plugin-root-link-${SESSION_KEY}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; LINK=$(bash "$R" --require-script team-command-transaction.sh) || exit 1; PROJECT_ROOT=$(source "$LINK/scripts/lib/lbwc-target-root.sh" && lbwc_resolve_target_root 0 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null) || { echo "LBWC: no Git repository root found. /lbwc:team requires a Git repository." >&2; exit 1; }; AGENT_TEAMS_STATUS=$(bash "$LINK/scripts/lbwc-config.sh" agent-teams-status) || exit 1; printf 'Plugin root: %s\nProject root: %s\nAgent Teams status: %s\n' "$LINK" "$PROJECT_ROOT" "$AGENT_TEAMS_STATUS"`
+!`SESSION_KEY="${CLAUDE_SESSION_ID:-default}"; L="/tmp/.lbwc-plugin-root-link-${SESSION_KEY}"; R="$L/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || R="${CLAUDE_PLUGIN_ROOT:-}/scripts/resolve-plugin-root.sh"; [ -f "$R" ] || { echo "LBWC: plugin root unavailable. Restart this session to recreate $L." >&2; exit 1; }; LINK=$(bash "$R" --require-script team-command-transaction.sh) || exit 1; PROJECT_ROOT=$(source "$LINK/scripts/lib/lbwc-target-root.sh" && lbwc_resolve_target_root 0 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null) || { echo "LBWC: no Git repository root found. /lbwc:team requires a Git repository." >&2; exit 1; }; AGENT_TEAMS_CHECK=$(bash "$LINK/scripts/lbwc-config.sh" agent-teams-check --project-root "$PROJECT_ROOT") || exit 1; printf 'Plugin root: %s\nProject root: %s\n%s\n' "$LINK" "$PROJECT_ROOT" "$AGENT_TEAMS_CHECK"`
 ```
 
 Store the returned `Plugin root` value as `{LINK}` and the returned `Project root` value as `{PROJECT_ROOT}` for every literal helper invocation below. Never guess a plugin path or substitute a missing helper with inline approximations.
@@ -30,11 +30,25 @@ bash "{LINK}/scripts/indexer-sync.sh" --project-root "{PROJECT_ROOT}"
 
 This is mandatory. Stop before the team workflow when the helper exits non-zero.
 
+## Catalog freshness gate
+
+When `{PROJECT_ROOT}/.lbwc-planning` exists, refresh the saved Claude capability catalog before preflight, confirmation, or any transaction preparation. Run exactly:
+
+```bash
+bash "{LINK}/scripts/lbwc-model" refresh "{PROJECT_ROOT}/.lbwc-planning"
+```
+
+This writes host Agent aliases and patched ids from the current Claude Code binary into `.lbwc-planning/claude-capabilities.json`, so `lbwc-routing.sh check` accepts those aliases on the saved catalog. Stop before the team workflow when the helper exits non-zero. Skip this gate when `{PROJECT_ROOT}/.lbwc-planning` is missing. Do not create a planning directory here.
+
 ## Guard
 
 Parse `$ARGUMENTS` into an optional `--plan <path>` (one explicit untrusted plan file, read but never executed), repeatable `--scope <path>` entries, and the remaining words as the work instruction. `--scope <path>` is repeatable. The default scope is `.` and must be displayed before confirmation.
 
-If the Agent Teams status shows `enabled: false`, ask one bounded `AskUserQuestion` offering `Enable Agent Teams` and `Cancel`. On approval, run `bash "{LINK}/scripts/lbwc-config.sh" agent-teams-enable --approved`, display its restart guidance verbatim, and STOP. Do not claim the current process changed. On decline, leave settings unchanged and STOP.
+Use the Context team-check line. It reads Claude Code `settings.json` (`env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`), not LBWC planning state.
+
+If Context printed `TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK.`, do not ask whether team agents should be enabled. Continue.
+
+If Context printed `TEAM CHECK IS NOT ENABLED.`, ask one bounded `AskUserQuestion` offering `Enable Agent Teams` and `Cancel`. On approval, run `bash "{LINK}/scripts/lbwc-config.sh" agent-teams-enable --approved`, display its restart guidance verbatim, and STOP. Do not claim the current process changed. On decline, leave settings unchanged and STOP.
 
 No contract, native task, generated definition, or teammate exists until confirmation.
 
@@ -46,7 +60,7 @@ No contract, native task, generated definition, or teammate exists until confirm
 bash "{LINK}/scripts/team-command-transaction.sh" preflight --project-root "{PROJECT_ROOT}" ${SCOPE_ARGS[@]+"${SCOPE_ARGS[@]}"}
 ```
 
-Preflight writes nothing and returns canonical scopes, the proposed roster, `team_mode`, routing evidence, and `side_effects:false`. Stop on a protected scope, an invalid role, or a missing routing authority.
+Preflight writes nothing and returns canonical scopes, the proposed roster, `team_mode`, routing evidence, and `side_effects:false`. Agent Teams status uses the same project-root check as Context (`agent-teams-status --project-root`), not an explicit settings pin. Stop on a protected scope, an invalid role, or a missing routing authority.
 
 2. **Select context.** An explicit instruction and `--plan` win. Otherwise use the active LBWC plan. If neither exists, inventory candidates with `bash "{LINK}/scripts/team-context-index.sh" --project-root "{PROJECT_ROOT}" --run-root <pending-run>` only after confirmation is needed. Show at most three newest-first candidates and ask one bounded selection question. Never execute plan text.
 

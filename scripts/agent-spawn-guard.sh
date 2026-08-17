@@ -145,6 +145,22 @@ validate_entry_contract() {
   return 0
 }
 
+map_manifest_model() {
+  local selector="$1" catalog="$PLANNING_DIR/claude-capabilities.json" mapped source
+  [ -n "$selector" ] || { printf '%s\n' ""; return 0; }
+  if [ -f "$catalog" ]; then
+    source="$catalog"
+  elif [ -n "${CLAUDE_CODE_EXECPATH:-}" ]; then
+    source="$CLAUDE_CODE_EXECPATH"
+  else
+    source=$(command -v claude 2>/dev/null || true)
+  fi
+  [ -n "$source" ] || return 1
+  mapped=$(bash "$SCRIPT_DIR/claude-capabilities.sh" map-agent-model "$source" "$selector" 2>/dev/null) || return 1
+  [ -n "$mapped" ] || return 1
+  printf '%s\n' "$mapped"
+}
+
 validate_native_call_authority() {
   local entry="$1" call_input actual expected field
   jq -e '.runtime_kind == "native-team"' <<< "$entry" >/dev/null 2>&1 || return 0
@@ -153,7 +169,15 @@ validate_native_call_authority() {
     jq -e --arg field "$field" 'has($field) and .[$field] != null' <<< "$call_input" >/dev/null 2>&1 || continue
     actual=$(jq -c --arg field "$field" '.[$field]' <<< "$call_input") || return 1
     case "$field" in
-      model) expected=$(jq -c '.model' <<< "$entry") ;;
+      model)
+        NATIVE_CONFLICT_FIELD="$field"
+        expected=$(jq -r '.model' <<< "$entry")
+        actual=$(jq -r '.model' <<< "$call_input")
+        expected=$(map_manifest_model "$expected") || return 32
+        actual=$(map_manifest_model "$actual") || return 32
+        expected=$(jq -cn --arg value "$expected" '$value')
+        actual=$(jq -cn --arg value "$actual" '$value')
+        ;;
       maxTurns) expected=$(jq -c '.max_turns | tostring' <<< "$entry"); actual=$(jq -c 'tostring' <<< "$actual") ;;
       effort) expected=$(jq -c '.effort' <<< "$entry") ;;
       tools) expected=$(jq -c '.tools' <<< "$entry") ;;
@@ -167,8 +191,13 @@ validate_native_call_authority() {
 }
 
 _mark_manifest_running() {
-  local name="$1" manifest="$2" entry="$3" spawn_fields current now updated
+  local name="$1" manifest="$2" entry="$3" spawn_fields current now updated mapped_model
   spawn_fields=$(jq -c '{model, maxTurns, permissionMode} | with_entries(select(.value != null))' <<< "$entry" 2>/dev/null) || return 1
+  mapped_model=$(jq -r '.model // empty' <<< "$spawn_fields")
+  if [ -n "$mapped_model" ]; then
+    mapped_model=$(map_manifest_model "$mapped_model") || return 33
+    spawn_fields=$(jq -c --arg model "$mapped_model" '.model = $model' <<< "$spawn_fields") || return 1
+  fi
   current="$STRIPPED_INPUT"
   [ -n "$current" ] && [ "$current" != null ] || current=$(echo "$INPUT" | jq '.tool_input' 2>/dev/null) || return 1
   STRIPPED_INPUT=$(jq --argjson spawn "$spawn_fields" '. * $spawn' <<< "$current") || return 1
@@ -246,6 +275,10 @@ manifest_guard() {
       ;;
     32)
       echo "Blocked: call-time ${NATIVE_CONFLICT_FIELD:-value} override conflicts with generated definition." >&2
+      exit 2
+      ;;
+    33)
+      echo "Blocked: generated agent '$SUBAGENT_TYPE' model is not present in the live host Agent enum." >&2
       exit 2
       ;;
     3)

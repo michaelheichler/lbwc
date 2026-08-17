@@ -16,6 +16,10 @@ from typing import Any, cast
 
 ASK_TOOL = "AskUserQuestion"
 INSPECTION_TOOLS = {"Read", "Glob", "Grep"}
+PENDING_ORCHESTRATION_REASON = (
+    "A user decision is pending. Inspection may continue, but orchestration "
+    "and mutation must wait."
+)
 TECHNICAL_TERMS = re.compile(
     r"\b(api|binary|cli|filesystem|hook|json|regex|runtime|schema|token)\b",
     re.IGNORECASE,
@@ -398,7 +402,8 @@ class DecisionStore:
         )
         self._validate_shape(record.get("response_shape"))
         _require(
-            record.get("status") in {"pending", "awaiting_freeform", "resolved"},
+            record.get("status")
+            in {"pending", "awaiting_freeform", "resolved", "cancelled"},
             "The pending user decision record is invalid.",
         )
         authority = self._authority_path(
@@ -578,6 +583,37 @@ class DecisionStore:
             _require(path is not None, "The pending user decision state is invalid.")
             self._persist(cast(Path, path), record)
 
+    def cancel(self, session_id: str) -> None:
+        with self._lock(session_id):
+            record = self.record(session_id)
+            if record["status"] == "cancelled":
+                return
+            _require(
+                record["status"] in {"pending", "awaiting_freeform"},
+                "The pending user decision record is invalid.",
+            )
+            timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            record["status"] = "cancelled"
+            record["response"] = {"kind": "cancelled"}
+            record["resolved_at"] = timestamp
+            path = self._record_path(session_id, create=True)
+            _require(path is not None, "The pending user decision state is invalid.")
+            self._persist(cast(Path, path), record)
+
+    def acknowledge_cancel(self, session_id: str) -> None:
+        with self._lock(session_id):
+            record = self.record(session_id)
+            if record["status"] == "resolved":
+                return
+            _require(
+                record["status"] == "cancelled",
+                "The pending user decision record is invalid.",
+            )
+            record["status"] = "resolved"
+            path = self._record_path(session_id, create=True)
+            _require(path is not None, "The pending user decision state is invalid.")
+            self._persist(cast(Path, path), record)
+
 
 def _record_for_current_state(
     store: DecisionStore, session_id: str
@@ -738,10 +774,7 @@ def _pretool(data: dict[str, Any]) -> str | None:
         if status in {"pending", "awaiting_freeform"} and _is_blocked_while_pending(
             tool_name
         ):
-            reason = (
-                "A user decision is pending. Inspection may continue, but orchestration "
-                "and mutation must wait."
-            )
+            reason = PENDING_ORCHESTRATION_REASON
         elif tool_name == ASK_TOOL:
             reason = _open_question(data, store, session_id)
     except DecisionStateError as error:
@@ -756,6 +789,15 @@ def _answer_map(data: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
+def _is_error_payload(data: dict[str, Any]) -> bool:
+    if data.get("is_error") is True:
+        return True
+    response = data.get("tool_response")
+    if isinstance(response, dict) and response.get("is_error") is True:
+        return True
+    return False
+
+
 def _posttool(data: dict[str, Any]) -> str | None:
     if data.get("tool_name") != ASK_TOOL:
         return None
@@ -768,26 +810,31 @@ def _posttool(data: dict[str, Any]) -> str | None:
         )
         planning_dir = cast(Path, planning_dir)
         session_id = cast(str, session_id)
-        answers = _answer_map(data)
-        if answers is None:
-            return None
         store = DecisionStore(planning_dir)
+        status = store.state(session_id)
+        if status not in {"pending", "awaiting_freeform"}:
+            return None
+        answers = _answer_map(data)
         record, error = _record_for_current_state(store, session_id)
-        if error:
-            return error
-        _require(record is not None, "The pending user decision record is invalid.")
-        record = cast(dict[str, Any], record)
-        shape = record["response_shape"]
-        _require(
-            isinstance(shape, dict), "The pending user decision record is invalid."
-        )
-        question = shape["question"]
-        _require(
-            isinstance(question, str), "The pending user decision record is invalid."
-        )
-        answer = answers.get(question)
-        _require(isinstance(answer, str), "AskUserQuestion returned an invalid answer.")
-        store.answer(session_id, cast(str, answer), str(record["state_fingerprint"]))
+        if answers is not None and error is None and record is not None:
+            shape = record["response_shape"]
+            _require(
+                isinstance(shape, dict),
+                "The pending user decision record is invalid.",
+            )
+            question = shape["question"]
+            _require(
+                isinstance(question, str),
+                "The pending user decision record is invalid.",
+            )
+            answer = answers.get(question)
+            if isinstance(answer, str) and not _is_error_payload(data):
+                store.answer(
+                    session_id, answer, str(record["state_fingerprint"])
+                )
+                return None
+        store.cancel(session_id)
+        return None
     except DecisionStateError as error:
         return str(error)
     return None
@@ -803,7 +850,11 @@ def _prompt(data: dict[str, Any]) -> str | None:
         _require(session_id is not None, "The pending user decision record is invalid.")
         session_id = cast(str, session_id)
         store = DecisionStore(planning_dir)
-        if store.state(session_id) == "awaiting_freeform":
+        status = store.state(session_id)
+        if status == "cancelled":
+            store.acknowledge_cancel(session_id)
+            return None
+        if status == "awaiting_freeform":
             record, error = _record_for_current_state(store, session_id)
             if error:
                 return error
@@ -829,13 +880,8 @@ def _stop(data: dict[str, Any]) -> str | None:
         store = DecisionStore(planning_dir)
         status = store.state(session_id)
         if status in {"pending", "awaiting_freeform"}:
-            _, error = _record_for_current_state(store, session_id)
-            if error:
-                return error
-            return (
-                "A required user decision is still pending. Present or resume that decision "
-                "before stopping."
-            )
+            store.cancel(session_id)
+            return None
     except DecisionStateError as error:
         return (
             "The pending user decision record is invalid: "

@@ -64,7 +64,7 @@ Only the main session may ask the user a question or change decision state. A ge
 
 For an unbounded choice, return an empty `choices` array. Do not invent bounded options. The main session turns that report into one plain-text follow-up. For a bounded choice, return 2 to 4 choices so the main session can issue one single-select AskUserQuestion call. Claude Code provides native `Other`, so the handoff does not duplicate it.
 
-An agent may explain evidence and recommend an option, but it has no authority to select one. It must not call AskUserQuestion, write a decision artifact, invoke a decision-state command, or run a trusted shell transition that advances the workflow. It must leave the workflow pending until the main session receives the user response. A dismissed dialog leaves the decision pending and blocks decision-dependent work.
+An agent may explain evidence and recommend an option, but it has no authority to select one. It must not call AskUserQuestion, write a decision artifact, invoke a decision-state command, or run a trusted shell transition that advances the workflow. It must leave the workflow pending until the main session receives the user response. Killing or dismissing the dialog clears that pending decision. The main session resumes normally.
 
 ## No-Tool Circuit Breaker
 

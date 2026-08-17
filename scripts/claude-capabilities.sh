@@ -3,12 +3,15 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROUTING_PATH="$SCRIPT_DIR/lbwc-routing.sh"
+. "$SCRIPT_DIR/lib/compose-model-catalog.sh"
 LOCK_DIR=""
 TEMPORARY=""
 HELP_TEMP=""
 MODELS_TEMP=""
 REASONING_TEMP=""
 ASSOCIATIONS_TEMP=""
+HOST_ENUM_TEMP=""
+COMPOSED_MODELS_TEMP=""
 
 fail() {
   printf 'Error: %s\n' "$1" >&2
@@ -18,7 +21,8 @@ fail() {
 usage() {
   printf '%s\n' \
     'Usage: claude-capabilities.sh <refresh planning-dir|validate catalog-path>' \
-    '       claude-capabilities.sh refresh-from-binary <binary-path>' >&2
+    '       claude-capabilities.sh refresh-from-binary <binary-path>' \
+    '       claude-capabilities.sh map-agent-model <binary-or-catalog> <selector>' >&2
 }
 
 require_tools() {
@@ -33,7 +37,7 @@ cleanup() {
   if [ -n "$TEMPORARY" ] && [ -f "$TEMPORARY" ]; then
     rm -f "$TEMPORARY"
   fi
-  for path in "$HELP_TEMP" "$MODELS_TEMP" "$REASONING_TEMP" "$ASSOCIATIONS_TEMP"; do
+  for path in "$HELP_TEMP" "$MODELS_TEMP" "$REASONING_TEMP" "$ASSOCIATIONS_TEMP" "$HOST_ENUM_TEMP" "$COMPOSED_MODELS_TEMP"; do
     if [ -n "$path" ]; then
       rm -f "$path" "${path}.array"
     fi
@@ -115,29 +119,7 @@ extract_help() {
 }
 
 extract_model_records() {
-  local binary="$1" output="$2" entries metadata entry rest id display_name
-  entries=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-model-entries.XXXXXX") || fail 'could not create model-entry temporary file'
-  metadata=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-model-metadata.XXXXXX") || {
-    rm -f "$entries"
-    fail 'could not create model-metadata temporary file'
-  }
-  LC_ALL=C grep -aoE 'id:"claude-[a-zA-Z0-9._-]+",family:"[a-zA-Z0-9_]+",display_name:"[^"[:cntrl:]]+"' "$binary" > "$entries" 2>/dev/null || true
-  : > "$metadata"
-  while IFS= read -r entry; do
-    rest="${entry#id:\"}"
-    id="${rest%%\",family:\"*}"
-    rest="${entry#*,display_name:\"}"
-    display_name="${rest%\"}"
-    jq -cn --arg selector "$id" --arg label "$display_name" \
-      '{selector:$selector,label:$label,description:$label}' >> "$metadata"
-  done < "$entries"
-  jq -s '
-    reduce .[] as $record ([];
-      if any(.[]; .selector == $record.selector) then . else . + [$record] end
-    )
-  ' "$metadata" > "$output"
-  rm -f "$entries" "$metadata"
-  jq -e 'length > 0' "$output" >/dev/null || fail 'Claude Code binary exposed no validated model catalog'
+  lbwc_extract_model_records "$1" "$2" || fail 'Claude Code binary exposed no validated model catalog'
 }
 
 extract_reasoning_values() {
@@ -227,62 +209,30 @@ validate_catalog_json() {
       and (.value | length == (unique | length))
       and (all(.value[]; . as $effort | $catalog.reasoning.accepted_values | index($effort) != null))
     ))
+    and (
+      (has("host_agent_enum") | not)
+      or (
+        (.host_agent_enum | type == "array")
+        and (all(.host_agent_enum[]; type == "string" and length > 0))
+        and (.host_agent_enum | length == (unique | length))
+      )
+    )
+    and (
+      (has("agent_model_ids") | not)
+      or (
+        has("host_agent_enum")
+        and (.agent_model_ids | type == "object")
+        and (all(.agent_model_ids | to_entries[];
+          (.value | type == "string" and length > 0)
+          and (.value as $host_id | $catalog.host_agent_enum | index($host_id) != null)
+        ))
+      )
+    )
   ' "$1" >/dev/null 2>&1
 }
 
 build_catalog() {
-  local binary="$1" output="$2" before after version detected_at help_path models_path reasoning_path associations_path
-  help_path=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-help.XXXXXX") || fail 'could not create help temporary file'
-  HELP_TEMP="$help_path"
-  models_path=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-models.XXXXXX") || {
-    rm -f "$help_path"
-    fail 'could not create model temporary file'
-  }
-  MODELS_TEMP="$models_path"
-  reasoning_path=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-reasoning.XXXXXX") || {
-    rm -f "$help_path" "$models_path"
-    fail 'could not create reasoning temporary file'
-  }
-  REASONING_TEMP="$reasoning_path"
-  associations_path=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-model-associations.XXXXXX") || {
-    rm -f "$help_path" "$models_path" "$reasoning_path"
-    fail 'could not create model-association temporary file'
-  }
-  ASSOCIATIONS_TEMP="$associations_path"
-  before=$(sha256_file "$binary") || fail 'could not fingerprint Claude Code executable'
-  version=$(extract_version "$binary")
-  extract_help "$binary" "$help_path"
-  extract_model_records "$binary" "$models_path"
-  extract_reasoning_values "$help_path" "$reasoning_path"
-  extract_model_associations "$binary" "$associations_path"
-  after=$(sha256_file "$binary") || fail 'could not recheck Claude Code executable fingerprint'
-  [ "$before" = "$after" ] || fail 'Claude Code executable changed during capability extraction'
-  detected_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  jq -S -n \
-    --arg binary_path "$binary" \
-    --arg version "$version" \
-    --arg sha256 "$after" \
-    --arg detected_at "$detected_at" \
-    --slurpfile models "$models_path" \
-    --slurpfile reasoning "$reasoning_path" \
-    --slurpfile associations "$associations_path" '
-      {
-        schema_version: 1,
-        source: {
-          binary_path: $binary_path,
-          version: $version,
-          sha256: $sha256,
-          detected_at: $detected_at
-        },
-        models: $models[0],
-        reasoning: {
-          scope: "global",
-          accepted_values: $reasoning[0],
-          model_associations: $associations[0]
-        }
-      }
-    ' > "$output"
-  rm -f "$help_path" "$models_path" "$reasoning_path" "$associations_path"
+  lbwc_build_catalog "$1" "$2"
 }
 
 refresh_catalog() {
@@ -337,8 +287,21 @@ catalog_planning_directory() {
 }
 
 main() {
-  local command="${1:-}" target="${2:-}" state_planning
+  local command="${1:-}" target="${2:-}" state_planning selector mapped
   require_tools
+  if [ "$command" = map-agent-model ]; then
+    selector="${3:-}"
+    [ -n "$target" ] && [ -n "$selector" ] && [ "$#" -eq 3 ] || {
+      usage
+      exit 1
+    }
+    umask 077
+    trap cleanup EXIT
+    mapped=$(lbwc_map_agent_model "$target" "$selector") \
+      || fail "model selector is not present in the live host Agent enum: $selector"
+    printf '%s\n' "$mapped"
+    return 0
+  fi
   [ -n "$command" ] && [ -n "$target" ] && [ "$#" -eq 2 ] || {
     usage
     exit 1

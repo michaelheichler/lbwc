@@ -359,13 +359,16 @@ EOF
 }
 
 @test "team runs the indexer gate before agent teams enablement and preflight" {
-  local gate_line enable_line preflight_line
+  local gate_line enable_line preflight_line catalog_line
   gate_line="$(grep -n 'indexer-sync.sh' "$REPO_ROOT/commands/team.md" | cut -d: -f1)"
+  catalog_line="$(grep -n 'lbwc-model" refresh' "$REPO_ROOT/commands/team.md" | cut -d: -f1)"
   enable_line="$(grep -n 'agent-teams-enable --approved' "$REPO_ROOT/commands/team.md" | cut -d: -f1)"
   preflight_line="$(grep -n '\*\*Preflight (read-only)\.\*\*' "$REPO_ROOT/commands/team.md" | cut -d: -f1)"
 
   [ "$gate_line" -lt "$enable_line" ]
   [ "$gate_line" -lt "$preflight_line" ]
+  [ "$gate_line" -lt "$catalog_line" ]
+  [ "$catalog_line" -lt "$preflight_line" ]
 }
 
 @test "build runs the indexer gate before phase and plan state reads" {

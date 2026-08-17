@@ -145,6 +145,118 @@ teardown() {
   [ "$(jq -r --arg name "$name" '.agents[$name].state' "$control_root/agent-manifest.json")" = "registered" ]
 }
 
+@test "spawn guard rewrites a full selector to the live host alias" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/spawn-map" contract id name
+  mkdir -p "$control_root"
+  jq --arg custom "leverframe:openai-oauth:codex-auto-review" '
+    .models += [
+      {selector:"claude-sonnet-5",label:"Sonnet 5",description:"Sonnet 5"},
+      {selector:"sonnet",label:"sonnet",description:"sonnet"},
+      {selector:$custom,label:$custom,description:$custom}
+    ]
+    | .host_agent_enum = ["sonnet","opus",$custom]
+    | .agent_model_ids = {
+        "nova-route":"nova-route",
+        "claude-sonnet-5":"sonnet",
+        "sonnet":"sonnet"
+      }
+    | .agent_model_ids[$custom] = $custom
+  ' "$TEST_TEMP_DIR/.lbwc-planning/claude-capabilities.json" > "$control_root/claude-capabilities.json"
+  ROUTE_SHA=$(shasum -a 256 "$ROUTE_BINARY" | awk '{print $1}')
+  jq --arg binary "$ROUTE_BINARY" --arg sha "$ROUTE_SHA" \
+    '.source.binary_path = $binary | .source.sha256 = $sha' \
+    "$control_root/claude-capabilities.json" > "$control_root/catalog.tmp"
+  mv "$control_root/catalog.tmp" "$control_root/claude-capabilities.json"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" spawn-map \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --write-capability directory:.)
+  id=$(basename "$contract" .json)
+  bash "$SCRIPTS_DIR/agent-generator.sh" --native-team web-engineer --job "scope" \
+    --task-id "$id" --contract "$contract" --control-root "$control_root" \
+    --write-capability directory:. >/dev/null
+  name=$(jq -r '.agents | keys[0]' "$control_root/agent-manifest.json")
+  jq --arg name "$name" '.agents[$name].model = "claude-sonnet-5"' \
+    "$control_root/agent-manifest.json" > "$control_root/manifest.tmp"
+  mv "$control_root/manifest.tmp" "$control_root/agent-manifest.json"
+  bash "$SCRIPTS_DIR/task-contract.sh" state "$TEST_TEMP_DIR" "$id" dispatched >/dev/null
+
+  run bash -c 'jq -cn --arg name "$1" \
+    '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
+    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+
+  [ "$status" -eq 0 ]
+  jq -e '.hookSpecificOutput.updatedInput.model == "sonnet"' <<< "$output" >/dev/null
+}
+
+@test "spawn guard leaves a live custom id unchanged" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/spawn-custom" contract id name custom
+  custom="leverframe:openai-oauth:codex-auto-review"
+  mkdir -p "$control_root"
+  jq --arg custom "$custom" '
+    .models += [{selector:$custom,label:$custom,description:$custom}]
+    | .host_agent_enum = ["sonnet",$custom]
+    | .agent_model_ids = {"nova-route":"nova-route"}
+    | .agent_model_ids[$custom] = $custom
+  ' "$TEST_TEMP_DIR/.lbwc-planning/claude-capabilities.json" > "$control_root/claude-capabilities.json"
+  ROUTE_SHA=$(shasum -a 256 "$ROUTE_BINARY" | awk '{print $1}')
+  jq --arg binary "$ROUTE_BINARY" --arg sha "$ROUTE_SHA" \
+    '.source.binary_path = $binary | .source.sha256 = $sha' \
+    "$control_root/claude-capabilities.json" > "$control_root/catalog.tmp"
+  mv "$control_root/catalog.tmp" "$control_root/claude-capabilities.json"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" spawn-custom \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --write-capability directory:.)
+  id=$(basename "$contract" .json)
+  bash "$SCRIPTS_DIR/agent-generator.sh" --native-team web-engineer --job "scope" \
+    --task-id "$id" --contract "$contract" --control-root "$control_root" \
+    --write-capability directory:. >/dev/null
+  name=$(jq -r '.agents | keys[0]' "$control_root/agent-manifest.json")
+  jq --arg name "$name" --arg custom "$custom" '.agents[$name].model = $custom' \
+    "$control_root/agent-manifest.json" > "$control_root/manifest.tmp"
+  mv "$control_root/manifest.tmp" "$control_root/agent-manifest.json"
+  bash "$SCRIPTS_DIR/task-contract.sh" state "$TEST_TEMP_DIR" "$id" dispatched >/dev/null
+
+  run bash -c 'jq -cn --arg name "$1" \
+    '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
+    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+
+  [ "$status" -eq 0 ]
+  jq -e --arg custom "$custom" '.hookSpecificOutput.updatedInput.model == $custom' <<< "$output" >/dev/null
+}
+
+@test "spawn guard fails closed for a model missing from the live host enum" {
+  local control_root="$TEST_TEMP_DIR/.temporary-agent-runfiles/runs/spawn-unknown" contract id name
+  mkdir -p "$control_root"
+  jq '
+    .host_agent_enum = ["sonnet"]
+    | .agent_model_ids = {"sonnet":"sonnet"}
+  ' "$TEST_TEMP_DIR/.lbwc-planning/claude-capabilities.json" > "$control_root/claude-capabilities.json"
+  ROUTE_SHA=$(shasum -a 256 "$ROUTE_BINARY" | awk '{print $1}')
+  jq --arg binary "$ROUTE_BINARY" --arg sha "$ROUTE_SHA" \
+    '.source.binary_path = $binary | .source.sha256 = $sha' \
+    "$control_root/claude-capabilities.json" > "$control_root/catalog.tmp"
+  mv "$control_root/catalog.tmp" "$control_root/claude-capabilities.json"
+  contract=$(bash "$SCRIPTS_DIR/task-contract.sh" issue "$TEST_TEMP_DIR" spawn-unknown \
+    --command team --role web-engineer --team solo --job "scope" \
+    --control-root "$control_root" --write-capability directory:.)
+  id=$(basename "$contract" .json)
+  bash "$SCRIPTS_DIR/agent-generator.sh" --native-team web-engineer --job "scope" \
+    --task-id "$id" --contract "$contract" --control-root "$control_root" \
+    --write-capability directory:. >/dev/null
+  name=$(jq -r '.agents | keys[0]' "$control_root/agent-manifest.json")
+  jq --arg name "$name" '.agents[$name].model = "not-a-model"' \
+    "$control_root/agent-manifest.json" > "$control_root/manifest.tmp"
+  mv "$control_root/manifest.tmp" "$control_root/agent-manifest.json"
+  bash "$SCRIPTS_DIR/task-contract.sh" state "$TEST_TEMP_DIR" "$id" dispatched >/dev/null
+
+  run bash -c 'jq -cn --arg name "$1" \
+    '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
+    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"not present in the live host Agent enum"* ]]
+}
+
 @test "build contract serializes task teams within each dependency wave" {
   run grep -F \
     "Within a dependency wave, process tasks in PLAN order and admit exactly one task team at a time." \
