@@ -38,46 +38,66 @@ default_claude_settings_path() {
   fi
 }
 
-agent_teams_file_enabled() {
+agent_teams_file_is_object() {
+  jq -e 'type == "object"' "$1" >/dev/null 2>&1
+}
+
+agent_teams_file_setting() {
   local settings_path="$1" setting_value
   [ -f "$settings_path" ] || return 1
-  jq -e 'type == "object"' "$settings_path" >/dev/null 2>&1 || fail "settings file is not valid JSON: $settings_path"
-  setting_value=$(jq -r '.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS // empty' "$settings_path")
-  [ "$setting_value" = "1" ]
+  agent_teams_file_is_object "$settings_path" || return 1
+  if ! jq -e '(.env | type) == "object" and (.env | has("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"))' \
+    "$settings_path" >/dev/null 2>&1; then
+    return 1
+  fi
+  setting_value=$(jq -r '.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS | tostring' "$settings_path")
+  printf '%s\n' "$setting_value"
 }
 
 agent_teams_settings_candidates() {
   local settings_path="$1" project_root="$2" settings_explicit="$3"
-  local dir candidate
+  local dir
   if [ "$settings_explicit" = true ]; then
     printf '%s\n' "$settings_path"
     return 0
   fi
   dir=$(dirname "$settings_path")
-  for candidate in "$settings_path" "$dir/settings.local.json"; do
-    printf '%s\n' "$candidate"
-  done
   if [ -n "$project_root" ]; then
-    printf '%s\n' "$project_root/.claude/settings.json"
     printf '%s\n' "$project_root/.claude/settings.local.json"
+    printf '%s\n' "$project_root/.claude/settings.json"
   fi
+  printf '%s\n' "$dir/settings.local.json"
+  printf '%s\n' "$settings_path"
 }
 
 agent_teams_status() {
   local settings_path="$1" project_root="$2" settings_explicit="$3"
-  local candidate seen=""
-  if [ "${CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:-}" = "1" ]; then
-    jq -n '{enabled:true,source:"environment"}'
+  local candidate seen="" fail_closed=false setting_value
+  if [ -n "${CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS+x}" ]; then
+    if [ "$CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS" = "1" ]; then
+      jq -n '{enabled:true,source:"environment"}'
+    else
+      jq -n '{enabled:false,source:"environment"}'
+    fi
     return 0
   fi
+  [ "$settings_explicit" = true ] && fail_closed=true
   while IFS= read -r candidate; do
     [ -n "$candidate" ] || continue
     case " $seen " in
       *" $candidate "*) continue ;;
     esac
     seen="$seen $candidate"
-    if agent_teams_file_enabled "$candidate"; then
-      jq -n --arg path "$candidate" '{enabled:true,source:"settings",settings_path:$path}'
+    if [ -f "$candidate" ] && ! agent_teams_file_is_object "$candidate"; then
+      [ "$fail_closed" = true ] && fail "settings file is not valid JSON: $candidate"
+      continue
+    fi
+    if setting_value=$(agent_teams_file_setting "$candidate"); then
+      if [ "$setting_value" = "1" ]; then
+        jq -n --arg path "$candidate" '{enabled:true,source:"settings",settings_path:$path}'
+      else
+        jq -n --arg path "$candidate" '{enabled:false,source:"settings",settings_path:$path}'
+      fi
       return 0
     fi
   done < <(agent_teams_settings_candidates "$settings_path" "$project_root" "$settings_explicit")

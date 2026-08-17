@@ -10,9 +10,11 @@ setup() {
   SETTINGS="$TEST_ROOT/settings.json"
   printf '%s\n' '{}' > "$SETTINGS"
   PROJECT="$TEST_ROOT/project"
-  mkdir -p "$PROJECT/src"
+  mkdir -p "$PROJECT/src" "$TEST_ROOT/claude"
   git -C "$PROJECT" init -q
   export LBWC_SETTINGS_PATH="$SETTINGS"
+  export CLAUDE_CONFIG_DIR="$TEST_ROOT/claude"
+  unset CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS || true
 }
 
 teardown() {
@@ -53,6 +55,30 @@ record_full_roster() {
       --contract-id "$CONTRACT_ID" --teammate "$name"
     [ "$status" -eq 0 ]
   done < <(jq -r '.teammates[].name' <<< "$output")
+}
+
+write_seeded_claude_fixture() {
+  local binary="$1" host_enum="$2" models_json="$3"
+  mkdir -p "$(dirname "$binary")"
+  cat > "$binary" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+case "\${1:-}" in
+  --version)
+    printf '%s\n' '91.7.3 (Fixture Code)'
+    ;;
+  --help)
+    printf '%s\n' '  --effort <level>  Session reasoning' '                      (low, high, max)'
+    ;;
+  *)
+    exit 97
+    ;;
+esac
+exit 0
+: 'models:$models_json'
+: '$host_enum'
+EOF
+  chmod +x "$binary"
 }
 
 @test "agent teams status reports disabled without changing settings" {
@@ -106,6 +132,43 @@ record_full_roster() {
   [ "$output" = "TEAM CHECK IS NOT ENABLED." ]
 }
 
+@test "agent teams check is RED when project disable overrides user enable" {
+  mkdir -p "$PROJECT/.claude" "$TEST_ROOT/claude"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' \
+    > "$TEST_ROOT/claude/settings.json"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"0"}}' \
+    > "$PROJECT/.claude/settings.json"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
+    bash "$SCRIPT" agent-teams-check --project-root "$PROJECT"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "TEAM CHECK IS NOT ENABLED." ]
+}
+
+@test "agent teams check skips a corrupt sibling settings file" {
+  mkdir -p "$PROJECT/.claude" "$TEST_ROOT/claude"
+  printf '%s\n' 'not-json' > "$PROJECT/.claude/settings.local.json"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' \
+    > "$PROJECT/.claude/settings.json"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CLAUDE_CONFIG_DIR="$TEST_ROOT/claude" \
+    bash "$SCRIPT" agent-teams-check --project-root "$PROJECT"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "TEAM CHECK IS ENABLED. MOVE TO THE NEXT CHECK." ]
+}
+
+@test "agent teams check fails closed on a pinned corrupt settings file" {
+  printf '%s\n' 'not-json' > "$SETTINGS"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+    bash "$SCRIPT" agent-teams-check --settings "$SETTINGS"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"settings file is not valid JSON"* ]]
+}
+
 @test "agent teams enable requires explicit approval" {
   run bash "$SCRIPT" agent-teams-enable --settings "$SETTINGS"
 
@@ -135,8 +198,11 @@ record_full_roster() {
   grep -F 'TEAM CHECK IS NOT ENABLED.' "$command"
   grep -F 'do not ask whether team agents should be enabled' "$command"
   grep -F 'agent-teams-check --project-root' "$command"
+  grep -F 'agent-teams-status --project-root' "$command"
   grep -F 'lbwc-model" refresh' "$command"
   grep -F 'lbwc-routing.sh check' "$command"
+  grep -F 'agent-teams-status --project-root' "$TRANSACTION"
+  ! grep -E 'agent-teams-status --settings' "$TRANSACTION"
 }
 
 @test "team command documents execution choice and an explicit tmux spawn branch" {
@@ -169,6 +235,85 @@ record_full_roster() {
 @test "team command is registered in the command section contract" {
   jq -e '.commands["team.md"].required_headings == ["Context","Guard","Steps","Failure and recovery","Output Format","Next Up"]' \
     "$REPO_ROOT/config/command-sections.json" >/dev/null
+}
+
+@test "seeded host model skips a custom enum head and prefers sonnet when present" {
+  run jq -r -f "$REPO_ROOT/scripts/lib/seeded-host-model.jq" <<'JSON'
+{
+  "host_agent_enum": ["leverframe:openai-oauth:codex-auto-review", "opus", "sonnet"],
+  "models": [],
+  "agent_model_ids": {}
+}
+JSON
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "sonnet" ]
+}
+
+@test "seeded host model uses the first native family when sonnet is absent" {
+  run jq -r -f "$REPO_ROOT/scripts/lib/seeded-host-model.jq" <<'JSON'
+{
+  "host_agent_enum": ["leverframe:openai-oauth:codex-auto-review", "amber", "violet"],
+  "models": [],
+  "agent_model_ids": {}
+}
+JSON
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "amber" ]
+}
+
+@test "seeded host model maps a claude selector when the enum is only custom ids" {
+  run jq -r -f "$REPO_ROOT/scripts/lib/seeded-host-model.jq" <<'JSON'
+{
+  "host_agent_enum": ["leverframe:openai-oauth:codex-auto-review"],
+  "models": [{"selector": "claude-amber-route", "label": "Amber Route", "description": "Amber Route"}],
+  "agent_model_ids": {"claude-amber-route": "amber"}
+}
+JSON
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "amber" ]
+}
+
+@test "seeded host model fails closed when only custom ids exist" {
+  run jq -r -f "$REPO_ROOT/scripts/lib/seeded-host-model.jq" <<'JSON'
+{
+  "host_agent_enum": ["leverframe:openai-oauth:codex-auto-review"],
+  "models": [{"selector": "leverframe:openai-oauth:codex-auto-review", "label": "custom", "description": "custom"}],
+  "agent_model_ids": {"leverframe:openai-oauth:codex-auto-review": "leverframe:openai-oauth:codex-auto-review"}
+}
+JSON
+
+  [ "$status" -eq 0 ]
+  [ -z "$output" ]
+}
+
+@test "preflight reports agent teams enabled from project settings" {
+  mkdir -p "$PROJECT/.claude"
+  jq -n '{env:{CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:"1"}}' \
+    > "$PROJECT/.claude/settings.json"
+
+  run env -u CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+    bash "$TRANSACTION" preflight --project-root "$PROJECT"
+
+  [ "$status" -eq 0 ]
+  jq -e '.agent_teams.enabled == true and .agent_teams.status.source == "settings"' \
+    <<< "$output" >/dev/null
+}
+
+@test "preflight seeded routing prefers sonnet over enum order" {
+  local binary="$TEST_ROOT/claude-seeded"
+  write_seeded_claude_fixture \
+    "$binary" \
+    '["haiku","sonnet","opus","leverframe:openai-oauth:codex-auto-review"]' \
+    '[{id:"claude-haiku-route",family:"haiku",display_name:"Haiku Route"},{id:"claude-sonnet-5",family:"sonnet",display_name:"Sonnet 5"},{id:"claude-opus-5",family:"opus",display_name:"Opus 5"}]'
+
+  run env CLAUDE_CODE_EXECPATH="$binary" \
+    bash "$TRANSACTION" preflight --project-root "$PROJECT"
+
+  [ "$status" -eq 0 ]
+  jq -e '.routing.mode == "seeded" and .routing.model == "sonnet"' <<< "$output" >/dev/null
 }
 
 @test "preflight is read-only and reports canonical scopes and no side effects" {

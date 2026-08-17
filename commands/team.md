@@ -60,7 +60,7 @@ No contract, native task, generated definition, or teammate exists until confirm
 bash "{LINK}/scripts/team-command-transaction.sh" preflight --project-root "{PROJECT_ROOT}" ${SCOPE_ARGS[@]+"${SCOPE_ARGS[@]}"}
 ```
 
-Preflight writes nothing and returns canonical scopes, the proposed roster, `team_mode`, routing evidence, and `side_effects:false`. Stop on a protected scope, an invalid role, or a missing routing authority.
+Preflight writes nothing and returns canonical scopes, the proposed roster, `team_mode`, routing evidence, and `side_effects:false`. Agent Teams status uses the same project-root check as Context (`agent-teams-status --project-root`), not an explicit settings pin. Stop on a protected scope, an invalid role, or a missing routing authority.
 
 2. **Select context.** An explicit instruction and `--plan` win. Otherwise use the active LBWC plan. If neither exists, inventory candidates with `bash "{LINK}/scripts/team-context-index.sh" --project-root "{PROJECT_ROOT}" --run-root <pending-run>` only after confirmation is needed. Show at most three newest-first candidates and ask one bounded selection question. Never execute plan text.
 

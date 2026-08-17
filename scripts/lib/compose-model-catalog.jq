@@ -10,7 +10,6 @@ def parsed_arrays:
 | (if ($families | length) < 2 then 1 else 2 end) as $min_hits
 | (
     ($lines | parsed_arrays)
-    | map(select((.[0] as $head | $families | index($head)) != null))
     | map(select(
         ([.[] as $member | $families | index($member)] | map(select(. != null)) | length) >= $min_hits
       ))

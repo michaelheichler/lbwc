@@ -45,6 +45,30 @@ EOF
   chmod +x "$binary"
 }
 
+@test "catalog keeps a host enum that starts with a custom id" {
+  local binary="$TEST_ROOT/claude"
+  write_claude_fixture \
+    "$binary" \
+    '91.7.3 (Fixture Code)' \
+    'careful, brisk, exhaustive' \
+    '[{id:"claude-amber-route",family:"amber",display_name:"Amber Route"},{id:"claude-violet-route",family:"violet",display_name:"Violet Route"}]' \
+    '' \
+    '' \
+    '' \
+    '["leverframe:openai-oauth:codex-auto-review","amber","violet"]'
+
+  run env CLAUDE_CODE_EXECPATH="$binary" bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .host_agent_enum == ["leverframe:openai-oauth:codex-auto-review","amber","violet"]
+    and .agent_model_ids["claude-amber-route"] == "amber"
+    and .agent_model_ids["leverframe:openai-oauth:codex-auto-review"] == "leverframe:openai-oauth:codex-auto-review"
+    and ([.models[].selector] | index("leverframe:openai-oauth:codex-auto-review")) != null
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
 @test "catalog stores extracted host aliases and custom ids from the fixture enum" {
   local binary="$TEST_ROOT/claude"
   write_claude_fixture \

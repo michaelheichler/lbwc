@@ -259,13 +259,11 @@ resolve_routing() {
     local catalog_json
     catalog_json=$(bash "$SCRIPT_DIR/claude-capabilities.sh" refresh-from-binary "$binary_path") \
       || fail "could not extract capability catalog from $binary_path"
+    require_file "$SCRIPT_DIR/lib/seeded-host-model.jq" 'seeded host model filter not found'
     CATALOG_JSON="$catalog_json"
-    ROUTING_MODEL=$(jq -r '
-      if (.host_agent_enum | type == "array" and length > 0) then .host_agent_enum[0]
-      else .models[0].selector
-      end
-    ' <<< "$catalog_json")
-    [ -n "$ROUTING_MODEL" ] && [ "$ROUTING_MODEL" != "null" ] || fail "no model selector in capability catalog"
+    ROUTING_MODEL=$(jq -r -f "$SCRIPT_DIR/lib/seeded-host-model.jq" <<< "$catalog_json")
+    [ -n "$ROUTING_MODEL" ] && [ "$ROUTING_MODEL" != "null" ] \
+      || fail "no native host model in capability catalog"
     ROUTING_REASONING_JSON=$(jq -c '.reasoning.accepted_values[] | select(. == "high")' <<< "$catalog_json" | head -1)
     [ -n "$ROUTING_REASONING_JSON" ] || fail "no high reasoning value in capability catalog"
     ROUTING_EFFORT="high"
@@ -340,7 +338,7 @@ resolve_roster() {
 }
 
 read_agent_teams_status() {
-  AGENT_TEAMS_STATUS=$(bash "$SCRIPT_DIR/lbwc-config.sh" agent-teams-status --settings "$SETTINGS_PATH") \
+  AGENT_TEAMS_STATUS=$(bash "$SCRIPT_DIR/lbwc-config.sh" agent-teams-status --project-root "$PROJECT_ROOT") \
     || fail 'could not read agent teams status'
 }
 
