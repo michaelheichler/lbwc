@@ -927,3 +927,15 @@ teardown() {
   [ "$status" -ne 0 ]
   [ -d "$lock" ]
 }
+
+@test "repeated resolution always builds a lock owner token" {
+  local attempt failures=0
+  bash "$ROUTING" set "$TEST_TEMP_DIR/.lbwc-planning" balanced docs ember-path '"swift"' >/dev/null
+
+  for ((attempt = 0; attempt < 100; attempt++)); do
+    bash "$ROUTING" resolve "$TEST_TEMP_DIR/.lbwc-planning" docs >/dev/null 2>&1 \
+      || failures=$((failures + 1))
+  done
+
+  [ "$failures" -eq 0 ]
+}

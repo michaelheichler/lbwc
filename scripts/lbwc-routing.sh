@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROLE_DEFAULTS_PATH="$SCRIPT_DIR/../templates/agent-roles/defaults.json"
+ENV_TOOL=""
 LOCK_DIR=""
 LOCK_DIR_IDENTITY=""
 LOCK_BACKEND=""
@@ -79,6 +80,7 @@ configure_platform_tools() {
   platform=$(system_name) || fail 'could not identify the operating system'
   LOCK_BACKEND=$(lock_backend_for_system "$platform") \
     || fail "unsupported operating system for routing locks: $platform"
+  ENV_TOOL=$(first_executable /usr/bin/env /bin/env) || fail 'a trusted system env is required'
   OD_TOOL=$(first_executable /usr/bin/od /bin/od) || fail 'a trusted system od is required'
   case "$LOCK_BACKEND" in
     lockf)
@@ -214,7 +216,7 @@ acquire_config_lock() {
   wait_attempts="${LBWC_ROUTING_LOCK_WAIT_ATTEMPTS:-$LOCK_WAIT_ATTEMPTS_DEFAULT}"
   [[ "$wait_attempts" =~ ^[1-9][0-9]*$ ]] || fail 'routing lock wait attempts must be a positive integer'
   [ "$wait_attempts" -le 5000 ] || fail 'routing lock wait attempts exceed the safe bound'
-  token=$(LC_ALL=C command "$OD_TOOL" -An -N 16 -tx1 /dev/urandom 2>/dev/null) \
+  token=$(command "$ENV_TOOL" LC_ALL=C "$OD_TOOL" -An -N 16 -tx1 /dev/urandom 2>/dev/null) \
     || fail 'could not create secure routing lock owner token'
   token=${token//[[:space:]]/}
   [[ "$token" =~ ^[0-9a-f]{32}$ ]] || fail 'could not create secure routing lock owner token'
