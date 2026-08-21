@@ -14,6 +14,178 @@ teardown() {
   rm -rf "$TEST_ROOT"
 }
 
+@test "refresh persists workflow availability when the host clears every gate" {
+  local binary="$TEST_ROOT/claude" empty_config="$TEST_ROOT/empty-claude-config"
+  make_claude_fixture "$binary"
+  mkdir -p "$empty_config"
+
+  run env -u CLAUDE_CODE_DISABLE_WORKFLOWS -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$empty_config" \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.min_version == "2.1.154"
+    and .workflow.host_version == "91.7.3"
+    and .workflow.meets_version_floor == true
+    and .workflow.disabled_by_settings == false
+    and .workflow.disabled_by_env == false
+    and .workflow.subagent_model_override_active == false
+    and .workflow.available == true
+    and .workflow.unavailable_reasons == []
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+  run bash "$SCRIPT" validate "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "refresh marks workflow unavailable below the version floor" {
+  local binary="$TEST_ROOT/claude" empty_config="$TEST_ROOT/empty-claude-config"
+  write_claude_fixture \
+    "$binary" \
+    '2.1.100 (Fixture Code)' \
+    'careful, brisk' \
+    '[{id:"claude-amber-route",family:"amber",display_name:"Amber Route"}]' \
+    ''
+  mkdir -p "$empty_config"
+
+  run env -u CLAUDE_CODE_DISABLE_WORKFLOWS -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$empty_config" \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.meets_version_floor == false
+    and .workflow.available == false
+    and (.workflow.unavailable_reasons | length == 1)
+    and (.workflow.unavailable_reasons[0] | contains("2.1.100") and contains("2.1.154"))
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "refresh marks workflow unavailable when disableWorkflows is true in settings" {
+  local binary="$TEST_ROOT/claude" claude_config="$TEST_ROOT/claude-config"
+  make_claude_fixture "$binary"
+  mkdir -p "$claude_config"
+  printf '%s\n' '{"disableWorkflows":true}' > "$claude_config/settings.json"
+
+  run env -u CLAUDE_CODE_DISABLE_WORKFLOWS -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$claude_config" \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.disabled_by_settings == true
+    and .workflow.available == false
+    and (.workflow.unavailable_reasons | any(. == "disableWorkflows is true in the Claude Code settings file."))
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "refresh marks workflow unavailable when CLAUDE_CODE_DISABLE_WORKFLOWS is set" {
+  local binary="$TEST_ROOT/claude" empty_config="$TEST_ROOT/empty-claude-config"
+  make_claude_fixture "$binary"
+  mkdir -p "$empty_config"
+
+  run env -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$empty_config" CLAUDE_CODE_DISABLE_WORKFLOWS=1 \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.disabled_by_env == true
+    and .workflow.available == false
+    and (.workflow.unavailable_reasons | any(. == "CLAUDE_CODE_DISABLE_WORKFLOWS is set."))
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "refresh marks workflow unavailable when CLAUDE_CODE_DISABLE_WORKFLOWS carries a non-1 truthy spelling" {
+  local binary="$TEST_ROOT/claude" empty_config="$TEST_ROOT/empty-claude-config"
+  make_claude_fixture "$binary"
+  mkdir -p "$empty_config"
+
+  run env -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$empty_config" CLAUDE_CODE_DISABLE_WORKFLOWS=true \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.disabled_by_env == true
+    and .workflow.available == false
+    and (.workflow.unavailable_reasons | any(. == "CLAUDE_CODE_DISABLE_WORKFLOWS is set."))
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "refresh marks workflow unavailable and names CLAUDE_CODE_SUBAGENT_MODEL when it is set" {
+  local binary="$TEST_ROOT/claude" empty_config="$TEST_ROOT/empty-claude-config"
+  make_claude_fixture "$binary"
+  mkdir -p "$empty_config"
+
+  run env -u CLAUDE_CODE_DISABLE_WORKFLOWS \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$empty_config" CLAUDE_CODE_SUBAGENT_MODEL=claude-opus \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.subagent_model_override_active == true
+    and .workflow.available == false
+    and (.workflow.unavailable_reasons | any(contains("CLAUDE_CODE_SUBAGENT_MODEL")))
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "refresh treats an exported but empty CLAUDE_CODE_DISABLE_WORKFLOWS or CLAUDE_CODE_SUBAGENT_MODEL as absent, agreeing with runtime-snapshot.sh's -z gate" {
+  local binary="$TEST_ROOT/claude" empty_config="$TEST_ROOT/empty-claude-config"
+  make_claude_fixture "$binary"
+  mkdir -p "$empty_config"
+
+  run env CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$empty_config" \
+    CLAUDE_CODE_DISABLE_WORKFLOWS='' CLAUDE_CODE_SUBAGENT_MODEL='' \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .workflow.disabled_by_env == false
+    and .workflow.subagent_model_override_active == false
+    and .workflow.available == true
+    and .workflow.unavailable_reasons == []
+  ' "$PLANNING_DIR/claude-capabilities.json"
+  [ "$status" -eq 0 ]
+}
+
+@test "validate accepts a catalog predating the workflow probe" {
+  local catalog="$TEST_ROOT/no-workflow.json" binary="$TEST_ROOT/claude"
+  make_claude_fixture "$binary"
+
+  run env -u CLAUDE_CODE_DISABLE_WORKFLOWS -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$TEST_ROOT/empty-claude-config" \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+  [ "$status" -eq 0 ]
+  jq 'del(.workflow)' "$PLANNING_DIR/claude-capabilities.json" > "$catalog"
+
+  run bash "$SCRIPT" validate "$catalog"
+
+  [ "$status" -eq 0 ]
+}
+
+@test "validate rejects a catalog whose workflow object is malformed" {
+  local catalog="$TEST_ROOT/bad-workflow.json" binary="$TEST_ROOT/claude"
+  make_claude_fixture "$binary"
+
+  run env -u CLAUDE_CODE_DISABLE_WORKFLOWS -u CLAUDE_CODE_SUBAGENT_MODEL \
+    CLAUDE_CODE_EXECPATH="$binary" CLAUDE_CONFIG_DIR="$TEST_ROOT/empty-claude-config" \
+    bash "$SCRIPT" refresh "$PLANNING_DIR"
+  [ "$status" -eq 0 ]
+  jq '.workflow.available = "yes"' "$PLANNING_DIR/claude-capabilities.json" > "$catalog"
+
+  run bash "$SCRIPT" validate "$catalog"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"invalid Claude Code capability catalog"* ]]
+}
+
 make_claude_fixture() {
   local binary="$1"
   write_claude_fixture \

@@ -142,4 +142,7 @@ printf '%s' "$filtered"
 if [ "${CONTRACT_RESOLVED_BACKEND:-}" = tmux ]; then
   printf '\n'
   cat "$TEMPLATE_DIR/tmux-bus-loop.md"
+elif [ "${CONTRACT_RESOLVED_BACKEND:-}" = workflow ]; then
+  printf '\n'
+  cat "$TEMPLATE_DIR/workflow-return.md"
 fi

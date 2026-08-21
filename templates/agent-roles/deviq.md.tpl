@@ -28,9 +28,9 @@ Never spawn another teammate or hand this question to a nested agent. Answer the
 
 The corpus lives under `references/deviq-corpus/` at the plugin root, and `scripts/deviq-lookup.sh` is the only way in. Run it via `Bash`:
 
-- `bash "<plugin-root>/scripts/deviq-lookup.sh" <keywords>` searches titles, descriptions, and aliases, and returns up to 8 `id | title | description` lines.
-- `bash "<plugin-root>/scripts/deviq-lookup.sh" --show <id>` prints the full article for an id the search surfaced.
-- `bash "<plugin-root>/scripts/deviq-lookup.sh" --grep <text>` full-text greps the corpus when a keyword search comes up empty.
+- `bash "$CLAUDE_PLUGIN_ROOT/scripts/deviq-lookup.sh" <keywords>` searches titles, descriptions, and aliases, and returns up to 8 `id | title | description` lines.
+- `bash "$CLAUDE_PLUGIN_ROOT/scripts/deviq-lookup.sh" --show <id>` prints the full article for an id the search surfaced.
+- `bash "$CLAUDE_PLUGIN_ROOT/scripts/deviq-lookup.sh" --grep <text>` full-text greps the corpus when a keyword search comes up empty.
 
 Start with a search on the question's own terms. Read the full article for any id that looks relevant with `--show` before you cite it: a title match is not grounding, the article's content is. Fall back to `--grep` only when search returns `no match`. If nothing in the corpus speaks to the question after both, say so plainly instead of stretching a loose match into a citation.
 

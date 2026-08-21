@@ -353,12 +353,16 @@ validate_config_json() {
       and (.cleanup_policy | type == "string" and IN("kill_on_complete", "keep_panes"))
       and (.layout | type == "string" and IN("main-vertical", "main-horizontal", "tiled", "even-horizontal", "even-vertical"))
       and (.restrictions | tmux_restrictions);
+    def workflow_execution:
+      type == "object"
+      and exact_keys(["enabled"])
+      and (.enabled | type == "boolean");
     type == "object"
     and exact_keys([
       "schema_version", "effort", "autonomy", "auto_commit", "planning_tracking", "auto_push",
       "verification_tier", "skill_suggestions", "auto_install_skills", "discovery_questions",
       "discussion_mode", "context_compiler", "visual_format", "max_tasks_per_plan", "prefer_teams",
-      "agent_execution_mode", "tmux_execution",
+      "agent_execution_mode", "tmux_execution", "workflow_execution",
       "pipeline_research", "branch_per_milestone", "plain_summary", "active_profile", "custom_profiles",
       "agent_max_turns", "qa_skip_agents", "auto_uat", "require_phase_discussion", "rolling_summary",
       "metrics", "token_budgets", "two_phase_completion", "smart_routing", "validation_gates",
@@ -382,8 +386,9 @@ validate_config_json() {
     and (.visual_format | type == "string" and IN("unicode", "ascii"))
     and (.max_tasks_per_plan | type == "number" and . > 0 and . == floor)
     and (.prefer_teams | type == "string" and IN("always", "auto", "never"))
-    and (.agent_execution_mode | type == "string" and IN("in_process", "tmux", "ask"))
+    and (.agent_execution_mode | type == "string" and IN("in_process", "tmux", "workflow", "ask"))
     and (.tmux_execution | tmux_execution)
+    and (.workflow_execution | workflow_execution)
     and (.pipeline_research | type == "boolean")
     and (.branch_per_milestone | type == "boolean")
     and (.plain_summary | type == "boolean")
@@ -488,6 +493,7 @@ migrate_config_json() {
     | .tmux_execution = (($defaults.tmux_execution // {}) * (.tmux_execution // {}))
     | .tmux_execution |= del(.session_timeout_seconds, .pane_base_index)
     | .tmux_execution.restrictions = (($defaults.tmux_execution.restrictions // {}) * (.tmux_execution.restrictions // {}))
+    | .workflow_execution = (($defaults.workflow_execution // {}) * (.workflow_execution // {}))
     | .routing.active_profile = (
         if $existing.routing.active_profile? != null
         then normalized_profile($existing.routing.active_profile)
@@ -546,7 +552,7 @@ validate_config_file() {
 
 setting_is_writable() {
   case "$1" in
-    effort|autonomy|auto_commit|planning_tracking|auto_push|verification_tier|skill_suggestions|auto_install_skills|discovery_questions|discussion_mode|context_compiler|visual_format|max_tasks_per_plan|prefer_teams|agent_execution_mode|tmux_execution|tmux_execution.enabled|tmux_execution.session_name_prefix|tmux_execution.max_agents|tmux_execution.attach_policy|tmux_execution.heartbeat_interval_seconds|tmux_execution.heartbeat_stale_seconds|tmux_execution.comms_latency_tolerance_ms|tmux_execution.comms_fallback|tmux_execution.cleanup_policy|tmux_execution.layout|tmux_execution.restrictions.allow_nested_spawn|tmux_execution.restrictions.allow_agent_git|tmux_execution.restrictions.allow_agent_ask_user|tmux_execution.restrictions.require_orchestrator_attach|pipeline_research|branch_per_milestone|plain_summary|active_profile|custom_profiles|agent_max_turns|qa_skip_agents|auto_uat|require_phase_discussion|rolling_summary|metrics|token_budgets|two_phase_completion|smart_routing|validation_gates|snapshot_resume|lease_locks|event_recovery|worktree_isolation|monorepo_routing|debug_logging|statusline_hide_limits|statusline_hide_limits_for_api_key|statusline_hide_agent_in_tmux|statusline_collapse_agent_in_tmux|caveman_style|caveman_commit|caveman_review|max_uat_remediation_rounds|routing.active_profile)
+    effort|autonomy|auto_commit|planning_tracking|auto_push|verification_tier|skill_suggestions|auto_install_skills|discovery_questions|discussion_mode|context_compiler|visual_format|max_tasks_per_plan|prefer_teams|agent_execution_mode|tmux_execution|tmux_execution.enabled|tmux_execution.session_name_prefix|tmux_execution.max_agents|tmux_execution.attach_policy|tmux_execution.heartbeat_interval_seconds|tmux_execution.heartbeat_stale_seconds|tmux_execution.comms_latency_tolerance_ms|tmux_execution.comms_fallback|tmux_execution.cleanup_policy|tmux_execution.layout|tmux_execution.restrictions.allow_nested_spawn|tmux_execution.restrictions.allow_agent_git|tmux_execution.restrictions.allow_agent_ask_user|tmux_execution.restrictions.require_orchestrator_attach|workflow_execution|workflow_execution.enabled|pipeline_research|branch_per_milestone|plain_summary|active_profile|custom_profiles|agent_max_turns|qa_skip_agents|auto_uat|require_phase_discussion|rolling_summary|metrics|token_budgets|two_phase_completion|smart_routing|validation_gates|snapshot_resume|lease_locks|event_recovery|worktree_isolation|monorepo_routing|debug_logging|statusline_hide_limits|statusline_hide_limits_for_api_key|statusline_hide_agent_in_tmux|statusline_collapse_agent_in_tmux|caveman_style|caveman_commit|caveman_review|max_uat_remediation_rounds|routing.active_profile)
       return 0
       ;;
     *)
@@ -604,7 +610,7 @@ execution_setting_is_frozen() {
     tmux_execution.cleanup_policy|statusline_hide_agent_in_tmux|statusline_collapse_agent_in_tmux)
       return 1
       ;;
-    tmux_execution|tmux_execution.*|effort|routing.active_profile)
+    tmux_execution|tmux_execution.*|workflow_execution|workflow_execution.*|effort|routing.active_profile)
       return 0
       ;;
     *)

@@ -38,6 +38,9 @@ write_config() {
           require_orchestrator_attach: true
         }
       },
+      workflow_execution: {
+        enabled: false
+      },
       routing: {
         active_profile: "balanced",
         profiles: {
@@ -121,6 +124,151 @@ freeze_in_process() {
   [ "$status" -ne 0 ]
   [[ "$output" == *'backend drift'* ]]
   [ "$(shasum -a 256 "$SNAPSHOT_PATH" | awk '{print $1}')" = "$before" ]
+}
+
+write_capability_catalog() {
+  local available="$1"
+  if [ "$available" = true ]; then
+    jq -n '{
+      workflow: {
+        min_version: "2.1.154",
+        host_version: "2.1.200",
+        meets_version_floor: true,
+        disabled_by_settings: false,
+        disabled_by_env: false,
+        subagent_model_override_active: false,
+        available: true,
+        unavailable_reasons: []
+      }
+    }' > "$PLANNING_DIR/claude-capabilities.json"
+  else
+    jq -n '{
+      workflow: {
+        min_version: "2.1.154",
+        host_version: "2.1.100",
+        meets_version_floor: false,
+        disabled_by_settings: false,
+        disabled_by_env: false,
+        subagent_model_override_active: false,
+        available: false,
+        unavailable_reasons: ["Claude Code 2.1.100 is older than the workflow version floor 2.1.154."]
+      }
+    }' > "$PLANNING_DIR/claude-capabilities.json"
+  fi
+}
+
+freeze_workflow() {
+  jq '.agent_execution_mode = "workflow" | .workflow_execution.enabled = true' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+  write_capability_catalog true
+  run_snapshot freeze --requested-backend workflow --resolved-backend workflow
+  [ "$status" -eq 0 ]
+}
+
+@test "freeze creates a workflow snapshot and validate round-trips it" {
+  freeze_workflow
+
+  [ -f "$SNAPSHOT_PATH" ]
+  jq -e --arg phase "phases/01-runtime-freeze" '
+    .schema_version == 1
+    and .phase == $phase
+    and .requested_backend == "workflow"
+    and .resolved_backend == "workflow"
+    and (.source_config_digest | test("^[0-9a-f]{64}$"))
+  ' "$SNAPSHOT_PATH" >/dev/null
+  [[ "$output" == *'"status":"created"'* ]]
+  before=$(shasum -a 256 "$SNAPSHOT_PATH" | awk '{print $1}')
+
+  run_snapshot validate
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'"status":"matched"'* ]]
+  [ "$(shasum -a 256 "$SNAPSHOT_PATH" | awk '{print $1}')" = "$before" ]
+}
+
+@test "a workflow request cannot resolve to another backend" {
+  jq '.agent_execution_mode = "ask"' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+
+  run_snapshot freeze --requested-backend workflow --resolved-backend in_process
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'workflow requested backend cannot resolve to another backend'* ]]
+  [ ! -f "$SNAPSHOT_PATH" ]
+}
+
+@test "workflow config mode rejects a frozen non-workflow backend" {
+  freeze_in_process
+  before=$(shasum -a 256 "$SNAPSHOT_PATH" | awk '{print $1}')
+  jq '.agent_execution_mode = "workflow"' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+
+  run_snapshot validate
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'backend drift: configuration requires workflow'* ]]
+  [ "$(shasum -a 256 "$SNAPSHOT_PATH" | awk '{print $1}')" = "$before" ]
+}
+
+@test "a requested workflow backend fails closed on a disabled-host capability probe" {
+  jq '.agent_execution_mode = "workflow" | .workflow_execution.enabled = true' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+  write_capability_catalog false
+
+  run_snapshot freeze --requested-backend workflow --resolved-backend workflow
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'workflow backend is unavailable'* ]]
+  [[ "$output" == *'Claude Code 2.1.100 is older than the workflow version floor 2.1.154.'* ]]
+  [ ! -f "$SNAPSHOT_PATH" ]
+}
+
+@test "a requested workflow backend fails closed when disabled in configuration" {
+  jq '.agent_execution_mode = "workflow" | .workflow_execution.enabled = false' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+  write_capability_catalog true
+
+  run_snapshot freeze --requested-backend workflow --resolved-backend workflow
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'workflow backend is disabled in configuration'* ]]
+  [ ! -f "$SNAPSHOT_PATH" ]
+}
+
+@test "a requested workflow backend fails closed when no capability catalog exists" {
+  jq '.agent_execution_mode = "workflow" | .workflow_execution.enabled = true' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+  rm -f "$PLANNING_DIR/claude-capabilities.json"
+
+  run_snapshot freeze --requested-backend workflow --resolved-backend workflow
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'workflow backend is unavailable'* ]]
+  [ ! -f "$SNAPSHOT_PATH" ]
+}
+
+@test "a requested workflow backend fails closed when CLAUDE_CODE_SUBAGENT_MODEL is set live against a stale available catalog" {
+  jq '.agent_execution_mode = "workflow" | .workflow_execution.enabled = true' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+  write_capability_catalog true
+
+  CLAUDE_CODE_SUBAGENT_MODEL=claude-opus run_snapshot freeze --requested-backend workflow --resolved-backend workflow
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'CLAUDE_CODE_SUBAGENT_MODEL is set in this session'* ]]
+  [ ! -f "$SNAPSHOT_PATH" ]
+}
+
+@test "a requested workflow backend fails closed when CLAUDE_CODE_DISABLE_WORKFLOWS is set live against a stale available catalog" {
+  jq '.agent_execution_mode = "workflow" | .workflow_execution.enabled = true' "$PLANNING_DIR/config.json" > "$PLANNING_DIR/config.json.tmp"
+  mv "$PLANNING_DIR/config.json.tmp" "$PLANNING_DIR/config.json"
+  write_capability_catalog true
+
+  CLAUDE_CODE_DISABLE_WORKFLOWS=1 run_snapshot freeze --requested-backend workflow --resolved-backend workflow
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'CLAUDE_CODE_DISABLE_WORKFLOWS is set in this session'* ]]
+  [ ! -f "$SNAPSHOT_PATH" ]
 }
 
 @test "routing drift fails before mutation" {

@@ -3,7 +3,7 @@ category: advanced
 disable-model-invocation: true
 description: Produce a structured codebase map from inline analysis and Scout evidence.
 argument-hint: "[--incremental] [--package=name] [--tier=solo|duo|quad]"
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, Agent, Skill, LSP
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, Agent, Skill, LSP, AskUserQuestion, Workflow
 ---
 
 # LBWC Map: $ARGUMENTS
@@ -47,6 +47,16 @@ Git HEAD:
 ```text
 !`git rev-parse HEAD 2>/dev/null || echo "no-git"`
 ```
+
+## Workflow capability gate
+
+Refresh the saved Claude capability catalog before any Scout contract or spawn:
+
+```bash
+bash "{plugin-root}/scripts/lbwc-model" refresh .lbwc-planning
+```
+
+This persists workflow-backend availability as `.workflow` on `.lbwc-planning/claude-capabilities.json`, the authority the execution-mode choice in Step 3 reads before offering or resolving `workflow`. A non-zero exit here does not stop mapping. It leaves `RESOLVED_BACKEND` at `in_process`, so mapping proceeds on whatever catalog already exists. Only a run that goes on to request or choose `workflow` can still be blocked, by step 0 of `workflow-spawn-protocol.md` and by `workflow-generator.sh`'s own live re-validation at generation time. Skip this gate when `.lbwc-planning/` is missing. Do not create a planning directory here.
 
 ## Guard
 
@@ -157,7 +167,7 @@ The Scout prompt must begin with exactly one rendered `<skill_activation>` or `<
 bash "{plugin-root}/scripts/extract-skill-follow-up-files.sh" "{all preselected skill names from the activation block}" 2>/dev/null || true
 ```
 
-Render `{plugin-root}/references/skill-activation-payload.md` with the ordered `skill_calls`, the task-specific `no_skill_reason` when none were selected, and any helper-emitted `follow_up_files_block`. Prepend the rendered bytes to the child prompt. After calling `Skill(...)`, read only relevant follow-up files named by the skill or helper; do not paste the template path, variables, or unresolved `@` include into the prompt.
+Render `{plugin-root}/references/skill-activation-payload.md` with the ordered `skill_calls`, the task-specific `no_skill_reason` when none were selected, and any helper-emitted `follow_up_files_block`. Prepend the rendered bytes to the child prompt. After calling `Skill(...)`, read only relevant follow-up files named by the skill or helper. Do not paste the template path, variables, or unresolved `@` include into the prompt.
 
 Also evaluate available MCP tools in the system context before each Scout spawn. Note relevant documentation, search, code-analysis, or domain-data MCP tools in the Scout brief and tell it to prefer those tools for matching lookups over generic WebFetch/WebSearch. Do not name a tool that is not available.
 
@@ -180,9 +190,42 @@ commit, or stage map artifacts.
 
 **Step 3-solo:** Analyze stack, dependencies, architecture, structure, conventions, testing, and concerns inline. The main session writes all seven domain documents under `.lbwc-planning/codebase/`.
 
-**Step 3-duo:** Create two shell-issued, read-only Scout contracts, one for tech and architecture and one for quality and concerns. Use the identical brief, contract path, and task id with generic `scripts/agent-generator.sh scout`, then advance each contract to `dispatched`. Spawn only with the emitted `model` and `SPAWN_READY` name as `subagent_type` and `name`, as required by `references/agent-spawn-protocol.md`. Do not grant a write allowance. Each Scout returns cited evidence and proposed content in its report. The main session validates and writes every map document.
+**Choose the execution backend (duo and quad only):** Solo-tier mapping analyzes inline and spawns no Scout, so this choice never applies to it. For duo and quad, follow step 0 of `{plugin-root}/references/workflow-spawn-protocol.md`, with `<control-root>` bound to `.lbwc-planning`. Use these literal `AskUserQuestion` fields when that step's `ask` branch applies:
 
-**Step 3-quad:** Create four shell-issued, read-only Scout contracts for stack and dependencies, architecture and structure, conventions and testing, and concerns. Follow the same generic generator and spawn protocol for each contract. Each Scout returns cited evidence and proposed content only. The main session is the sole writer of map artifacts.
+- header: `Map execution`
+- question: `Where should Scout evidence gathering run? Workflow run orchestrates each Scout through a committed background script. Native spawn keeps the current multi-agent Scout spawn.`
+- options:
+  - `Workflow run`: Gather evidence through committed workflow scripts in the background.
+  - `Native spawn`: Keep the current native Scout spawn.
+  - `Cancel mapping`: Do not map this codebase now.
+
+**Step 3-duo:** When `RESOLVED_BACKEND` is `in_process`, create two shell-issued, read-only Scout contracts, one for tech and architecture and one for quality and concerns. Use the identical brief, contract path, and task id with generic `scripts/agent-generator.sh scout`, then advance each contract to `dispatched`. Spawn only with the emitted `model` and `SPAWN_READY` name as `subagent_type` and `name`, as required by `references/agent-spawn-protocol.md`. Do not grant a write allowance. Each Scout returns cited evidence and proposed content in its report. The main session validates and writes every map document.
+
+When `RESOLVED_BACKEND` is `workflow`, follow `{plugin-root}/references/workflow-spawn-protocol.md` for `DOMAINS=("tech-and-architecture" "quality-and-concerns")`. Scout's default role permits `Write`, so a schema 3 contract for it requires either a granted write capability or an explicit `--read-only-role scout` declaration. No Scout in this command writes any file: issue every contract read-only.
+
+```bash
+PROJECT_ROOT=$(pwd)
+CONTROL_ROOT="$PROJECT_ROOT/.lbwc-planning"
+DOMAINS=("tech-and-architecture" "quality-and-concerns")
+CONTRACT_PATHS=(); TASK_IDS=(); SCRIPT_PATHS=()
+for DOMAIN in "${DOMAINS[@]}"; do
+  SCOUT_BRIEF="map ${DOMAIN} for {package or full codebase}"
+  CONTRACT_PATH=$(bash "{plugin-root}/scripts/task-contract.sh" issue "$PROJECT_ROOT" "map-${DOMAIN}" --command map --role scout --team solo --job "$SCOUT_BRIEF" --control-root "$CONTROL_ROOT" --requested-backend workflow --resolved-backend workflow --read-only-role scout) || exit 1
+  TASK_ID=$(basename "$CONTRACT_PATH" .json)
+  GENERATOR_OUTPUT=$(bash "{plugin-root}/scripts/agent-generator.sh" scout --job "$SCOUT_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --control-root "$CONTROL_ROOT" --execution-backend workflow) || exit 1
+  NAME=$(printf '%s\n' "$GENERATOR_OUTPUT" | awk '/^SPAWN_READY/{print $2}')
+  WORKFLOW_OUTPUT=$(bash "{plugin-root}/scripts/workflow-generator.sh" solo scout --job "$SCOUT_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --name "$NAME" --control-root "$CONTROL_ROOT") || exit 1
+  bash "{plugin-root}/scripts/task-contract.sh" state "$PROJECT_ROOT" "$TASK_ID" dispatched >/dev/null || exit 1
+  CONTRACT_PATHS+=("$CONTRACT_PATH"); TASK_IDS+=("$TASK_ID")
+  SCRIPT_PATHS+=("$(printf '%s\n' "$WORKFLOW_OUTPUT" | awk '/^  path:/{print $2}')")
+done
+```
+
+Read each generation's own `Agent-call parameters:` and `SPAWN_READY <name>` line, captured above as `NAME`, and use only that printed name, never an invented one. Read each script's own `Workflow-call parameters:` block and `WORKFLOW_READY <task-id>` line. Call `Workflow` once per entry in `SCRIPT_PATHS`, passing only that entry's own `scriptPath`. Never pass `script`, and never inline or paraphrase a rendered file into the call. Launch both Scout runs before waiting on either. Wait for every launched run's own terminal result before Step 3.5. A `user_decision_required` result is the only path back to the user for that Scout: ask one bounded `AskUserQuestion` about it. Any other terminal result carries that Scout's evidence report, validated exactly like the `in_process` branch above.
+
+**Step 3-quad:** When `RESOLVED_BACKEND` is `in_process`, create four shell-issued, read-only Scout contracts for stack and dependencies, architecture and structure, conventions and testing, and concerns. Follow the same generic generator and spawn protocol for each contract. Each Scout returns cited evidence and proposed content only. The main session is the sole writer of map artifacts.
+
+When `RESOLVED_BACKEND` is `workflow`, follow the identical loop as Step 3-duo above with `DOMAINS=("stack-and-dependencies" "architecture-and-structure" "conventions-and-testing" "concerns")`, one contract, generation, and workflow script per domain, each issued with `--read-only-role scout`. Launch all four Scout runs before waiting on any of them. Wait for every launched run's own terminal result before Step 3.5. A `user_decision_required` result is the only path back to the user for that Scout: ask one bounded `AskUserQuestion` about it. Any other terminal result carries that Scout's evidence report, validated exactly like the `in_process` branch above.
 
 For every Scout brief, require file paths, concrete evidence, uncertainty, and the exact assigned domains. Do not ask Scouts to create, edit, commit, or stage files. Wait for every report. If a Scout fails, continue only when inline analysis can fill its assigned domain and mark the gap in `INDEX.md` Validation Notes.
 
@@ -201,6 +244,8 @@ The main session writes `META.md` from the exact template above after all docume
 ## Failure and recovery
 
 If contract issuance, generation, or spawning fails, report the helper error verbatim. Do not retry with a hand-written agent, another role, unsupported Agent fields, or a write allowance. Keep existing map artifacts unchanged until a complete replacement document is validated. If a report is incomplete, analyze that domain inline or stop with the missing evidence named.
+
+If the workflow generator fails or a `Workflow` call is denied for a Scout, leave that Scout's contract `planned`, report the failure verbatim, and do not fall back to `in_process`. Analyze that Scout's assigned domain inline instead, or stop with the missing evidence named.
 
 ## Output Format
 

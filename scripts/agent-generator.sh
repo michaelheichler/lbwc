@@ -209,8 +209,8 @@ validate_contract() {
     CONTRACT_COMMUNICATION_POLICY=$(jq -r '.communication_policy // empty' <<< "$contract")
     CONTRACT_REQUESTED_BACKEND=$(jq -r '.requested_backend // empty' <<< "$contract")
     CONTRACT_RESOLVED_BACKEND=$(jq -r '.resolved_backend // empty' <<< "$contract")
-    case "$CONTRACT_REQUESTED_BACKEND" in in_process|tmux) ;; *) fail "contract requested backend is invalid" ;; esac
-    case "$CONTRACT_RESOLVED_BACKEND" in in_process|tmux) ;; *) fail "contract resolved backend is invalid" ;; esac
+    case "$CONTRACT_REQUESTED_BACKEND" in in_process|tmux|workflow) ;; *) fail "contract requested backend is invalid" ;; esac
+    case "$CONTRACT_RESOLVED_BACKEND" in in_process|tmux|workflow) ;; *) fail "contract resolved backend is invalid" ;; esac
     [ "$CONTRACT_REQUESTED_BACKEND" = "$CONTRACT_RESOLVED_BACKEND" ] || fail "contract backend resolution is invalid"
     CONTRACT_CAPABILITY_ARGS_JSON=$(printf '%s\n' "${WRITE_CAPABILITIES[@]}" | jq -Rsc 'split("\n") | map(select(length > 0) | (split(":")) | select(length == 2) | {access:"write",kind:.[0],path:.[1]})')
     jq -ne --argjson requested "$CONTRACT_CAPABILITY_ARGS_JSON" --argjson allowed "$CONTRACT_CAPABILITIES_JSON" '$requested == $allowed' >/dev/null || fail "write capabilities do not match contract"
@@ -413,7 +413,7 @@ fi
 validate_execution_backend_override() {
   [ -n "$EXECUTION_BACKEND_OVERRIDE" ] || return 0
   case "$EXECUTION_BACKEND_OVERRIDE" in
-    in_process|tmux) ;;
+    in_process|tmux|workflow) ;;
     *) fail "invalid execution backend override '$EXECUTION_BACKEND_OVERRIDE'" ;;
   esac
   [ "$CONTRACT_SCHEMA_VERSION" = "3" ] || fail "execution backend overrides require a schema 3 contract"

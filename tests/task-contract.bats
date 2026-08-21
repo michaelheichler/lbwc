@@ -249,6 +249,68 @@ teardown() { rm -rf "$ROOT"; }
   [ "$status" -eq 0 ]
 }
 
+@test "issue accepts a typed contract with no capability for a role that disallows Write and Edit" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/qa-one"
+  mkdir -p "$control_root"
+  run bash "$SCRIPT" issue "$ROOT" "qa-scope" \
+    --command qa --role qa --team solo --job "verify the web scope" \
+    --control-root "$control_root" \
+    --requested-backend workflow --resolved-backend workflow
+  [ "$status" -eq 0 ]
+  local contract="$output"
+  run jq -e '.schema_version == 3 and .capabilities_by_role["qa"] == []' "$contract"
+  [ "$status" -eq 0 ]
+}
+
+@test "issue still rejects a typed contract with no capability for a role that can write" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/dev-one"
+  mkdir -p "$control_root"
+  run bash "$SCRIPT" issue "$ROOT" "dev-scope" \
+    --command fix --role coding-dijkstra --team solo --job "fix the thing" \
+    --control-root "$control_root" \
+    --requested-backend workflow --resolved-backend workflow
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'typed contract requires at least one capability'* ]]
+}
+
+@test "issue accepts a declared read-only role that can write" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/scout-one"
+  mkdir -p "$control_root"
+  run bash "$SCRIPT" issue "$ROOT" "scout-scope" \
+    --command map --role scout --team solo --job "map the thing" \
+    --control-root "$control_root" \
+    --requested-backend workflow --resolved-backend workflow \
+    --read-only-role scout
+  [ "$status" -eq 0 ]
+  local contract="$output"
+  run jq -e '.schema_version == 3 and .capabilities_by_role["scout"] == []' "$contract"
+  [ "$status" -eq 0 ]
+}
+
+@test "issue rejects a read-only role outside the contract team" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/scout-two"
+  mkdir -p "$control_root"
+  run bash "$SCRIPT" issue "$ROOT" "scout-scope-bad" \
+    --command map --role scout --team solo --job "map the thing" \
+    --control-root "$control_root" \
+    --requested-backend workflow --resolved-backend workflow \
+    --read-only-role architect
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'read-only role is not in contract team'* ]]
+}
+
+@test "issue rejects a read-only role that also receives a write capability" {
+  local control_root="$ROOT/.temporary-agent-runfiles/runs/scout-three"
+  mkdir -p "$control_root"
+  run bash "$SCRIPT" issue "$ROOT" "scout-scope-conflict" \
+    --command map --role scout --team solo --job "map the thing" \
+    --control-root "$control_root" \
+    --requested-backend workflow --resolved-backend workflow \
+    --read-only-role scout --write-capability file:notes.md
+  [ "$status" -ne 0 ]
+  [[ "$output" == *'role declared read-only cannot also receive a write capability'* ]]
+}
+
 @test "schema 3 binds validated backend metadata into the contract digest" {
   local control_root="$ROOT/.temporary-agent-runfiles/runs/team-backend" contract
   mkdir -p "$control_root"

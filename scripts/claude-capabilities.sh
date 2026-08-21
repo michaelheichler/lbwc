@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROUTING_PATH="$SCRIPT_DIR/lbwc-routing.sh"
 . "$SCRIPT_DIR/lib/compose-model-catalog.sh"
+WORKFLOW_MIN_VERSION='2.1.154'
 LOCK_DIR=""
 TEMPORARY=""
 HELP_TEMP=""
@@ -12,6 +13,7 @@ REASONING_TEMP=""
 ASSOCIATIONS_TEMP=""
 HOST_ENUM_TEMP=""
 COMPOSED_MODELS_TEMP=""
+CATALOG_BASE_TEMP=""
 
 fail() {
   printf 'Error: %s\n' "$1" >&2
@@ -37,7 +39,7 @@ cleanup() {
   if [ -n "$TEMPORARY" ] && [ -f "$TEMPORARY" ]; then
     rm -f "$TEMPORARY"
   fi
-  for path in "$HELP_TEMP" "$MODELS_TEMP" "$REASONING_TEMP" "$ASSOCIATIONS_TEMP" "$HOST_ENUM_TEMP" "$COMPOSED_MODELS_TEMP"; do
+  for path in "$HELP_TEMP" "$MODELS_TEMP" "$REASONING_TEMP" "$ASSOCIATIONS_TEMP" "$HOST_ENUM_TEMP" "$COMPOSED_MODELS_TEMP" "$CATALOG_BASE_TEMP"; do
     if [ -n "$path" ]; then
       rm -f "$path" "${path}.array"
     fi
@@ -232,7 +234,14 @@ validate_catalog_json() {
 }
 
 build_catalog() {
-  lbwc_build_catalog "$1" "$2"
+  local binary="$1" output="$2" base version_line
+  base=$(mktemp "${TMPDIR:-/tmp}/lbwc-claude-catalog-base.XXXXXX") || fail 'could not create catalog base temporary file'
+  CATALOG_BASE_TEMP="$base"
+  lbwc_build_catalog "$binary" "$base"
+  version_line=$(jq -r '.source.version' "$base")
+  jq --argjson workflow "$(probe_workflow_capability "$version_line")" '. + {workflow: $workflow}' "$base" > "$output"
+  rm -f "$base"
+  CATALOG_BASE_TEMP=""
 }
 
 refresh_catalog() {
@@ -249,6 +258,7 @@ refresh_catalog() {
   TEMPORARY=$(mktemp './.claude-capabilities.json.tmp.XXXXXX') || fail 'could not create capability catalog temporary file'
   build_catalog "$binary" "$TEMPORARY"
   validate_catalog_json "$TEMPORARY" || fail 'extracted Claude Code capability catalog is invalid'
+  validate_workflow_capability_json "$TEMPORARY" || fail 'extracted Claude Code capability catalog is invalid'
   assert_no_symbolic_links 'claude-capabilities.json'
   mv -f "$TEMPORARY" 'claude-capabilities.json' || fail 'could not atomically persist Claude Code capability catalog'
   TEMPORARY=""
@@ -260,6 +270,7 @@ validate_catalog_file() {
   assert_no_symbolic_links "$path"
   [ -f "$path" ] || fail "capability catalog is not readable: $path"
   validate_catalog_json "$path" || fail "invalid Claude Code capability catalog: $path"
+  validate_workflow_capability_json "$path" || fail "invalid Claude Code capability catalog: $path"
   printf '%s\n' "$path"
 }
 
@@ -272,6 +283,7 @@ refresh_from_binary() {
   TEMPORARY="$temporary"
   build_catalog "$binary" "$temporary"
   validate_catalog_json "$temporary" || fail 'extracted Claude Code capability catalog is invalid'
+  validate_workflow_capability_json "$temporary" || fail 'extracted Claude Code capability catalog is invalid'
   cat "$temporary"
   rm -f "$temporary"
   TEMPORARY=""
@@ -341,6 +353,90 @@ main() {
       exit 1
       ;;
   esac
+}
+
+default_claude_settings_path() {
+  if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
+    printf '%s\n' "$CLAUDE_CONFIG_DIR/settings.json"
+  elif [ -d "$HOME/.config/claude-code" ]; then
+    printf '%s\n' "$HOME/.config/claude-code/settings.json"
+  else
+    printf '%s\n' "$HOME/.claude/settings.json"
+  fi
+}
+
+workflows_disabled_by_settings() {
+  local settings_path
+  settings_path=$(default_claude_settings_path)
+  [ -f "$settings_path" ] || return 1
+  jq -e 'type == "object" and .disableWorkflows == true' "$settings_path" >/dev/null 2>&1
+}
+
+version_meets_floor() {
+  local actual="$1" floor="$2"
+  [ "$(printf '%s\n%s\n' "$floor" "$actual" | (sort -V 2>/dev/null || sort -t. -k1,1n -k2,2n -k3,3n) | head -n1)" = "$floor" ]
+}
+
+workflow_unavailable_reasons() {
+  local host_version="$1" meets_floor="$2" disabled_settings="$3" disabled_env="$4" model_override="$5"
+  jq -cn \
+    --argjson meets_floor "$meets_floor" \
+    --arg min_version "$WORKFLOW_MIN_VERSION" \
+    --arg host_version "$host_version" \
+    --argjson disabled_settings "$disabled_settings" \
+    --argjson disabled_env "$disabled_env" \
+    --argjson model_override "$model_override" \
+    '[
+      (if $meets_floor then empty else "Claude Code \($host_version) is older than the workflow version floor \($min_version)." end),
+      (if $disabled_settings then "disableWorkflows is true in the Claude Code settings file." else empty end),
+      (if $disabled_env then "CLAUDE_CODE_DISABLE_WORKFLOWS is set." else empty end),
+      (if $model_override then "CLAUDE_CODE_SUBAGENT_MODEL is set, which overrides both the session model and any model a workflow script routes." else empty end)
+    ]'
+}
+
+probe_workflow_capability() {
+  local version_line="$1" host_version meets_floor=true disabled_settings=false disabled_env=false model_override=false reasons
+  host_version=$(awk '{print $1}' <<< "$version_line")
+  version_meets_floor "$host_version" "$WORKFLOW_MIN_VERSION" || meets_floor=false
+  workflows_disabled_by_settings && disabled_settings=true
+  [ -n "${CLAUDE_CODE_DISABLE_WORKFLOWS:-}" ] && disabled_env=true
+  [ -n "${CLAUDE_CODE_SUBAGENT_MODEL:-}" ] && model_override=true
+  reasons=$(workflow_unavailable_reasons "$host_version" "$meets_floor" "$disabled_settings" "$disabled_env" "$model_override")
+  jq -cn \
+    --arg min_version "$WORKFLOW_MIN_VERSION" \
+    --arg host_version "$host_version" \
+    --argjson meets_floor "$meets_floor" \
+    --argjson disabled_settings "$disabled_settings" \
+    --argjson disabled_env "$disabled_env" \
+    --argjson model_override "$model_override" \
+    --argjson reasons "$reasons" \
+    '{
+      min_version: $min_version,
+      host_version: $host_version,
+      meets_version_floor: $meets_floor,
+      disabled_by_settings: $disabled_settings,
+      disabled_by_env: $disabled_env,
+      subagent_model_override_active: $model_override,
+      available: ($reasons | length == 0),
+      unavailable_reasons: $reasons
+    }'
+}
+
+validate_workflow_capability_json() {
+  jq -e '
+    (has("workflow") | not)
+    or (
+      (.workflow | type == "object")
+      and (.workflow.min_version | type == "string" and length > 0)
+      and (.workflow.host_version | type == "string" and length > 0)
+      and (.workflow.meets_version_floor | type == "boolean")
+      and (.workflow.disabled_by_settings | type == "boolean")
+      and (.workflow.disabled_by_env | type == "boolean")
+      and (.workflow.subagent_model_override_active | type == "boolean")
+      and (.workflow.unavailable_reasons | type == "array" and all(.[]; type == "string" and length > 0))
+      and (.workflow.available == ((.workflow.unavailable_reasons | length) == 0))
+    )
+  ' "$1" >/dev/null 2>&1
 }
 
 main "$@"

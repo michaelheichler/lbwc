@@ -1,0 +1,17 @@
+# Exact (command, tool, phrase) exemptions for confirmed prose collisions.
+# Each entry names a command file, a gated tool, and the literal phrase.
+# The phrase names the tool in prose, not as an invocation instruction.
+# Example: "Agent Teams" in commands/config.md. Only text matching that
+# exact phrase is exempted. Any other mention of the same tool in the
+# same file still fails the check. Verified by reading context.
+commands/config.md:Agent:Agent Teams
+commands/config.md:Agent:Agent execution
+commands/config.md:Agent:Agent call
+commands/doctor.md:Agent:Agent role templates
+commands/doctor.md:Agent:Agent routing
+commands/status.md:Agent:Agent Teams
+commands/status.md:Agent:{Agent}
+commands/uninstall.md:Agent:Agent Teams
+commands/fix.md:Task:Task:
+commands/qa.md:Task:Task description
+commands/resume.md:Task:Task contracts

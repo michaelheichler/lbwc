@@ -11,11 +11,22 @@ line_number() {
   rg -n -m 1 "$pattern" "$file" | cut -d: -f1
 }
 
+# Anchored to the body so a frontmatter edit (e.g. widening allowed-tools)
+# can never coincidentally match first and silently retarget this ordering
+# assertion onto the wrong line.
+body_line_number() {
+  local pattern="$1" file="$2"
+  local body_start relative_line
+  body_start=$(awk '/^---$/{n++; if (n == 2) {print NR; exit}}' "$file")
+  relative_line=$(tail -n "+$((body_start + 1))" "$file" | rg -n -m 1 "$pattern" | cut -d: -f1)
+  [ -n "$relative_line" ] && echo $((body_start + relative_line))
+}
+
 @test "models command refreshes before display and routes every write through lbwc-model" {
   [ -f "$MODELS" ]
-  refresh_line=$(line_number 'lbwc-model.*refresh' "$MODELS")
-  show_line=$(line_number 'lbwc-model.*show' "$MODELS")
-  question_line=$(line_number 'AskUserQuestion' "$MODELS")
+  refresh_line=$(body_line_number 'lbwc-model.*refresh' "$MODELS")
+  show_line=$(body_line_number 'lbwc-model.*show' "$MODELS")
+  question_line=$(body_line_number 'Use native AskUserQuestion' "$MODELS")
   [ "$refresh_line" -lt "$show_line" ]
   [ "$show_line" -lt "$question_line" ]
   run rg -n 'lbwc-model.*(activate|set|copy|validate)' "$MODELS"

@@ -207,7 +207,7 @@ read_tmux_runtime_state() {
   [ -f "$PLANNING_DIR/config.json" ] || return 0
   if ! jq -e '
     type == "object"
-    and (if has("agent_execution_mode") then (.agent_execution_mode | type == "string" and (. == "in_process" or . == "tmux" or . == "ask")) else true end)
+    and (if has("agent_execution_mode") then (.agent_execution_mode | type == "string" and (. == "in_process" or . == "tmux" or . == "workflow" or . == "ask")) else true end)
     and (if has("statusline_hide_agent_in_tmux") then (.statusline_hide_agent_in_tmux | type == "boolean") else true end)
     and (if has("statusline_collapse_agent_in_tmux") then (.statusline_collapse_agent_in_tmux | type == "boolean") else true end)
   ' "$PLANNING_DIR/config.json" >/dev/null 2>&1; then

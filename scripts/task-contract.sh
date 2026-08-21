@@ -34,7 +34,7 @@ LEGAL = {
 STATES = set(LEGAL)
 RUNTIME_KINDS = {"native-team"}
 COMMUNICATION_POLICIES = {"native-team", "critic-relay"}
-EXECUTION_BACKENDS = {"in_process", "tmux"}
+EXECUTION_BACKENDS = {"in_process", "tmux", "workflow"}
 SCHEMA_2_KEYS = {
     "contract_id", "schema_version", "created_by", "project_root",
     "source_kind", "source_path", "source_sha256", "command_name",
@@ -152,6 +152,13 @@ def role_defaults():
     return data
 
 
+def role_write_capable(role_name):
+    entry = role_defaults().get(role_name, {})
+    disallowed = entry.get("disallowedTools", "") if isinstance(entry, dict) else ""
+    tokens = {token.strip() for token in disallowed.split(",")}
+    return not {"Write", "Edit"}.issubset(tokens)
+
+
 def configured_team(role, mode):
     safe_token(role, "role")
     defaults = role_defaults()
@@ -195,6 +202,7 @@ def parse_options(arguments, require_command=False):
         "control_root": "",
         "capabilities": [],
         "role_capabilities": [],
+        "read_only_roles": [],
         "runtime_kind": "",
         "communication_policy": "",
         "requested_backend": "",
@@ -241,6 +249,8 @@ def parse_options(arguments, require_command=False):
             if len(parts) != 3:
                 fail("invalid role write capability")
             options["role_capabilities"].append(tuple(parts))
+        elif flag == "--read-only-role":
+            options["read_only_roles"].append(value)
         else:
             fail(USAGE)
     if require_command and not options["command"]:
@@ -424,6 +434,12 @@ def command_contract(root, task_name, options):
         fail("--job is required")
     roles = configured_team(role, options["team"])
     capabilities = build_capabilities(roles, role, options["capabilities"], options["role_capabilities"])
+    for read_only_role in options["read_only_roles"]:
+        safe_token(read_only_role, "role")
+        if read_only_role not in roles:
+            fail("read-only role is not in contract team")
+        if capabilities[read_only_role]:
+            fail("role declared read-only cannot also receive a write capability")
     typed = bool(options["capabilities"] or options["role_capabilities"] or options["control_root"])
     if typed:
         allowances = {
@@ -437,7 +453,9 @@ def command_contract(root, task_name, options):
         )
     if typed and options["write_allowances"]:
         fail("typed capabilities cannot be combined with exact write allowances")
-    if typed and not options["capabilities"] and not options["role_capabilities"]:
+    if typed and not options["capabilities"] and not options["role_capabilities"] and any(
+        role_write_capable(team_role) for team_role in roles if team_role not in options["read_only_roles"]
+    ):
         fail("typed contract requires at least one capability")
     if typed and "." in [item["path"] for role_caps in capabilities.values() for item in role_caps] and command != "team":
         fail("repository root capability is only valid for team")

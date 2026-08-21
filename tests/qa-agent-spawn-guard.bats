@@ -30,6 +30,12 @@ teardown() {
   [[ "$output" == *"jq not available"* ]]
 }
 
+@test "malformed JSON input is blocked instead of skipping the guard" {
+  run bash -c "printf '%s' 'not json at all' | bash '$SCRIPTS_DIR/agent-spawn-guard.sh'"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"could not parse tool call input"* ]]
+}
+
 @test "generated identity without a control root fails closed" {
   rm -rf "$TEST_TEMP_DIR/.lbwc-planning"
 
@@ -182,7 +188,7 @@ teardown() {
 
   run bash -c 'jq -cn --arg name "$1" \
     '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
-    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+    | LBWC_CONTROL_ROOT="$2" CLAUDE_CODE_EXECPATH="$4" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh" "$ROUTE_BINARY"
 
   [ "$status" -eq 0 ]
   jq -e '.hookSpecificOutput.updatedInput.model == "sonnet"' <<< "$output" >/dev/null
@@ -218,7 +224,7 @@ teardown() {
 
   run bash -c 'jq -cn --arg name "$1" \
     '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
-    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+    | LBWC_CONTROL_ROOT="$2" CLAUDE_CODE_EXECPATH="$4" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh" "$ROUTE_BINARY"
 
   [ "$status" -eq 0 ]
   jq -e --arg custom "$custom" '.hookSpecificOutput.updatedInput.model == $custom' <<< "$output" >/dev/null
@@ -251,7 +257,7 @@ teardown() {
 
   run bash -c 'jq -cn --arg name "$1" \
     '\''{tool_name:"Agent",tool_input:{subagent_type:$name}}'\'' \
-    | LBWC_CONTROL_ROOT="$2" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh"
+    | LBWC_CONTROL_ROOT="$2" CLAUDE_CODE_EXECPATH="$4" bash "$3"' _ "$name" "$control_root" "$SCRIPTS_DIR/agent-spawn-guard.sh" "$ROUTE_BINARY"
 
   [ "$status" -eq 2 ]
   [[ "$output" == *"not present in the live host Agent enum"* ]]

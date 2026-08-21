@@ -3,7 +3,7 @@ category: supporting
 disable-model-invocation: true
 description: Apply a quick fix or small change with commit discipline. Turbo mode, no planning ceremony.
 argument-hint: "<description of what to fix or change>"
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, Agent, Skill, LSP
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, Agent, Skill, LSP, AskUserQuestion, Workflow
 ---
 
 # LBWC Fix: $ARGUMENTS
@@ -27,6 +27,16 @@ Store the plugin root path output above as `{plugin-root}` for use in script inv
 @${CLAUDE_PLUGIN_ROOT}/references/agent-spawn-protocol.md
 
 Config: Pre-injected by SessionStart hook.
+
+## Workflow capability gate
+
+Refresh the saved Claude capability catalog before any Dev contract or spawn:
+
+```bash
+bash "{plugin-root}/scripts/lbwc-model" refresh .lbwc-planning
+```
+
+This persists workflow-backend availability as `.workflow` on `.lbwc-planning/claude-capabilities.json`, the authority the execution-mode choice below reads before offering or resolving `workflow`. A non-zero exit here does not stop the fix. It leaves `RESOLVED_BACKEND` at `in_process`, so the fix proceeds on whatever catalog already exists. Only a run that goes on to request or choose `workflow` can still be blocked, by step 0 of `workflow-spawn-protocol.md` and by `workflow-generator.sh`'s own live re-validation at generation time. Skip this gate when `.lbwc-planning/` is missing. Do not create a planning directory here.
 
 ## Guard
 
@@ -76,11 +86,22 @@ Command shape: `bash "{plugin-root}/scripts/todo-details.sh" get <hash>`.
 
     Use `safe` for `{cleanup_policy}` when `DETAIL_STATUS=ok`, otherwise use `keep`. If the helper returns `status="error"`, STOP with its `message` value. If it returns `status="partial"`, continue but surface its `warning` value in the final result so cleanup state is explicit. This pickup path only applies to true numeric todo selections, never to manual text or manual `(ref:HASH)` inputs.
 
-1. **Spawn Dev:** Follow `{plugin-root}/references/agent-spawn-protocol.md`. The main session owns planning files, Git, verification, and user questions. The Dev contract allows writes only to exact product paths identified from the parsed fix description, todo detail, and repository evidence. Do not use a directory, glob, or planning artifact as an allowance.
+1. **Choose the execution backend.** Follow step 0 of `{plugin-root}/references/workflow-spawn-protocol.md`, with `<control-root>` bound to `.lbwc-planning`. Use these literal `AskUserQuestion` fields when that step's `ask` branch applies:
+
+  - header: `Fix execution`
+  - question: `Where should this fix run? Workflow run applies it through a committed background script. Native spawn keeps the current single-agent fix.`
+  - options:
+    - `Workflow run`: Apply the fix through a committed workflow script in the background.
+    - `Native spawn`: Keep the current native Dev spawn.
+    - `Cancel fix`: Do not apply this fix now.
+
+2. **Spawn Dev:** Follow `{plugin-root}/references/agent-spawn-protocol.md`. The main session owns planning files, Git, verification, and user questions. The Dev contract allows writes only to exact product paths identified from the parsed fix description, todo detail, and repository evidence. Do not use a directory, glob, or planning artifact as an allowance.
+
+  When `RESOLVED_BACKEND` is `in_process`:
 
   ```bash
     PROJECT_ROOT=$(pwd)
-    DEV_BRIEF="{fix description from Step 1}"
+    DEV_BRIEF="{fix description from the Parse step}"
     CONTRACT_PATH=$(bash "{plugin-root}/scripts/task-contract.sh" issue "$PROJECT_ROOT" "fix-{task-slug}" --command fix --role coding-dijkstra --team solo --job "$DEV_BRIEF" --write-allowance "{exact diagnosed product path}") || exit 1
     TASK_ID=$(basename "$CONTRACT_PATH" .json)
     bash "{plugin-root}/scripts/agent-generator.sh" coding-dijkstra --job "$DEV_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --write-allowance "{exact diagnosed product path}" || exit 1
@@ -88,6 +109,27 @@ Command shape: `bash "{plugin-root}/scripts/todo-details.sh" get <hash>`.
   ```
 
   Read the emitted `Agent-call parameters:` and `SPAWN_READY` line. Spawn the generated Dev with only its printed `subagent_type`, `name`, and `model`. Do not add any other Agent-call fields.
+
+  When `RESOLVED_BACKEND` is `workflow`, follow `{plugin-root}/references/workflow-spawn-protocol.md`. Issue the same solo Dev contract as a schema 3 contract, granting the same exact product path as a typed write capability instead of a write allowance:
+
+  ```bash
+    PROJECT_ROOT=$(pwd)
+    CONTROL_ROOT="$PROJECT_ROOT/.lbwc-planning"
+    DEV_BRIEF="{fix description from the Parse step}"
+    CONTRACT_PATH=$(bash "{plugin-root}/scripts/task-contract.sh" issue "$PROJECT_ROOT" "fix-{task-slug}" --command fix --role coding-dijkstra --team solo --job "$DEV_BRIEF" --control-root "$CONTROL_ROOT" --requested-backend workflow --resolved-backend workflow --write-capability "file:{exact diagnosed product path}") || exit 1
+    TASK_ID=$(basename "$CONTRACT_PATH" .json)
+    GENERATOR_OUTPUT=$(bash "{plugin-root}/scripts/agent-generator.sh" coding-dijkstra --job "$DEV_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --control-root "$CONTROL_ROOT" --write-capability "file:{exact diagnosed product path}" --execution-backend workflow) || exit 1
+    NAME=$(printf '%s\n' "$GENERATOR_OUTPUT" | awk '/^SPAWN_READY/{print $2}')
+  ```
+
+  Read the emitted `Agent-call parameters:` and `SPAWN_READY <name>` from `GENERATOR_OUTPUT`, captured above as `NAME`, then render and register the workflow:
+
+  ```bash
+    bash "{plugin-root}/scripts/workflow-generator.sh" solo coding-dijkstra --job "$DEV_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --name "$NAME" --control-root "$CONTROL_ROOT" || exit 1
+    bash "{plugin-root}/scripts/task-contract.sh" state "$PROJECT_ROOT" "$TASK_ID" dispatched >/dev/null || exit 1
+  ```
+
+  Read the `Workflow-call parameters:` block and the `WORKFLOW_READY <task-id>` line that follows it. Call `Workflow` exactly once with `scriptPath` set to the printed `path` value. Never pass `script`, and never inline or paraphrase the rendered file into the call. The `PreToolUse` guard on `Workflow` independently revalidates the path against the registered digest. A denial is a stop, not a fallback trigger. `Workflow` runs Dev in the background. Its own tool result reports only the launch, never Dev's report. Wait for the run's own terminal result. A `user_decision_required` result is the only path back to the user, ask exactly one bounded `AskUserQuestion` about it. Any other terminal result is Dev's report. Process it exactly like the `in_process` branch above.
 
   Before composing the Dev task description, evaluate installed skills visible in your system context. Read each skill's description and select all materially helpful skills for this fix, including adjacent or supporting skills surfaced by the prompt, logs, error text, related files, or stack context. Do not choose only the single most direct skill. The spawned prompt MUST begin with exactly one explicit skill outcome block: use `<skill_activation>{For each selected skill: "Call Skill({skill-name})"}</skill_activation>` when one or more installed skills are preselected at orchestration time, or `<skill_no_activation>Evaluated installed skills for this task. No skills were preselected at orchestration time. Reason: {brief task-specific reason}.</skill_no_activation>` when none are preselected. Silent omission of both blocks is invalid. After evaluating, state the skill outcome in your response. If the prompt or error mentions SwiftData, include `swiftdata` alongside relevant test and build skills. After calling `Skill(...)`, read any relevant follow-up files named by that skill before reasoning or acting. Do not scan entire skill folders or read unrelated references.
 
@@ -167,6 +209,7 @@ Command shape: `bash "{plugin-root}/scripts/todo-details.sh" get <hash>`.
 ## Failure and recovery
 
 - If contract issuance, generation, spawn, or verification fails, clear the delegation marker, preserve the working tree, and report the failure verbatim. Do not create an uncontracted fallback.
+- If the workflow generator fails or the `Workflow` call is denied, clear the delegation marker, leave the contract `planned`, and report the failure verbatim. Do not fall back to `in_process`.
 - If the Dev reports ambiguity, stop without a commit and direct the user to `/lbwc:debug`.
 
 ## Output Format

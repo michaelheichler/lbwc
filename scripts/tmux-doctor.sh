@@ -166,7 +166,7 @@ fi
 
 backend=$(jq -r '.agent_execution_mode // "in_process"' "$config_path" 2>/dev/null || printf 'in_process')
 case "$backend" in
-  in_process|tmux|ask) ;;
+  in_process|tmux|workflow|ask) ;;
   *) backend=in_process ;;
 esac
 agent_total=$(jq '[.agents[]] | length' <<<"$registry")

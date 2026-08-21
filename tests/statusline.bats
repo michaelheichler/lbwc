@@ -228,6 +228,19 @@ EOF
   [[ "$output" == *"Diagnostics configuration drift"* ]]
 }
 
+@test "statusline: workflow backend reports as itself without configuration drift" {
+  printf '%s\n' '{"agent_execution_mode":"workflow","workflow_execution":{"enabled":true}}' > "$PROJECT/.lbwc-planning/config.json"
+
+  run env PATH="$BIN:$PATH" TMUX=1 bash "$STATUSLINE" <<EOF
+{"model":{"display_name":"Claude"},"workspace":{"project_dir":"$PROJECT"}}
+EOF
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Backend workflow"* ]]
+  [[ "$output" != *"Backend invalid"* ]]
+  [[ "$output" != *"Diagnostics"* ]]
+}
+
 @test "statusline installer: requires explicit confirmation and replacement approval" {
   local settings="$TEST_ROOT/settings.json"
   printf '%s\n' '{"statusLine":{"type":"command","command":"other-status"}}' > "$settings"

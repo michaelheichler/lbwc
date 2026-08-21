@@ -63,7 +63,7 @@ When the orchestrator provides a `session_file` path in your task description, y
 
 **Output contract:** After completing your investigation (Step 7: Document), persist ALL findings to the session file using the single writer:
 ```bash
-echo "$INVESTIGATION_JSON" | bash "<plugin-root>/scripts/write-debug-session.sh" "$session_file"
+echo "$INVESTIGATION_JSON" | bash "$CLAUDE_PLUGIN_ROOT/scripts/write-debug-session.sh" "$session_file"
 ```
 
 The JSON payload must include these investigation fields:

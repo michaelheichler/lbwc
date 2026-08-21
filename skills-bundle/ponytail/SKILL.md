@@ -121,7 +121,10 @@ the same lens (deletion as the work, beware-the-share, resist-the-singleton).
 
 For the cited corpus version of the same antipatterns (analysis paralysis,
 over-engineering, golden hammer), see `references/deviq-corpus/antipatterns/`
-at the plugin root via `scripts/deviq-lookup.sh`. Ponytail is the in-session
+at the plugin root via `scripts/deviq-lookup.sh`. Resolve the plugin root
+first (`$CLAUDE_PLUGIN_ROOT`, or `scripts/resolve-plugin-root.sh` if unset)
+and call the script by its absolute path. A bare relative path fails once
+your working directory is not the plugin root. Ponytail is the in-session
 reflex; DevIQ is the reference shelf.
 
 ## Boundaries

@@ -257,5 +257,39 @@ check "schema 3 tmux metadata and bootstrap have no drift" "$?"
 grep -q '## TMUX bus loop' "$PROJECT_H/.claude/agents/$NAME_H.md"
 check "schema 3 tmux definition includes the bus loop" "$?"
 
+PROJECT_I=$(new_project)
+CONTROL_ROOT_I="$PROJECT_I/.temporary-agent-runfiles/runs/workflow-selection"
+mkdir -p "$CONTROL_ROOT_I"
+CONTRACT_I=$(bash "$TASK_CONTRACT" issue "$PROJECT_I" core-workflow-selection \
+  --command integration-test --role web-engineer --team solo --job "run in workflow" \
+  --control-root "$CONTROL_ROOT_I" --requested-backend workflow --resolved-backend workflow \
+  --write-capability directory:src/web)
+RUN_OUTPUT=$(cd "$PROJECT_I" && PATH="$(dirname "$GENERATOR_BASH"):$PATH" \
+  LBWC_AGENT_RANDOM_SEED=43 \
+  "$GENERATOR_BASH" "$GENERATOR" web-engineer --job "run in workflow" \
+    --contract "$CONTRACT_I" --task-id "$(basename "$CONTRACT_I" .json)" \
+    --control-root "$CONTROL_ROOT_I" --write-capability directory:src/web \
+    --execution-backend workflow 2>&1)
+RUN_RC=$?
+check "schema 3 workflow runtime selection generates an agent" "$RUN_RC"
+NAME_I=$(jq -r '.agents | keys[0] // empty' "$CONTROL_ROOT_I/agent-manifest.json" 2>/dev/null)
+jq -e --arg name "$NAME_I" '
+  .agents[$name].execution.requested_backend == "workflow"
+  and .agents[$name].execution.resolved_backend == "workflow"
+  and .agents[$name].execution.role == .agents[$name].role
+  and .agents[$name].execution.model == .agents[$name].model
+  and .agents[$name].execution.effort == .agents[$name].effort
+  and .agents[$name].execution.max_turns == .agents[$name].max_turns
+  and .agents[$name].execution.contract_id == .agents[$name].contract_id
+  and .agents[$name].execution.contract_digest == .agents[$name].contract_digest
+  and .agents[$name].execution.task_identity == .agents[$name].task_identity
+  and (.agents[$name].execution | has("tmux_bootstrap") | not)
+' "$CONTROL_ROOT_I/agent-manifest.json" >/dev/null
+check "schema 3 workflow metadata has no tmux bootstrap and no drift" "$?"
+grep -q '## Workflow return' "$PROJECT_I/.claude/agents/$NAME_I.md"
+check "schema 3 workflow definition includes the workflow return section" "$?"
+! grep -q '## TMUX bus loop' "$PROJECT_I/.claude/agents/$NAME_I.md"
+check "schema 3 workflow definition omits the bus loop" "$?"
+
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]
