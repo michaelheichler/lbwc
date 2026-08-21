@@ -1,0 +1,87 @@
+commands/build.md
+  s_7a7dd68bdabc76::t_2f59efd6093c8a 6,35-44,65-72,114-115,118,137-152,192-198,213-214
+commands/config.md
+  s_05076b36c9236e::t_bd414dcc9b7b44 194,265,278-279
+commands/debug.md
+  s_7a7dd68bdabc76::t_841c210837b0fb 6,39-42,306-319,329-351,480
+commands/fix.md
+  s_5d556945e3fea2::t_6817a4200ca468 6,31-40,89-100,104,113-133,212
+commands/init.md
+  s_7a7dd68bdabc76::t_4faf76c97675fa 6,70-75,433-463,559-560
+commands/map.md
+  s_7a7dd68bdabc76::t_4679bd50c52c96 6,51-60,170,193-202,204-228,248-249
+commands/models.md
+  s_05076b36c9236e::t_f0b0adeee464bb 5
+commands/qa.md
+  s_7a7dd68bdabc76::t_fc8b80783842c6 7,88-97,261-272,285-305,461
+commands/research.md
+  s_7a7dd68bdabc76::t_8e92e3c11e8348 6,39-48,60-69,77,81-103,139-140,146-147
+commands/team.md
+  s_7a7dd68bdabc76::t_a4a810ff486763 3,5,41,83,86-93,98,106-107,135-136,197-211,240
+commands/vibe.md
+  s_5d556945e3fea2::t_582e9e410a1c5b 5,49-58,205-220,243-244,277-278
+tests/build-command.bats
+  s_a8781560f65cef::t_0fd62dc668d61a 1-87
+tests/debug-command.bats
+  s_5b8c14d316203a::t_ccfe458c01ff6a 1-41
+tests/fix-command.bats
+  s_5b8c14d316203a::t_bce6a2e4e9bed5 1-37
+tests/init-command.bats
+  s_5b8c14d316203a::t_b06604104ac709 1-86
+tests/map-command.bats
+  s_5b8c14d316203a::t_dd88cea91b3803 1-83
+tests/qa-command.bats
+  s_5b8c14d316203a::t_8890e5dbb712b5 1-43
+tests/research-command.bats
+  s_5b8c14d316203a::t_363616948021cf 1-84
+tests/vibe-command.bats
+  s_a8781560f65cef::t_7bf1bd9e917c5d 1-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "b5241c9617530fd54302e517ac9abefe97a3223a",
+  "prompts": {},
+  "sessions": {
+    "s_05076b36c9236e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a2d03b3934bcdbeba",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_5b8c14d316203a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ab96057612e0b7bac",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_5d556945e3fea2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a015e4c6752ccac96",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_7a7dd68bdabc76": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a02681358873dd2f8",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_a8781560f65cef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a4250bc41cd0eb663",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
