@@ -1,0 +1,23 @@
+skills-bundle/ponytail/SKILL.md
+  s_a752d425e373c2::t_3b812c4a3fdb69 124-127
+templates/agent-roles/debugger.md.tpl
+  s_a752d425e373c2::t_e4acdfb97d3ff5 66
+templates/agent-roles/deviq.md.tpl
+  s_a752d425e373c2::t_16f122d23d1ff0 31-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "d8f83cafc1195b624136397ccaa0e38ae8a50e54",
+  "prompts": {},
+  "sessions": {
+    "s_a752d425e373c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "729c6d0d-b8a8-4030-adad-618dd186d5ec",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
