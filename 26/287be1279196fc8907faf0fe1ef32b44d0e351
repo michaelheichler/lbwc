@@ -1,0 +1,179 @@
+config/gated-tool-prose-allowlist.txt
+  s_9cea4aa5acb11a::t_ec1a7c23ca9488 1-17
+config/settings.json
+  s_5b8c14d316203a::t_2de90c71c48104 30-32
+hooks/hooks.json
+  s_5b8c14d316203a::t_250212ac4501dd 25-34
+references/agent-spawn-protocol.md
+  s_5b8c14d316203a::t_3c7eb93807f954 54-55
+references/routing-lock-diagnostics.md
+  s_a14ec3ec55c3b7::t_93872ff45d90d3 1-74
+references/structural-decay-assessment.md
+  s_81e459f16a2f04::t_c59a144491d25f 1-163
+references/vibe-mode-execute.md
+  s_a8781560f65cef::t_75e255a2ca2123 12,16,89-94
+references/workflow-api-contract.md
+  s_5b8c14d316203a::t_2da2e5b0184374 1-59
+references/workflow-probe-findings.md
+  s_5b8c14d316203a::t_b57fa6b3e4ee04 1-95
+references/workflow-spawn-protocol.md
+  s_a8781560f65cef::t_854ac1270a5e83 1-30
+scripts/agent-generator.sh
+  s_5b8c14d316203a::t_44c93d52dca186 212-213,416
+scripts/agent-spawn-guard.sh
+  s_81e459f16a2f04::t_ed376a563db343 9-14,18-21,23,29-30
+scripts/claude-capabilities.sh
+  s_5b8c14d316203a::t_e65740c175d249 7,16,42,237-244,261,273,286,358-441
+scripts/command-contract.sh
+  s_05076b36c9236e::t_c8102c11c91beb 45-63,160-199,297-419,431,435,449-450
+scripts/lbwc-config.sh
+  s_5b8c14d316203a::t_20185adacd7b81 356-359,365,389,391,496,555,613
+scripts/lbwc-routing.sh
+  s_a14ec3ec55c3b7::t_928324d96d19e9 194,220-235,237-238
+scripts/lbwc-statusline.sh
+  s_5b8c14d316203a::t_9e79ed5e2baafa 210
+scripts/lib/agent-manifest.sh
+  s_5b8c14d316203a::t_24700848bc199b 6,23,26,33,37,40-42,49,53,56
+scripts/lib/lbwc-control-root.sh
+  s_5b8c14d316203a::t_9f46fbd770eef0 80-105
+scripts/lib/manifest-lock.sh
+  s_5b8c14d316203a::t_0507940771c675 1-119
+scripts/lib/workflow-manifest.sh
+  s_5b8c14d316203a::t_5e69b877d9d08e 1-169
+scripts/render-agent-template.sh
+  s_5b8c14d316203a::t_fd943c71aaf5fd 145-147
+scripts/render-workflow-template.sh
+  s_5b8c14d316203a::t_1421cabf98615f 1-90
+scripts/runtime-snapshot.sh
+  s_5b8c14d316203a::t_cbab121e703518 6,49,58-59,76,80-91,94-95,103-105,113-116,150-151
+scripts/task-contract.sh
+  s_5b8c14d316203a::t_42e67db05e204b 37,155-161,205,252-253,437-442,456-458
+scripts/team-command-transaction.sh
+  s_5b8c14d316203a::t_2ce64785c1f0e8 354-355
+scripts/tests/agent-generator-core.sh
+  s_5b8c14d316203a::t_88636ffc867665 260-293
+scripts/tests/workflow-generator-core.sh
+  s_5b8c14d316203a::t_bc350c8c235ab7 1-612
+scripts/tmux-doctor.sh
+  s_5b8c14d316203a::t_7550f628e9913c 169
+scripts/workflow-generator.sh
+  s_5b8c14d316203a::t_3ffbdcf404a376 1-376
+scripts/workflow-spawn-guard.sh
+  s_5b8c14d316203a::t_8354d74eb81dcc 1-88
+templates/agent-roles/workflow-return.md
+  s_5b8c14d316203a::t_ec1c94aa19e637 1-11
+templates/workflows/pair.js.tpl
+  s_5b8c14d316203a::t_5bb08ff4909664 1-130
+templates/workflows/solo.js.tpl
+  s_5b8c14d316203a::t_0f20aed4d237bc 1-50
+templates/workflows/trio.js.tpl
+  s_5b8c14d316203a::t_46e0410bac3112 1-190
+tests/claude-capabilities.bats
+  s_5b8c14d316203a::t_d906e6cb38dc00 17-188
+tests/command-contract.bats
+  s_9cea4aa5acb11a::t_53079716bb0d36 10,95-100,202-294
+tests/doctor.bats
+  s_5b8c14d316203a::t_aa0a4a11893e4b 224-235
+tests/fixtures/workflow-harness.cjs
+  s_5b8c14d316203a::t_fe2e3a1c35ddef 1-50
+tests/lbwc-execution-config.bats
+  s_5b8c14d316203a::t_463bef0e23cc78 57-76,169-199,268-287
+tests/lbwc-routing-lock.bats
+  s_a14ec3ec55c3b7::t_980211bacc0e83 1-600
+tests/model-config-commands.bats
+  s_05076b36c9236e::t_f2447b2c129d46 14-24,27-29
+tests/qa-agent-spawn-guard.bats
+  s_81e459f16a2f04::t_bed9d942fa0419 33-38,191,227,260
+tests/qa-workflow-spawn-guard.bats
+  s_5d556945e3fea2::t_ccc01c40b3c09c 1-497
+tests/render-workflow-template-gate-loop.bats
+  s_917f3d24f953c3::t_e08c57dda8bc3a 1-158
+tests/render-workflow-template.bats
+  s_917f3d24f953c3::t_25fd41e25d86b7 1-365
+tests/runtime-snapshot.bats
+  s_5b8c14d316203a::t_70edd671fe0308 41-43,129-273
+tests/self-check.sh
+  s_5b8c14d316203a::t_d87ca0abe55869 19,21-23
+tests/statusline.bats
+  s_5b8c14d316203a::t_60ed2ab0c4194e 231-243
+tests/task-contract.bats
+  s_5b8c14d316203a::t_df4ba460664c78 252-313
+tests/team-command.bats
+  s_5b8c14d316203a::t_a9768bef73adab 235-272
+tests/workflow-manifest.bats
+  s_5b8c14d316203a::t_90e2def9388f74 1-155
+tests/workflow-spawn-protocol.bats
+  s_a8781560f65cef::t_7c923e35fe09fa 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "26287be1279196fc8907faf0fe1ef32b44d0e351",
+  "prompts": {},
+  "sessions": {
+    "s_05076b36c9236e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a2d03b3934bcdbeba",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_5b8c14d316203a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ab96057612e0b7bac",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_5d556945e3fea2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a015e4c6752ccac96",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_81e459f16a2f04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a347ee3379dd9ea41",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_917f3d24f953c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ad134ab4fff32bb4d",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_9cea4aa5acb11a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a450080e73a684f3e",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_a14ec3ec55c3b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a06fa5e82c18dadcd",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    },
+    "s_a8781560f65cef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a4250bc41cd0eb663",
+        "model": "unknown"
+      },
+      "human_author": "Michael Heichler <iam@michaelheichler.eu>"
+    }
+  }
+}
