@@ -1,5 +1,14 @@
 # Changelog
 This file records user-visible LBWC releases. Keep the newest entry first.
+## [1.0.5] - 2026-08-21
+
+### A second way to get work done, and a fixed lookup
+
+Some commands can now hand a job to a scripted workflow instead of only spawning agents one by one, so multi-step work can run with less manual coordination.
+
+- Build, debug, fix, init, map, qa, research, team, and vibe can each choose the workflow path when it fits, and fall back to the usual agent spawn otherwise.
+- Fixed a bug where the DevIQ advisor and saved debug sessions could fail with a "no such file or directory" error instead of running.
+
 ## [1.0.4] - 2026-08-17
 
 ### Teams that follow Claude, and questions you can close
