@@ -6,21 +6,28 @@ command -v jq >/dev/null 2>&1 || {
   exit 2
 }
 
-INPUT=$(cat 2>/dev/null) || exit 0
+fail() {
+  echo "Blocked: $1" >&2
+  exit 2
+}
+
+INPUT=$(cat 2>/dev/null) || fail "agent spawn guard could not read tool call input"
 [ -z "$INPUT" ] && exit 0
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-[ -f "$SCRIPT_DIR/lib/agent-manifest.sh" ] || exit 0
-. "$SCRIPT_DIR/lib/agent-manifest.sh" || exit 0
-. "$SCRIPT_DIR/lib/lbwc-control-root.sh" || exit 0
+[ -f "$SCRIPT_DIR/lib/agent-manifest.sh" ] || fail "agent manifest library is unavailable"
+. "$SCRIPT_DIR/lib/agent-manifest.sh" || fail "agent manifest library failed to load"
+[ -f "$SCRIPT_DIR/lib/lbwc-control-root.sh" ] || fail "control root library is unavailable"
+. "$SCRIPT_DIR/lib/lbwc-control-root.sh" || fail "control root library failed to load"
 
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || exit 0
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || fail "agent spawn guard could not parse tool call input"
 case "$TOOL_NAME" in
   Agent|TaskCreate) ;;
   *) exit 0 ;;
 esac
 
-SUBAGENT_TYPE=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // .tool_input.agent_type // .tool_input.name // ""' 2>/dev/null) || exit 0
+SUBAGENT_TYPE=$(echo "$INPUT" | jq -r '.tool_input.subagent_type // .tool_input.agent_type // .tool_input.name // ""' 2>/dev/null) \
+  || fail "agent spawn guard could not parse subagent type"
 
 block_unresolved_generated_identity() {
   case "$SUBAGENT_TYPE" in

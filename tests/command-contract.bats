@@ -7,6 +7,7 @@ setup() {
   FIXTURE="$TEST_ROOT/repo"
   mkdir -p "$FIXTURE/commands" "$FIXTURE/config" "$FIXTURE/references" "$FIXTURE/scripts" "$FIXTURE/templates"
   : > "$FIXTURE/config/legacy-identifier-allowlist.txt"
+  : > "$FIXTURE/config/gated-tool-prose-allowlist.txt"
   write_valid_command alpha
   write_manifest alpha.md
 }
@@ -89,6 +90,12 @@ PY
 
 run_checker() {
   run bash "$CHECKER" --root "$FIXTURE"
+}
+
+grant_tool() {
+  local tool=$1
+  sed -i.bak "s/^allowed-tools: Read, Bash\$/allowed-tools: Read, Bash, ${tool}/" "$FIXTURE/commands/alpha.md"
+  rm -f "$FIXTURE/commands/alpha.md.bak"
 }
 
 @test "command-contract accepts a complete command set" {
@@ -190,6 +197,99 @@ PY
   [ "$status" -eq 1 ]
   [[ "$output" == *'beta.md: missing required heading: Next Up'* ]]
   [[ "$output" == *'beta.md: missing next_up contract'* ]]
+}
+
+@test "command-contract rejects a gated tool named in the body without being declared" {
+  printf '\nUse native AskUserQuestion to confirm the target before continuing.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool AskUserQuestion in the body at line'* ]]
+  [[ "$output" == *'without declaring it in allowed-tools at line'* ]]
+}
+
+@test "command-contract accepts a gated tool named in the body once it is declared" {
+  grant_tool AskUserQuestion
+  printf '\nUse native AskUserQuestion to confirm the target before continuing.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 0 ]
+}
+
+@test "command-contract rejects a gated tool named through indirect phrasing" {
+  printf '\nAsk one bounded question via AskUserQuestion for each decision.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool AskUserQuestion in the body at line'* ]]
+}
+
+@test "command-contract rejects an ungranted Workflow named in the body" {
+  printf '\nCall `Workflow` exactly once with scriptPath set.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool Workflow in the body at line'* ]]
+}
+
+@test "command-contract rejects a gated tool named in a negated sentence" {
+  printf '\nNever call the Agent tool directly.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool Agent in the body at line'* ]]
+}
+
+@test "command-contract rejects an ungranted Agent named in the body" {
+  printf '\nSpawn the generated dev by calling `Agent(...)` with its printed subagent_type.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool Agent in the body at line'* ]]
+}
+
+@test "command-contract rejects an ungranted Task named in the body" {
+  printf '\nSpawn the roster by calling the `Task` tool for every teammate.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool Task in the body at line'* ]]
+}
+
+@test "command-contract rejects an ungranted tool named only inside a negated instruction" {
+  printf '\nDo not proceed without AskUserQuestion confirmation.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool AskUserQuestion in the body at line'* ]]
+}
+
+@test "command-contract suppresses a gated tool mention exempted by its allowlisted phrase" {
+  printf 'commands/alpha.md:Agent:Agent Teams\n' >> "$FIXTURE/config/gated-tool-prose-allowlist.txt"
+  printf '\nAgent Teams is process-level Claude Code configuration, unrelated to this tool grant.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 0 ]
+}
+
+@test "command-contract still rejects a genuine invocation in a file exempted for an unrelated phrase" {
+  printf 'commands/alpha.md:Agent:Agent Teams\n' >> "$FIXTURE/config/gated-tool-prose-allowlist.txt"
+  printf '\nAgent Teams is process-level Claude Code configuration, unrelated to this tool grant.\n' >> "$FIXTURE/commands/alpha.md"
+  printf '\nSpawn the generated dev by calling `Agent(...)` with its printed subagent_type.\n' >> "$FIXTURE/commands/alpha.md"
+
+  run_checker
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *'alpha.md: names gated tool Agent in the body at line'* ]]
 }
 
 @test "repository commands satisfy the tracked command contract" {

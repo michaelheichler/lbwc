@@ -351,8 +351,8 @@ require_run_roster() {
     || fail_diag 'contract is missing, stale, or tampered'
   CONTRACT_REQUESTED_BACKEND=$(jq -r '.requested_backend // empty' <<< "$contract")
   CONTRACT_RESOLVED_BACKEND=$(jq -r '.resolved_backend // empty' <<< "$contract")
-  case "$CONTRACT_REQUESTED_BACKEND" in in_process|tmux) ;; *) fail_diag 'contract backend metadata is invalid' ;; esac
-  case "$CONTRACT_RESOLVED_BACKEND" in in_process|tmux) ;; *) fail_diag 'contract backend metadata is invalid' ;; esac
+  case "$CONTRACT_REQUESTED_BACKEND" in in_process|tmux|workflow) ;; *) fail_diag 'contract backend metadata is invalid' ;; esac
+  case "$CONTRACT_RESOLVED_BACKEND" in in_process|tmux|workflow) ;; *) fail_diag 'contract backend metadata is invalid' ;; esac
   [ "$CONTRACT_REQUESTED_BACKEND" = "$CONTRACT_RESOLVED_BACKEND" ] || fail_diag 'contract backend metadata is invalid'
   jq -e --arg contract "$EXPECTED_CONTRACT" --arg requested "$CONTRACT_REQUESTED_BACKEND" --arg resolved "$CONTRACT_RESOLVED_BACKEND" '
     .schema_version == 3 and .contract_id == $contract

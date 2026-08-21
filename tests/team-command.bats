@@ -232,6 +232,44 @@ EOF
   ! grep -F '$AGENTS_JSON' "$command"
 }
 
+@test "team command documents the workflow execution option and its spawn branch" {
+  command="$REPO_ROOT/commands/team.md"
+
+  grep -F 'agent_execution_mode=workflow' "$command"
+  grep -F '.workflow.available' "$command"
+  grep -F '.workflow.unavailable_reasons' "$command"
+  grep -F 'There is no automatic fallback from a requested `workflow` to another backend.' "$command"
+  grep -F 'Workflow run' "$command"
+  grep -F '.workflow_execution.enabled' "$command"
+  grep -F 'question when `.workflow.available` and `.workflow_execution.enabled` are both `true`: `After confirming this team, where should teammates run? Workflow run orchestrates the roster from a committed background script. Native keeps the current Claude Code Agent team. TMUX starts each teammate as a fresh pane session.`' "$command"
+  grep -F 'question when `.workflow.available` or `.workflow_execution.enabled` is not `true`: `After confirming this team, where should teammates run? Native keeps the current Claude Code Agent team. TMUX starts each teammate as a fresh pane session.`' "$command"
+  grep -F 'options when `.workflow.available` and `.workflow_execution.enabled` are both `true`' "$command"
+  grep -F 'options when `.workflow.available` or `.workflow_execution.enabled` is not `true`' "$command"
+  grep -F 'If the user chooses `Workflow run`, select requested and resolved `workflow`.' "$command"
+  grep -F 'If `snapshot.resolved_backend` is `workflow`' "$command"
+  grep -F 'references/workflow-spawn-protocol.md' "$command"
+  grep -F '7. **Workflow path.**' "$command"
+  grep -F 'workflow-generator.sh' "$command"
+  grep -F 'WORKFLOW_READY' "$command"
+  grep -F 'set to the path value from the `Workflow-call parameters:` block, confirmed by the `WORKFLOW_READY <task-id>` line that follows it' "$command"
+  grep -F 'Never pass `script`' "$command"
+  grep -F 'scriptPath' "$command"
+  grep -F 'user_decision_required' "$command"
+}
+
+@test "agent spawn protocol documents workflow spawn mechanics and its references" {
+  local protocol="$REPO_ROOT/references/agent-spawn-protocol.md"
+
+  grep -F 'references/workflow-spawn-protocol.md' "$protocol"
+  grep -F 'references/workflow-api-contract.md' "$protocol"
+  [ -f "$REPO_ROOT/references/workflow-spawn-protocol.md" ]
+  [ -f "$REPO_ROOT/references/workflow-api-contract.md" ]
+}
+
+@test "team-command-transaction widens the run roster backend enum to include workflow" {
+  grep -F 'in_process|tmux|workflow' "$TRANSACTION"
+}
+
 @test "team command is registered in the command section contract" {
   jq -e '.commands["team.md"].required_headings == ["Context","Guard","Steps","Failure and recovery","Output Format","Next Up"]' \
     "$REPO_ROOT/config/command-sections.json" >/dev/null

@@ -221,6 +221,18 @@ EOF
   [ "$(jq -r '.detail' <<<"$output")" = 'backend=tmux session=lbwc-main panes=1/1 agents=1 running:0 idle:0 failed:0 heartbeats=fresh' ]
 }
 
+@test "tmux doctor: workflow backend reports as itself, not coerced to in_process" {
+  plant_healthy_runtime
+  jq '.agent_execution_mode = "workflow"' "$CONTROL_ROOT/config.json" > "$CONTROL_ROOT/config.json.tmp"
+  mv "$CONTROL_ROOT/config.json.tmp" "$CONTROL_ROOT/config.json"
+
+  run_tmux_doctor
+
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.status' <<<"$output")" = PASS ]
+  [[ "$(jq -r '.detail' <<<"$output")" == 'backend=workflow '* ]]
+}
+
 @test "doctor resolves the unavailable-runtime preflight helper before invoking it" {
   run grep -c '^!`' "$DOCTOR"
   [ "$status" -eq 0 ]

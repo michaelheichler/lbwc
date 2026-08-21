@@ -77,6 +77,32 @@ lbwc_control_root_lock_path() {
   fi
 }
 
+lbwc_control_root_workflow_manifest_path() {
+  local control_root
+  control_root=$(lbwc_control_root_canonical_path "$1") || return 1
+  if [ "$(basename "$control_root")" = ".lbwc-planning" ]; then
+    printf '%s/.workflow-manifest.json\n' "$control_root"
+  else
+    printf '%s/workflow-manifest.json\n' "$control_root"
+  fi
+}
+
+lbwc_control_root_workflow_manifest_lock_path() {
+  local control_root
+  control_root=$(lbwc_control_root_canonical_path "$1") || return 1
+  if [ "$(basename "$control_root")" = ".lbwc-planning" ]; then
+    printf '%s/.workflow-manifest.lock\n' "$control_root"
+  else
+    printf '%s/workflow-manifest.lock\n' "$control_root"
+  fi
+}
+
+lbwc_control_root_workflows_dir() {
+  local control_root
+  control_root=$(lbwc_control_root_canonical_path "$1") || return 1
+  printf '%s/workflows\n' "$control_root"
+}
+
 lbwc_control_root_contracts_dir() {
   local control_root
   control_root=$(lbwc_control_root_canonical_path "$1") || return 1

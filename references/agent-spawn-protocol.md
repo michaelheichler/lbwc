@@ -51,6 +51,8 @@ The generator's exclusive admission check, live-agent capacity check, and the sp
 
 Spawn every generated name for the admitted team in the same turn: one `Agent(...)` call per name, all in one message (parallel tool calls), never sequential, never a subset. `agent-spawn-guard.sh` blocks an unrelated spawn while a pair or trio is open. Open means not every member has reached `running` yet. It also blocks re-spawning a name that is already `used` or `expired`. Pass `subagent_type: <name>`, `name: <name>`, and the `model` the script printed for that name. Use it exactly as printed, do not re-derive it.
 
+This section describes the `in_process` backend. `tmux` starts each name as a fresh pane session instead, documented in `references/tmux-spawn-protocol.md`. The third backend, `workflow`, never calls `Agent` at all. The orchestrator's only spawn action is one `Workflow` call carrying `scriptPath`, and the generated names are reached from inside that script's own `agent()` calls instead of from a per-name `Agent(...)` call here. See `references/workflow-spawn-protocol.md` for the full mechanics and `references/workflow-api-contract.md` for the `agent()` call shape.
+
 ## Guardrails already enforced by this plugin's hooks
 
 Build the brief accordingly instead of hitting these blind:

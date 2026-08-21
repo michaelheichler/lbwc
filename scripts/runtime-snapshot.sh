@@ -3,7 +3,7 @@ set -Eeuo pipefail
 umask 077
 
 usage() {
-  printf '%s\n' 'Usage: runtime-snapshot.sh <freeze|validate|cancel|cleanup> --planning-dir PATH --phase-dir PATH [--requested-backend in_process|tmux --resolved-backend in_process|tmux]' >&2
+  printf '%s\n' 'Usage: runtime-snapshot.sh <freeze|validate|cancel|cleanup> --planning-dir PATH --phase-dir PATH [--requested-backend in_process|tmux|workflow --resolved-backend in_process|tmux|workflow]' >&2
 }
 
 fail() {
@@ -46,7 +46,7 @@ read_config() {
   jq -e '
     type == "object"
     and (.effort | type == "string" and IN("thorough", "balanced", "fast", "turbo"))
-    and (.agent_execution_mode | type == "string" and IN("in_process", "tmux", "ask"))
+    and (.agent_execution_mode | type == "string" and IN("in_process", "tmux", "workflow", "ask"))
     and (.tmux_execution | type == "object")
     and (.tmux_execution.enabled | type == "boolean")
     and (.tmux_execution.comms_fallback | type == "string" and IN("bus_only", "fall_back_to_in_process"))
@@ -55,6 +55,8 @@ read_config() {
     and (.tmux_execution.restrictions.allow_agent_git | type == "boolean")
     and (.tmux_execution.restrictions.allow_agent_ask_user | type == "boolean")
     and (.tmux_execution.restrictions.require_orchestrator_attach | type == "boolean")
+    and (.workflow_execution | type == "object")
+    and (.workflow_execution.enabled | type == "boolean")
     and (.routing | type == "object")
     and (.routing.active_profile | type == "string")
     and (.routing.profiles[.routing.active_profile].roles | type == "object")
@@ -71,19 +73,35 @@ read_config() {
   CONFIG_MODE=$(jq -r '.agent_execution_mode' "$CONFIG_PATH") || fail 'cannot read execution mode'
   CONFIG_PROFILE=$(jq -r '.routing.active_profile' "$CONFIG_PATH") || fail 'cannot read routing profile'
   CONFIG_TMUX=$(jq -cS '.tmux_execution' "$CONFIG_PATH") || fail 'cannot read tmux execution settings'
+  CONFIG_WORKFLOW=$(jq -cS '.workflow_execution' "$CONFIG_PATH") || fail 'cannot read workflow execution settings'
   CONFIG_ROUTING_ROLES="$routing_roles"
+}
+
+assert_workflow_capability() {
+  local catalog_path reasons
+  [ -z "${CLAUDE_CODE_DISABLE_WORKFLOWS:-}" ] || fail 'workflow backend is unavailable: CLAUDE_CODE_DISABLE_WORKFLOWS is set in this session'
+  [ -z "${CLAUDE_CODE_SUBAGENT_MODEL:-}" ] || fail 'workflow backend is unavailable: CLAUDE_CODE_SUBAGENT_MODEL is set in this session, which overrides both the session model and any model a workflow script routes'
+  catalog_path="$PLANNING_DIR/claude-capabilities.json"
+  [ -f "$catalog_path" ] && [ ! -L "$catalog_path" ] || fail "workflow backend is unavailable: no capability catalog at $catalog_path, run scripts/claude-capabilities.sh refresh first"
+  jq -e '.workflow | type == "object"' "$catalog_path" >/dev/null 2>&1 || fail "workflow backend is unavailable: capability catalog carries no workflow probe: $catalog_path"
+  jq -e '.workflow.available == true' "$catalog_path" >/dev/null 2>&1 && return 0
+  reasons=$(jq -r '.workflow.unavailable_reasons | join(" ")' "$catalog_path" 2>/dev/null)
+  fail "workflow backend is unavailable: $reasons"
 }
 
 validate_backends() {
   local requested="$1" resolved="$2"
-  case "$requested" in in_process|tmux) ;; *) fail "requested backend is invalid: $requested" ;; esac
-  case "$resolved" in in_process|tmux) ;; *) fail "resolved backend is invalid: $resolved" ;; esac
+  case "$requested" in in_process|tmux|workflow) ;; *) fail "requested backend is invalid: $requested" ;; esac
+  case "$resolved" in in_process|tmux|workflow) ;; *) fail "resolved backend is invalid: $resolved" ;; esac
   case "$CONFIG_MODE" in
     in_process)
       [ "$requested" = in_process ] && [ "$resolved" = in_process ] || fail 'backend drift: configuration requires in_process'
       ;;
     tmux)
       [ "$requested" = tmux ] || fail 'backend drift: configuration requires tmux'
+      ;;
+    workflow)
+      [ "$requested" = workflow ] && [ "$resolved" = workflow ] || fail 'backend drift: configuration requires workflow'
       ;;
     ask) ;;
   esac
@@ -92,6 +110,10 @@ validate_backends() {
     if [ "$resolved" = in_process ]; then
       jq -e '.comms_fallback == "fall_back_to_in_process"' <<< "$CONFIG_TMUX" >/dev/null || fail 'tmux fallback to in_process is not permitted'
     fi
+  elif [ "$requested" = workflow ]; then
+    [ "$resolved" = workflow ] || fail 'workflow requested backend cannot resolve to another backend'
+    jq -e '.enabled == true' <<< "$CONFIG_WORKFLOW" >/dev/null || fail 'workflow backend is disabled in configuration'
+    assert_workflow_capability
   else
     [ "$resolved" = in_process ] || fail 'in_process requested backend cannot resolve to tmux'
   fi
@@ -125,8 +147,8 @@ validate_snapshot_schema() {
     and (keys | sort == ["effort", "phase", "requested_backend", "resolved_backend", "routing_profile", "routing_roles", "schema_version", "source_config_digest", "tmux_execution"])
     and .schema_version == 1
     and (.phase | type == "string" and test("^phases/[0-9]{2}-[a-z0-9][a-z0-9-]*$"))
-    and (.requested_backend | IN("in_process", "tmux"))
-    and (.resolved_backend | IN("in_process", "tmux"))
+    and (.requested_backend | IN("in_process", "tmux", "workflow"))
+    and (.resolved_backend | IN("in_process", "tmux", "workflow"))
     and (.effort | type == "string" and IN("thorough", "balanced", "fast", "turbo"))
     and (.routing_profile | type == "string" and length > 0)
     and (.routing_roles | type == "object" and length > 0 and all(.[]; route))

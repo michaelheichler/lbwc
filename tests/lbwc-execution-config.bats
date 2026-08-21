@@ -54,6 +54,26 @@ run_config() {
   [ "$status" -eq 0 ]
 }
 
+@test "execution mode accepts workflow and persists workflow settings" {
+  run_config init "$PLANNING_DIR"
+
+  [ "$status" -eq 0 ]
+  run jq -e '.workflow_execution.enabled == false' "$PLANNING_DIR/config.json"
+  [ "$status" -eq 0 ]
+
+  workflow_settings=$(jq -c '.workflow_execution | .enabled = true' "$PLANNING_DIR/config.json")
+  run_config set-json "$PLANNING_DIR" workflow_execution "$workflow_settings"
+  [ "$status" -eq 0 ]
+  run_config set "$PLANNING_DIR" agent_execution_mode '"workflow"'
+  [ "$status" -eq 0 ]
+
+  run_config get "$PLANNING_DIR" agent_execution_mode
+  [ "$status" -eq 0 ]
+  [ "$output" = '"workflow"' ]
+  run jq -e '.workflow_execution.enabled == true' "$PLANNING_DIR/config.json"
+  [ "$status" -eq 0 ]
+}
+
 @test "execution mode rejects invalid values without changing configuration" {
   run_config init "$PLANNING_DIR"
   [ "$status" -eq 0 ]
@@ -146,6 +166,37 @@ VALUES
   [ "$before" = "$after" ]
 }
 
+@test "unused workflow keys are not writable and extra keys fail validation" {
+  run_config init "$PLANNING_DIR"
+  [ "$status" -eq 0 ]
+  before=$(shasum -a 256 "$PLANNING_DIR/config.json" | awk '{print $1}')
+
+  run_config set "$PLANNING_DIR" workflow_execution.size_guideline '"medium"'
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"setting is not writable"* ]]
+
+  workflow_settings=$(jq -c '.workflow_execution | .size_guideline = "medium"' "$PLANNING_DIR/config.json")
+  run_config set-json "$PLANNING_DIR" workflow_execution "$workflow_settings"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"invalid"* ]]
+  after=$(shasum -a 256 "$PLANNING_DIR/config.json" | awk '{print $1}')
+  [ "$before" = "$after" ]
+}
+
+@test "migration fills a missing workflow_execution block with defaults" {
+  mkdir -p "$PLANNING_DIR"
+  printf '%s\n' '{"schema_version":1,"agent_execution_mode":"workflow"}' > "$PLANNING_DIR/config.json"
+
+  run bash "$REPO_ROOT/scripts/migrate-config.sh" "$PLANNING_DIR/config.json"
+
+  [ "$status" -eq 0 ]
+  run jq -e '
+    .agent_execution_mode == "workflow"
+    and .workflow_execution.enabled == false
+  ' "$PLANNING_DIR/config.json"
+  [ "$status" -eq 0 ]
+}
+
 @test "migration rejects invalid existing tmux execution settings without changing the configuration" {
   mkdir -p "$PLANNING_DIR"
   run bash "$SCRIPT" default-config
@@ -210,6 +261,26 @@ VALUES
 
   before=$(shasum -a 256 "$PLANNING_DIR/config.json" | awk '{print $1}')
   run_config set "$PLANNING_DIR" tmux_execution.layout '"tiled"'
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"frozen"* ]]
+  after=$(shasum -a 256 "$PLANNING_DIR/config.json" | awk '{print $1}')
+  [ "$before" = "$after" ]
+}
+
+@test "workflow_execution.enabled is writable then frozen while a plan is active" {
+  run_config init "$PLANNING_DIR"
+  [ "$status" -eq 0 ]
+
+  run_config set "$PLANNING_DIR" workflow_execution.enabled 'true'
+  [ "$status" -eq 0 ]
+  run jq -e '.workflow_execution.enabled == true' "$PLANNING_DIR/config.json"
+  [ "$status" -eq 0 ]
+
+  printf '%s\n' '{"status":"executing"}' > "$PLANNING_DIR/.execution-state.json"
+  before=$(shasum -a 256 "$PLANNING_DIR/config.json" | awk '{print $1}')
+
+  run_config set "$PLANNING_DIR" workflow_execution.enabled 'false'
+
   [ "$status" -ne 0 ]
   [[ "$output" == *"frozen"* ]]
   after=$(shasum -a 256 "$PLANNING_DIR/config.json" | awk '{print $1}')

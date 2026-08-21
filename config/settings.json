@@ -27,6 +27,9 @@
       "require_orchestrator_attach": true
     }
   },
+  "workflow_execution": {
+    "enabled": false
+  },
   "auto_uat": false,
   "require_phase_discussion": false,
   "rolling_summary": false,

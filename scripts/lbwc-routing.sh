@@ -191,6 +191,7 @@ reclaim_stale_lock() {
 
 acquire_config_lock() {
   local planning_dir="$1" attempt wait_attempts created token guard_inode fd_inode guard_held=0
+  local token_status token_detail token_diag_file shell_detail
   if [ "$TRANSACTION_ACTIVE" = 1 ]; then
     LOCK_DIR="${LBWC_CONFIG_TRANSACTION_LOCK_DIR:-}"
     LOCK_DIR_IDENTITY="${LBWC_CONFIG_TRANSACTION_LOCK_IDENTITY:-}"
@@ -216,10 +217,25 @@ acquire_config_lock() {
   wait_attempts="${LBWC_ROUTING_LOCK_WAIT_ATTEMPTS:-$LOCK_WAIT_ATTEMPTS_DEFAULT}"
   [[ "$wait_attempts" =~ ^[1-9][0-9]*$ ]] || fail 'routing lock wait attempts must be a positive integer'
   [ "$wait_attempts" -le 5000 ] || fail 'routing lock wait attempts exceed the safe bound'
-  token=$(command "$ENV_TOOL" LC_ALL=C "$OD_TOOL" -An -N 16 -tx1 /dev/urandom 2>/dev/null) \
-    || fail 'could not create secure routing lock owner token'
+  token_diag_file=$(mktemp "${TMPDIR:-/tmp}/lbwc-routing-lock-diag.XXXXXX") || fail 'could not create routing lock diagnostic file'
+  {
+    if token=$(command "$ENV_TOOL" LC_ALL=C "$OD_TOOL" -An -N 16 -tx1 /dev/urandom); then
+      token_status=0
+    else
+      token_status=$?
+    fi
+  } 2>"$token_diag_file"
+  shell_detail=$(<"$token_diag_file")
+  rm -f -- "$token_diag_file" 2>/dev/null || true
+  token_detail="${token//$'\n'/ }"
+  shell_detail="${shell_detail//$'\n'/ }"
+  [ -n "$token_detail" ] || token_detail='(no output captured)'
+  [ -n "$shell_detail" ] || shell_detail='(no output captured)'
+  [ "$token_status" -eq 0 ] \
+    || fail "could not create secure routing lock owner token: $OD_TOOL exited $token_status (od stdout: $token_detail) (captured stderr: $shell_detail)"
   token=${token//[[:space:]]/}
-  [[ "$token" =~ ^[0-9a-f]{32}$ ]] || fail 'could not create secure routing lock owner token'
+  [[ "$token" =~ ^[0-9a-f]{32}$ ]] \
+    || fail "routing lock owner token was malformed: $OD_TOOL produced unexpected output (od stdout: $token_detail) (captured stderr: $shell_detail)"
   [ ! -L "$LOCK_DIR" ] || fail "symbolic link paths are not allowed: $LOCK_DIR"
   [ ! -e "$LOCK_GUARD" ] || { [ -f "$LOCK_GUARD" ] && [ ! -L "$LOCK_GUARD" ]; } \
     || fail "routing lock guard must be a regular file: $LOCK_GUARD"
