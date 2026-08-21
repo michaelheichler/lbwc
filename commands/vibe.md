@@ -2,7 +2,7 @@
 category: lifecycle
 description: "The one command. Detects state and parses intent. Routes to lifecycle modes including import, bootstrap, scope, plan, execute, verify, discuss, archive, and more."
 argument-hint: "[intent or flags]. Modes: [--import [path]] [--plan] [--execute] [--verify] [--discuss] [--assumptions] [--scope] [--add] [--insert] [--remove] [--archive]. Modifiers: [--yolo] [--effort=level] [--skip-qa] [--skip-audit] [--plan=NN] [N]."
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, SendMessage, Skill, LSP
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, SendMessage, Skill, LSP, Workflow
 disable-model-invocation: true
 ---
 
@@ -45,6 +45,16 @@ bash "{LINK}/scripts/indexer-sync.sh" --project-root "{PROJECT_ROOT}"
 ```
 
 This is mandatory. Stop before mode selection when the helper exits non-zero.
+
+## Workflow capability gate
+
+Refresh the saved Claude capability catalog before any Execute-mode grouping contract or spawn:
+
+```bash
+bash "{LINK}/scripts/lbwc-model" refresh "{PROJECT_ROOT}/.lbwc-planning"
+```
+
+This persists workflow-backend availability as `.workflow` on `.lbwc-planning/claude-capabilities.json`, the authority Execute mode reads before offering or resolving `workflow`. Stop before Execute mode when the helper exits non-zero. Skip this gate when `.lbwc-planning/` is missing. Every other mode ignores this gate. Do not create a planning directory here.
 
 ## Input Parsing
 
@@ -192,7 +202,22 @@ Before loading the execute protocol, resolve `{PHASE_DIR}` as the selected canon
    ```
 
    On success, use the returned `snapshot.requested_backend`, `snapshot.resolved_backend`, `snapshot.effort`, `snapshot.routing_profile`, `snapshot.routing_roles`, and `snapshot.tmux_execution` as the sole execution authority. Do not resolve again from live configuration. A non-zero result is `backend drift` or malformed runtime state. Stop before contracts, generation, spawning, telemetry, or prompts and preserve all state.
-2. When no snapshot exists, read the validated execution configuration once. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. `agent_execution_mode=ask` asks one bounded execution-mode question before any contract or agent exists. If the user chooses `Cancel spawn`, run exactly:
+2. When no snapshot exists, read the validated execution configuration once. An explicit `agent_execution_mode` wins outright, including an explicit `in_process` or `tmux`. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. `agent_execution_mode=workflow` selects requested `workflow`: read `.workflow.available` from `{PROJECT_ROOT}/.lbwc-planning/claude-capabilities.json` and `.workflow_execution.enabled` from `{PROJECT_ROOT}/.lbwc-planning/config.json`. When `.workflow.available` is `false`, stop before any contract or agent exists and report `.workflow.unavailable_reasons` verbatim. Otherwise, when `.workflow_execution.enabled` is not `true`, stop before any contract or agent exists with `workflow backend is disabled in configuration`. Otherwise resolve `workflow`. There is no automatic fallback from a requested `workflow` to another backend. For `agent_execution_mode=ask`, read both `.workflow.available` and `.workflow_execution.enabled` from the same catalog and config first, then ask one bounded execution-mode question before any contract or agent exists. Follow `{LINK}/references/ask-user-question.md`: exactly one question, `multiSelect` false, two to four visible options.
+
+   - header: `Execute execution`
+   - question when `.workflow.available` and `.workflow_execution.enabled` are both `true`: `Where should this phase's task groupings run? Workflow run orchestrates each grouping through a committed background script. Native keeps the current Claude Code Agent spawn. TMUX starts each grouping as a fresh pane session.`
+   - options when `.workflow.available` and `.workflow_execution.enabled` are both `true`, `Workflow run` first:
+     - `Workflow run`: Run each grouping through a committed workflow script in the background.
+     - `Native spawn`: Keep the current native Agent spawn.
+     - `TMUX panes`: Start each grouping as a fresh pane session through provision and split-group.
+     - `Cancel spawn`: Do not spawn any grouping for this execution.
+   - question when `.workflow.available` or `.workflow_execution.enabled` is not `true`: `Where should this phase's task groupings run? Native keeps the current Claude Code Agent spawn. TMUX starts each grouping as a fresh pane session.`
+   - options when `.workflow.available` or `.workflow_execution.enabled` is not `true`, the same three options with `Workflow run` left out entirely:
+     - `Native spawn`: Keep the current native Agent spawn.
+     - `TMUX panes`: Start each grouping as a fresh pane session through provision and split-group.
+     - `Cancel spawn`: Do not spawn any grouping for this execution.
+
+   If the user chooses `Workflow run`, select requested and resolved `workflow`. If the user chooses `Native spawn`, select requested and resolved `in_process`. If the user chooses `TMUX panes`, select requested `tmux`. If the user chooses `Cancel spawn`, run exactly:
 
    ```bash
    bash "{LINK}/scripts/runtime-snapshot.sh" cancel --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}"
@@ -214,6 +239,8 @@ Pass `snapshot.resolved_backend` to every `agent-generator.sh --execution-backen
 If `snapshot.resolved_backend` is `in_process`, keep the native Agent path in `{LINK}/references/vibe-mode-execute.md`.
 
 If `snapshot.resolved_backend` is `tmux`, `{LINK}/references/vibe-mode-execute.md` follows `{LINK}/references/tmux-spawn-protocol.md` on this branch only. Do not call native Agent. Do not invent a second orchestrator. Do not follow execute-protocol Agent spawn on this branch.
+
+If `snapshot.resolved_backend` is `workflow`, `{LINK}/references/vibe-mode-execute.md` follows `{LINK}/references/workflow-spawn-protocol.md` on this branch only. Do not call native Agent and do not run the tmux spawn driver.
 
 Read `{LINK}/references/vibe-mode-execute.md` and follow it. `{LINK}` is the first line of the plugin-root/state block in the Context output, labeled `first line is LINK`.
 
@@ -246,6 +273,8 @@ If the new detector output selects the next unbuilt phase, run its Plan mode and
 ## Failure and recovery
 
 A failed root resolver, detector, contract issue, generator call, tmux preflight, provision, split-group, bus publish/await/ack, artifact validation, state transition, or planning Git helper stops the current mode. Report the exact failing command boundary and preserve existing state. Never create placeholder plans, summaries, verification, or UAT files to make detection advance. Recovery re-runs `/lbwc:vibe` after the named blocker is corrected. If a bounded user dialog is dismissed or killed, clear the pending decision and resume normally.
+
+If the workflow generator fails or the `Workflow` call is denied during Execute mode, leave that grouping's contract `planned` and report the failure verbatim. Do not fall back to `in_process` or `tmux`.
 
 ## Output Format
 

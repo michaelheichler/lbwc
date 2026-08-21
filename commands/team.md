@@ -1,8 +1,8 @@
 ---
 category: lifecycle
-description: Form a contract-bound Claude Code agent team for one scoped task, choosing native or tmux spawn after confirmation.
+description: Form a contract-bound Claude Code agent team for one scoped task, choosing native, tmux, or workflow spawn after confirmation.
 argument-hint: "[work instruction] [--plan <path>] [--scope <path> ...]"
-allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, TaskCreate, TaskUpdate, Agent
+allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, TaskCreate, TaskUpdate, Agent, Workflow
 disable-model-invocation: true
 ---
 
@@ -38,7 +38,7 @@ When `{PROJECT_ROOT}/.lbwc-planning` exists, refresh the saved Claude capability
 bash "{LINK}/scripts/lbwc-model" refresh "{PROJECT_ROOT}/.lbwc-planning"
 ```
 
-This writes host Agent aliases and patched ids from the current Claude Code binary into `.lbwc-planning/claude-capabilities.json`, so `lbwc-routing.sh check` accepts those aliases on the saved catalog. Stop before the team workflow when the helper exits non-zero. Skip this gate when `{PROJECT_ROOT}/.lbwc-planning` is missing. Do not create a planning directory here.
+This writes host Agent aliases and patched ids from the current Claude Code binary into `.lbwc-planning/claude-capabilities.json`, so `lbwc-routing.sh check` accepts those aliases on the saved catalog. It also probes workflow-backend availability and persists it as `.workflow` on that catalog, the authority step 4 reads before offering or freezing `workflow`. Stop before the team workflow when the helper exits non-zero. Skip this gate when `{PROJECT_ROOT}/.lbwc-planning` is missing. Do not create a planning directory here.
 
 ## Guard
 
@@ -80,22 +80,30 @@ On success, use the returned `snapshot` as the only authority for requested back
 
 When no snapshot exists and `{PROJECT_ROOT}/.lbwc-planning` is missing, select requested and resolved `in_process`. Do not ask. TMUX spawn requires initialized planning and a canonical phase directory. Stop if the user or config selected `tmux` without those artifacts.
 
-When no snapshot exists and planning is present, read validated execution configuration once. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. For `agent_execution_mode=ask`, ask one bounded execution-mode question before any contract or agent exists. Follow `{LINK}/references/ask-user-question.md`: exactly one question, `multiSelect` false, two to four visible options.
+When no snapshot exists and planning is present, read validated execution configuration once. An explicit `agent_execution_mode` wins outright, including an explicit `in_process` or `tmux`. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. `agent_execution_mode=workflow` selects requested `workflow`: read `.workflow.available` from `{PROJECT_ROOT}/.lbwc-planning/claude-capabilities.json` and `.workflow_execution.enabled` from `{PROJECT_ROOT}/.lbwc-planning/config.json`. When `.workflow.available` is `false`, stop before any contract or agent exists and report `.workflow.unavailable_reasons` verbatim. Otherwise, when `.workflow_execution.enabled` is not `true`, stop before any contract or agent exists with `workflow backend is disabled in configuration`. Otherwise resolve `workflow`. There is no automatic fallback from a requested `workflow` to another backend. For `agent_execution_mode=ask`, read both `.workflow.available` and `.workflow_execution.enabled` from the same catalog and config first, then ask one bounded execution-mode question before any contract or agent exists. Follow `{LINK}/references/ask-user-question.md`: exactly one question, `multiSelect` false, two to four visible options.
 
 - header: `Team execution`
-- question: `After confirming this team, where should teammates run? Native keeps the current Claude Code Agent team. TMUX starts each teammate as a fresh pane session.`
-- options:
+- question when `.workflow.available` and `.workflow_execution.enabled` are both `true`: `After confirming this team, where should teammates run? Workflow run orchestrates the roster from a committed background script. Native keeps the current Claude Code Agent team. TMUX starts each teammate as a fresh pane session.`
+- options when `.workflow.available` and `.workflow_execution.enabled` are both `true`, `Workflow run` first:
+  - `Workflow run`: Run the roster through a committed workflow script in the background.
+  - `Native team`: Keep native Agent spawn, native tasks, and native teammate messaging.
+  - `TMUX panes`: Start each teammate as a fresh pane session through provision and split-group.
+  - `Cancel spawn`: Do not spawn teammates for this run.
+- question when `.workflow.available` or `.workflow_execution.enabled` is not `true`: `After confirming this team, where should teammates run? Native keeps the current Claude Code Agent team. TMUX starts each teammate as a fresh pane session.`
+- options when `.workflow.available` or `.workflow_execution.enabled` is not `true`, the same three options with `Workflow run` left out entirely:
   - `Native team`: Keep native Agent spawn, native tasks, and native teammate messaging.
   - `TMUX panes`: Start each teammate as a fresh pane session through provision and split-group.
   - `Cancel spawn`: Do not spawn teammates for this run.
 
-If the user chooses `Native team`, select requested and resolved `in_process`. Do not replace native teams. If the user chooses `TMUX panes`, select requested `tmux`. If the user chooses `Cancel spawn`, and `{PHASE_DIR}` exists, run exactly:
+If the user chooses `Workflow run`, select requested and resolved `workflow`. If the user chooses `Native team`, select requested and resolved `in_process`. Do not replace native teams. If the user chooses `TMUX panes`, select requested `tmux`. If the user chooses `Cancel spawn`, and `{PHASE_DIR}` exists, run exactly:
 
 ```bash
 bash "{LINK}/scripts/runtime-snapshot.sh" cancel --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}"
 ```
 
 Report cancellation and stop. This writes `{PHASE_DIR}/.runtime-cancelled.json` and creates no snapshot. If `{PHASE_DIR}` is missing, report cancellation and stop without a snapshot. It must cancel, never fall back.
+
+This gate is a fast, friendly stop before any contract, native task, generated definition, or teammate exists. It is not the only layer: freezing a requested `workflow` still fails with `workflow backend is disabled in configuration` when `workflow_execution.enabled` in `{PROJECT_ROOT}/.lbwc-planning/config.json` is `false`, and `workflow-generator.sh` re-validates both flags again at generation time. The shipped default has `workflow_execution.enabled=false`, so an unconfigured project never offers `Workflow run` and does not reach that freeze-time failure.
 
 For requested `tmux`, complete preflight before freezing. On success resolve `tmux`. On failure, resolve `in_process` only if `tmux_execution.comms_fallback=fall_back_to_in_process`. Otherwise stop without a snapshot. Then, when `{PHASE_DIR}` exists, run exactly:
 
@@ -123,6 +131,8 @@ fi
 If `snapshot.resolved_backend` is `in_process`, keep the native team and Agent path in step 5. Do not replace native teams.
 
 If `snapshot.resolved_backend` is `tmux`, follow `{LINK}/references/tmux-spawn-protocol.md` on this branch only. Do not call native Agent. Continue at step 6.
+
+If `snapshot.resolved_backend` is `workflow`, follow `{LINK}/references/workflow-spawn-protocol.md` on this branch only. Do not call native Agent. Continue at step 7.
 
 5. **Native path.** Run this path only when resolved backend is `in_process`. Choose one collision-safe run id, then run exactly:
 
@@ -184,6 +194,21 @@ bash "{LINK}/scripts/tmux-spawn-group.sh" dispatch --project-root "{PROJECT_ROOT
 
 Observe the helper JSON summary as the roster reports. After the grouping is terminal, apply protocol cleanup (`kill-agent` or `kill-session`) from the frozen cleanup policy. Stop on contract, generator, preflight, provision, split-group, or bus failure. Do not silently switch to in-process except the already-frozen `comms_fallback` case above.
 
+7. **Workflow path.** Run this path only when `snapshot.resolved_backend` is `workflow`. Do not call native Agent. Do not create a native shared task. Do not run `prepare`. Choose one collision-safe run id, then issue one schema 3 team contract for the whole roster (`pair` or `trio`, never `solo` for a multi-role roster). Copy snapshot backends into `issue` flags as `OPEN_BACKEND_ARGS` above. Repeat each resolved scope as `--role-write-capability "$ENGINEER_ROLE:directory:$SCOPE"`.
+
+```bash
+CONTRACT_PATH=$(bash "{LINK}/scripts/task-contract.sh" issue "{PROJECT_ROOT}" "$RUN_ID" --command team --role "$ENGINEER_ROLE" --team "$TEAM_MODE" --job "$INSTRUCTION" --runtime-kind native-team --communication-policy native-team "${OPEN_BACKEND_ARGS[@]}" ${CAPABILITY_ARGS[@]+"${CAPABILITY_ARGS[@]}"})
+TASK_ID=$(basename "$CONTRACT_PATH" .json)
+```
+
+Pass the contract path, task id, job, team mode, identical capability arguments, and `--execution-backend "$RESOLVED_BACKEND"` to one generator invocation (`--native-team` with `--pair` or `--trio` matching `$TEAM_MODE`). This mints every roster definition by the same mechanic `{LINK}/references/agent-spawn-protocol.md` already documents. If generation fails, leave that contract `planned` and report the error.
+
+Follow `{LINK}/references/workflow-spawn-protocol.md` on this branch only. `workflow-generator.sh` requires the same contract while it is still `planned`, so run it before the state transition below. Its call is `workflow-generator.sh <solo|pair|trio> "$ENGINEER_ROLE" --job "$INSTRUCTION" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --control-root "$CONTROL_ROOT"`. Pass every name the prior invocation produced as `--name` (solo) or `--engineer-name`/`--critic-name`/`--testdev-name` (pair or trio), plus `--autonomy` read from `{PROJECT_ROOT}/.lbwc-planning/config.json` for a pair or trio. Read the `Workflow-call parameters:` block and the `WORKFLOW_READY <task-id>` line that follows it. On any `workflow-generator:` stderr failure, stop and report the error verbatim, and leave the contract `planned`. After successful registration, run `state ... dispatched`.
+
+Call `Workflow` exactly once with `scriptPath` set to the path value from the `Workflow-call parameters:` block, confirmed by the `WORKFLOW_READY <task-id>` line that follows it. Never pass `script`, and never inline or paraphrase the rendered file into the call. The `PreToolUse` guard on `Workflow` independently revalidates the path against the registered digest. A denial is a stop, not a fallback trigger.
+
+`Workflow` runs the roster in the background. Its own tool result reports only the launch (`taskId`, `runId`, `transcriptDir`, `scriptPath`), never the outcome. Observe the run through its own terminal result, not through native task or bus polling. When that result carries `user_decision_required`, ask exactly one bounded `AskUserQuestion` about continuing remediation, following `{LINK}/references/ask-user-question.md`. Any other terminal result is the roster's report. Record it and stop.
+
 ## Failure and recovery
 
 On contract, task binding, generation, spawn, routing evidence, tmux preflight, provision, split-group, bus publish/await/ack, or completion mismatch, run `bash "{LINK}/scripts/team-command-transaction.sh" fail --project-root "{PROJECT_ROOT}" --run-root "$RUN_ROOT" --event "<exact failure>"` when a run root exists. Retain runfiles, append the actionable diagnostic, and report the exact failed artifact. Never widen scope, silently substitute a model, pre-author native team state, or delete an unreadable run.
@@ -212,4 +237,4 @@ Report missing runtime routing evidence as unknown. After completion, print the 
 
 ## Next Up
 
-The native shared task list is the next action after a confirmed successful native spawn. After a tmux spawn, observe pane sessions and bus results. A restart is the only next action after enabling Agent Teams.
+The native shared task list is the next action after a confirmed successful native spawn. After a tmux spawn, observe pane sessions and bus results. After a workflow spawn, observe the run's own terminal result rather than a native task or pane. A restart is the only next action after enabling Agent Teams.

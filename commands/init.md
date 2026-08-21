@@ -3,7 +3,7 @@ category: lifecycle
 disable-model-invocation: true
 description: Set up environment, scaffold .lbwc-planning, detect project context, and bootstrap project-defining files.
 argument-hint: "none"
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent, LSP
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent, LSP, Workflow
 ---
 
 # LBWC Init
@@ -66,6 +66,12 @@ bash "{LINK}/scripts/indexer-sync.sh" --project-root "{PROJECT_ROOT}"
 ```
 
 This is mandatory. Stop before Guard when the helper exits non-zero.
+
+## Workflow capability gate
+
+This command's only agent spawn, the Architect in Step 7c, always runs after Step 1's fail-closed sequence, which creates `.lbwc-planning/` and runs `lbwc-model refresh .lbwc-planning` before any bootstrap write proceeds, and after Step 1.8's additional refresh. That refresh, not a separate call here, is what persists workflow-backend availability as `.workflow` on `.lbwc-planning/claude-capabilities.json`, the authority Step 7c reads before offering or resolving `workflow`. A refresh failure in Step 1 already stops the whole command, so by the time backend resolution runs in 7c, `.lbwc-planning/` and its capability catalog are guaranteed to exist. The Guard below stops only when `.lbwc-planning/config.json` already exists, so `.lbwc-planning/` itself may already hold a partial scaffold at command start, but no spawn happens until well after Step 1 creates or completes it.
+
+Step 7c's `ask` branch is unreachable on the shipped default configuration. `config/settings.json`, the source Step 1 copies into `.lbwc-planning/config.json`, ships `agent_execution_mode: "ask"` and `workflow_execution.enabled: false`. Per step 0 of `workflow-spawn-protocol.md`, an `ask`-mode run only asks when `workflow_execution.enabled` is also `true`. Otherwise it keeps `RESOLVED_BACKEND=in_process` silently, so a fresh bootstrap only offers `Workflow run` when something upstream of Step 7c, a prior `/lbwc:config` change or a non-default settings source, already turned `workflow_execution.enabled` on.
 
 ## Guard
 
@@ -424,7 +430,37 @@ If SKIP_INFERENCE=false (confirmed/corrected inference data):
 
 **7c. Generate discovery.json and phases.json through a contracted Architect:**
 
-Follow `{plugin-root}/references/agent-spawn-protocol.md`. Build one complete brief from the gathered project data in 7a. Issue a solo, read-only `architect` command contract for `initial requirements and roadmap`. Run generic `scripts/agent-generator.sh architect` with the identical brief, contract path, and task id. The generator routes through detected `lbwc-model` configuration. Advance the contract to `dispatched`. Spawn only with the emitted `model` and final `SPAWN_READY` name as `subagent_type` and `name`.
+**Choose the execution backend.** Follow step 0 of `{plugin-root}/references/workflow-spawn-protocol.md`, with `<control-root>` bound to `.lbwc-planning`. Use these literal `AskUserQuestion` fields when that step's `ask` branch applies:
+
+- header: `Bootstrap execution`
+- question: `Where should the initial requirements and roadmap draft run? Workflow run orchestrates it through a committed background script. Native spawn keeps the current single-agent Architect spawn.`
+- options:
+  - `Workflow run`: Draft requirements and roadmap through a committed workflow script in the background.
+  - `Native spawn`: Keep the current native Architect spawn.
+  - `Cancel bootstrap`: Stop before generating project-defining files.
+
+On `Cancel bootstrap`, stop before this contract exists. Leave the Step 1 scaffold, config, routing, and any completed codebase mapping in place with the template-default `REQUIREMENTS.md`, `ROADMAP.md`, and `STATE.md` unchanged, report that project-defining content was not generated, and point to `/lbwc:vibe` to complete planning from those placeholders.
+
+Build one complete brief from the gathered project data in 7a, once, and reuse it across both branches below.
+
+When `RESOLVED_BACKEND` is `in_process`, follow `{plugin-root}/references/agent-spawn-protocol.md`. Issue a solo, read-only `architect` command contract for `initial requirements and roadmap`. Run generic `scripts/agent-generator.sh architect` with the identical brief, contract path, and task id. The generator routes through detected `lbwc-model` configuration. Advance the contract to `dispatched`. Spawn only with the emitted `model` and final `SPAWN_READY` name as `subagent_type` and `name`.
+
+When `RESOLVED_BACKEND` is `workflow`, follow `{plugin-root}/references/workflow-spawn-protocol.md`. Architect's default role permits `Write`, so a schema 3 contract for it requires either a granted write capability or an explicit `--read-only-role architect` declaration. The Architect returns discovery and phase JSON in its report and writes nothing: issue the contract read-only.
+
+```bash
+PROJECT_ROOT=$(pwd)
+CONTROL_ROOT="$PROJECT_ROOT/.lbwc-planning"
+ARCHITECT_BRIEF="draft initial requirements and roadmap"
+CONTRACT_PATH=$(bash "{plugin-root}/scripts/task-contract.sh" issue "$PROJECT_ROOT" "init-architect" --command init --role architect --team solo --job "$ARCHITECT_BRIEF" --control-root "$CONTROL_ROOT" --requested-backend workflow --resolved-backend workflow --read-only-role architect) || exit 1
+TASK_ID=$(basename "$CONTRACT_PATH" .json)
+GENERATOR_OUTPUT=$(bash "{plugin-root}/scripts/agent-generator.sh" architect --job "$ARCHITECT_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --control-root "$CONTROL_ROOT" --execution-backend workflow) || exit 1
+NAME=$(printf '%s\n' "$GENERATOR_OUTPUT" | awk '/^SPAWN_READY/{print $2}')
+WORKFLOW_OUTPUT=$(bash "{plugin-root}/scripts/workflow-generator.sh" solo architect --job "$ARCHITECT_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --name "$NAME" --control-root "$CONTROL_ROOT") || exit 1
+bash "{plugin-root}/scripts/task-contract.sh" state "$PROJECT_ROOT" "$TASK_ID" dispatched >/dev/null || exit 1
+SCRIPT_PATH=$(printf '%s\n' "$WORKFLOW_OUTPUT" | awk '/^  path:/{print $2}')
+```
+
+Read the emitted `Agent-call parameters:` and `SPAWN_READY <name>` line, captured above as `NAME`, and use only that printed name, never an invented one. Read the `Workflow-call parameters:` block and the `WORKFLOW_READY <task-id>` line that follows it. Call `Workflow` exactly once with `scriptPath` set to `SCRIPT_PATH`. Never pass `script`, and never inline or paraphrase the rendered file's contents into the call. The `PreToolUse` guard on `Workflow` independently revalidates the path against the registered digest. A denial is a stop, not a fallback trigger. `Workflow` runs the Architect in the background. Its own tool result reports only the launch, never the Architect's report. Wait for the run's own terminal result before validating and persisting in 7d. A `user_decision_required` result is the only path back to the user, ask exactly one bounded `AskUserQuestion` about it. Any other terminal result carries the Architect's report, validated exactly like the `in_process` branch above.
 
 Render the prompt prefix through `{plugin-root}/references/skill-activation-payload.md`. Ask the Architect to return exactly two complete JSON values in its report: discovery data shaped as `{"answered": [requirement strings], "inferred": [{"text":..., "priority":"Must-have"}]}` and phases shaped as `[{"name":..., "goal":..., "requirements":[...], "success_criteria":[...]}]`. The Architect is read-only and returns content and evidence only. It does not create, edit, stage, commit, or write planning files.
 
@@ -519,6 +555,8 @@ LBWC Initialization Complete
 ## Failure and recovery
 
 If `lbwc-model`, task-contract, or agent-generator fails, stop and show its error verbatim. Do not substitute a static model file, role-specific generator, source team, or unsupported Agent field. If the Architect response fails validation, leave project-defining artifacts unchanged, report the rejected value, and ask the user to retry or provide corrected freeform input under the shared interaction contract.
+
+If the workflow generator fails or the `Workflow` call is denied for the Architect, leave the contract `planned`, leave project-defining artifacts unchanged, and report the failure verbatim. Do not fall back to `in_process`.
 
 ## Next Up
 

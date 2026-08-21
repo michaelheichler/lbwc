@@ -3,7 +3,7 @@ category: lifecycle
 disable-model-invocation: true
 description: Execute a phase PLAN through contract-bound pair or trio agents, one main-session commit per task, and a verified summary.
 argument-hint: "<phase number or name>"
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, SendMessage, LSP
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Agent, SendMessage, LSP, AskUserQuestion, Workflow
 ---
 
 After resolving Context, first read `{LINK}/skills-bundle/ponytail/SKILL.md` and apply the ponytail discipline at level full for the whole task.
@@ -32,6 +32,16 @@ This is mandatory. Stop before plan execution when the helper exits non-zero.
 
 After the gate succeeds, run `bash "{LINK}/scripts/phase-detect.sh"`. Read the selected root or remediation PLAN, its declared task files and dependencies, relevant terminal summaries, task-contract state, and generated-agent manifest. Follow `{LINK}/references/execute-protocol.md` and `{LINK}/references/agent-spawn-protocol.md`.
 
+## Workflow capability gate
+
+Refresh the saved Claude capability catalog before any grouping contract or spawn:
+
+```bash
+bash "{LINK}/scripts/lbwc-model" refresh "{PROJECT_ROOT}/.lbwc-planning"
+```
+
+This persists workflow-backend availability as `.workflow` on `.lbwc-planning/claude-capabilities.json`, the authority the execution-mode choice in Spawn and verify reads before offering or resolving `workflow`. Stop before plan execution when the helper exits non-zero. Skip this gate when `.lbwc-planning/` is missing. Do not create a planning directory here.
+
 ## Guard
 
 Require initialized active planning state, `phase_detect_complete=true`, a canonical PLAN, and no detector-selected blocking route that precedes build. The main session owns contracts, planning writes, verification, telemetry, Git, summaries, and user output. Stop on a missing helper, malformed PLAN, stale contract, open exclusive grouping, or undeclared path.
@@ -51,6 +61,14 @@ Require initialized active planning state, `phase_detect_complete=true`, a canon
 Group the plan's `<task>` entries into waves by `depends_on`. Wave 1 has no unmet dependency. Later waves depend only on earlier waves. Preserve PLAN order for tasks within each wave.
 
 Within a dependency wave, process tasks in PLAN order and admit exactly one task team at a time. Each task team contains one or more sequential groupings. A grouping is a solo red stage, a pair, or a trio. Independence within a wave means the tasks have no dependency edge between them. It does not permit parallel admission. Generate every build grouping with `--exclusive`, then wait until every member is `used` or `expired` before generating the next grouping. Do not pre-generate a later grouping.
+
+This admission rule is identical under every resolved backend, including `workflow`, but a workflow grouping's closure signal is not. `--exclusive` reads the one shared agent manifest, not a backend-specific one. A workflow-spawned member's `agent()` step fires the same `SubagentStart`/`SubagentStop` hooks a native member's `Agent` call fires, carrying the registered `lbwc-` name in `agent_type`, and `agent-lifecycle.sh` advances that name to `running` then `used` from those hooks exactly as it does for a native or TMUX member. This is confirmed on the host, not assumed: see `references/workflow-probe-findings.md`, Unknown D. For a solo grouping that is the whole picture, one `agent()` call and one `used` transition, and the manifest closure check is sufficient on its own exactly as it is for native and TMUX.
+
+A pair or trio grouping is not that simple. `templates/workflows/pair.js.tpl` and `templates/workflows/trio.js.tpl` retry the same registered names for up to three remediation rounds, unbounded under `pure-vibe`, and every round ends with its own `SubagentStop` followed by the next round's `SubagentStart`. Between rounds, a still-running grouping's members read `used` in the manifest exactly like a closed one does, so `used` is necessary but not sufficient for workflow closure. It can also mean the grouping is between rounds. The run's own terminal `result`, read once the `Workflow` call completes, is what actually signals the grouping is done, including every internal round. The main session observes that terminal result before it reads the manifest's `used`-or-`expired` state as confirmation, and only then generates the next grouping, exactly as detailed in the workflow branch of Spawn and verify below. The manifest is not the sole admission authority for `workflow` the way it is for `in_process` and `tmux`. For `workflow` it is corroborating state read after the terminal result, never a substitute for it. No wave or cross-grouping ordering is ever delegated into a workflow script itself.
+
+Entry has the same asymmetry, mirrored. `references/agent-spawn-protocol.md` requires every admitted member spawned in one message. A native or tmux pair or trio reaches `running` together because of that. `templates/workflows/pair.js.tpl` instead awaits the engineer's `agent()` call before starting the critic's. `templates/workflows/trio.js.tpl` awaits engineer, then `test-dev`, then critic, in that order. A workflow pair or trio therefore never has more than one member `running` at once. It enters `running` one member at a time, in template order. `state ... running` in Main-session task contract and telemetry below is driven by the first admitted member reaching `running`. The later members have not started yet, so it is never driven by every admitted member reaching that state.
+
+**Open item.** `agent-generator.sh --exclusive` alone cannot detect an in-flight workflow grouping between remediation rounds. It blocks only on a `registered` or `running` manifest entry, and a mid-loop `used` state passes that check. This command protects admission only by never generating the next grouping until it has itself observed the workflow's terminal result, not by anything `--exclusive` enforces on its own. A generator-side fix, such as a workflow-run marker distinct from the per-agent manifest that `--exclusive` also checks, is not implemented here.
 
 ## Select roles
 
@@ -93,9 +111,11 @@ TASK_ID=$(basename "$CONTRACT_PATH" .json)
 
 Build `CONTRACT_ALLOWANCE_ARGS` only from the selected PLAN task's `<files>`. Repeat each engineer path as `--write-allowance <path>`. For a non-TDD trio, repeat each exact test path as `--role-write-allowance test-dev:<path>`. Use `qa-author`, `solo`, and only the exact test paths for the `red` contract. Use the selected engineer role, `pair`, and only implementation paths for the later TDD `implementation` contract. The contract writer rejects any allowance not declared in PLAN.
 
+`CONTRACT_ALLOWANCE_ARGS` is identical for every resolved backend, including `workflow`. `task-contract.sh open` always derives a schema 3 contract's typed write capabilities from these same `--write-allowance`/`--role-write-allowance` flags, so there is no separate typed-capability form to build for a workflow grouping.
+
 Pass the contract path, task id, job, team mode, and identical allowance arguments to one generator invocation. Pass `--execution-backend "$RESOLVED_BACKEND"` only when `OPEN_BACKEND_ARGS` is non-empty so the generator matches a schema 3 contract. Schema 2 native generation without a freeze, and the frozen `comms_fallback` case, must omit that override. The main session owns `open`. Workers never create or modify contracts. If generation fails, leave that grouping contract `planned` and report the error.
 
-Advance each grouping contract only from outcomes the main session observes. After successful registration, run `state ... dispatched`. After the manifest shows the admitted members `running`, run `state ... running`. After all reports arrive, run `state ... awaiting_review`. After verification, run `state ... verified`, `blocked`, or `cancelled`. Never advance one grouping from another grouping's outcome or from an unobserved worker claim. Record one bounded telemetry event only after the main session observes the command outcome:
+Advance each grouping contract only from outcomes the main session observes. After successful registration, run `state ... dispatched`. After the manifest shows the first admitted member `running`, run `state ... running`. For `in_process` and `tmux` every admitted member reaches `running` together, so the first is also the last. For `workflow`, only the first admitted member has started (see the entry-asymmetry paragraph in Plan waves above). After all reports arrive, run `state ... awaiting_review`. After verification, run `state ... verified`, `blocked`, or `cancelled`. Never advance one grouping from another grouping's outcome or from an unobserved worker claim. Record one bounded telemetry event only after the main session observes the command outcome:
 
 ```bash
 python3 "{LINK}/scripts/lib/session-telemetry.py" record --event command --outcome success --phase "$PHASE"
@@ -114,7 +134,22 @@ Before opening a grouping contract, resolve `{PHASE_DIR}` as the selected canoni
    ```
 
    On success, use the returned `snapshot` as the only authority for requested backend, resolved backend, effort, routing profile, routed models, TMUX settings, and restrictions. Do not re-read live configuration for execution selection. A non-zero result is `backend drift` or malformed runtime state. Stop before contract opening, generation, spawning, or telemetry and preserve every contract state.
-2. When no snapshot exists, read validated execution configuration once. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. For `agent_execution_mode=ask`, ask one bounded execution-mode question before any contract or agent exists. If the user chooses `Cancel spawn`, run exactly:
+2. When no snapshot exists, read validated execution configuration once. An explicit `agent_execution_mode` wins outright, including an explicit `in_process` or `tmux`. `agent_execution_mode=in_process` selects requested and resolved `in_process`. `agent_execution_mode=tmux` selects requested `tmux`. `agent_execution_mode=workflow` selects requested `workflow`: read `.workflow.available` from `{PROJECT_ROOT}/.lbwc-planning/claude-capabilities.json` and `.workflow_execution.enabled` from `{PROJECT_ROOT}/.lbwc-planning/config.json`. When `.workflow.available` is `false`, stop before any contract or agent exists and report `.workflow.unavailable_reasons` verbatim. Otherwise, when `.workflow_execution.enabled` is not `true`, stop before any contract or agent exists with `workflow backend is disabled in configuration`. Otherwise resolve `workflow`. There is no automatic fallback from a requested `workflow` to another backend. For `agent_execution_mode=ask`, read both `.workflow.available` and `.workflow_execution.enabled` from the same catalog and config first, then ask one bounded execution-mode question before any contract or agent exists. Follow `{LINK}/references/ask-user-question.md`: exactly one question, `multiSelect` false, two to four visible options.
+
+   - header: `Build execution`
+   - question when `.workflow.available` and `.workflow_execution.enabled` are both `true`: `Where should this phase's task groupings run? Workflow run orchestrates each grouping through a committed background script. Native keeps the current Claude Code Agent spawn. TMUX starts each grouping as a fresh pane session.`
+   - options when `.workflow.available` and `.workflow_execution.enabled` are both `true`, `Workflow run` first:
+     - `Workflow run`: Run each grouping through a committed workflow script in the background.
+     - `Native spawn`: Keep the current native Agent spawn.
+     - `TMUX panes`: Start each grouping as a fresh pane session through provision and split-group.
+     - `Cancel spawn`: Do not spawn any grouping for this build.
+   - question when `.workflow.available` or `.workflow_execution.enabled` is not `true`: `Where should this phase's task groupings run? Native keeps the current Claude Code Agent spawn. TMUX starts each grouping as a fresh pane session.`
+   - options when `.workflow.available` or `.workflow_execution.enabled` is not `true`, the same three options with `Workflow run` left out entirely:
+     - `Native spawn`: Keep the current native Agent spawn.
+     - `TMUX panes`: Start each grouping as a fresh pane session through provision and split-group.
+     - `Cancel spawn`: Do not spawn any grouping for this build.
+
+   If the user chooses `Workflow run`, select requested and resolved `workflow`. If the user chooses `Native spawn`, select requested and resolved `in_process`. If the user chooses `TMUX panes`, select requested `tmux`. If the user chooses `Cancel spawn`, run exactly:
 
    ```bash
    bash "{LINK}/scripts/runtime-snapshot.sh" cancel --planning-dir "{PROJECT_ROOT}/.lbwc-planning" --phase-dir "{PHASE_DIR}"
@@ -154,7 +189,13 @@ If `snapshot.resolved_backend` is `tmux`, follow `{LINK}/references/tmux-spawn-p
 
    Observe the helper JSON summary as the grouping reports. Then continue contract state, verification, and commits below. After the grouping is terminal, apply protocol cleanup (`kill-agent` or `kill-session`) from the frozen cleanup policy.
 
-- **TDD red stage:** open the `red` contract before generating solo `qa-author` with `--exclusive`. Pass the same must_haves brief and exact test-path allowances to both calls. Dispatch the contract before spawning. After the tests report and red commit, close its state from observed evidence. Wait until the manifest entry is `used` or `expired`. Then open a separate `implementation` pair contract for the engineer and critic. `test-dev` is not part of a TDD task.
+If `snapshot.resolved_backend` is `workflow`, follow `{LINK}/references/workflow-spawn-protocol.md` on this branch only. Do not call native Agent and do not run the tmux spawn driver. `workflow-generator.sh` requires the same grouping contract while it is still `planned`, so run it before the state transition below. Its call is `workflow-generator.sh <solo|pair|trio> "$ROLE" --job "$BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --control-root "$CONTROL_ROOT"`, with the shape matching `$TEAM_MODE` for this grouping. Pass every name the prior generator invocation produced as `--name` (solo) or `--engineer-name`/`--critic-name`/`--testdev-name` (pair or trio), plus `--autonomy` read from `{PROJECT_ROOT}/.lbwc-planning/config.json` for a pair or trio. Read the `Workflow-call parameters:` block and the `WORKFLOW_READY <task-id>` line that follows it. On any `workflow-generator:` stderr failure, stop and report the error verbatim, and leave the contract `planned`. After successful registration, run `state ... dispatched`.
+
+   Call `Workflow` exactly once with `scriptPath` set to the path value from the `Workflow-call parameters:` block, confirmed by the `WORKFLOW_READY <task-id>` line that follows it. Never pass `script`, and never inline or paraphrase the rendered file into the call. The `PreToolUse` guard on `Workflow` independently revalidates the path against the registered digest. A denial is a stop, not a fallback trigger.
+
+   `Workflow` runs the grouping in the background. Its own tool result reports only the launch (`taskId`, `runId`, `transcriptDir`, `scriptPath`), never the outcome. The manifest is still what `state ... running` reads, but entry is not the same shape here. The same `SubagentStart` hook that drives a native or TMUX member fires here too, but only for the one member the template has started so far. `templates/workflows/pair.js.tpl` awaits the engineer's `agent()` call before starting the critic's. `templates/workflows/trio.js.tpl` awaits engineer, then `test-dev`, then critic. A workflow pair or trio is therefore never more than one member `running` at once. Run `state ... running` from that first `SubagentStart`, not from waiting on every admitted member to reach it, because the later members have not started yet. Closure is not read from the manifest alone. Observe the run's own terminal `result` first, not through native task or bus polling, and only after that result arrives read the manifest's `used`-or-`expired` state as confirmation before generating the next grouping. For a pair or trio this ordering is required, not a formality. `templates/workflows/pair.js.tpl` and `templates/workflows/trio.js.tpl` retry the same registered names once per remediation round, so a member reads `used` between rounds while the grouping is still active. Reading the manifest alone at that moment would admit the next grouping too early. The terminal result is what actually marks the grouping done. The manifest corroborates it once observed, it does not substitute for it. When that result carries `user_decision_required`, ask exactly one bounded `AskUserQuestion` about continuing remediation, following `{LINK}/references/ask-user-question.md`. Any other terminal result is the grouping's report: continue contract state, verification, deviq evidence, and the commit exactly as the native path above. There is no pane or bus to clean up.
+
+- **TDD red stage:** open the `red` contract before generating solo `qa-author` with `--exclusive`. Pass the same must_haves brief and exact test-path allowances to both calls. Dispatch the contract before spawning. After the tests report and red commit, close its state from observed evidence. Wait until the manifest entry is `used` or `expired`. Then open a separate `implementation` pair contract for the engineer and critic. `test-dev` is not part of a TDD task. On `workflow`, generate and dispatch the red stage exactly like any other grouping above: `agent-generator.sh --execution-backend workflow --exclusive`, then `workflow-generator.sh solo qa-author ...`, then one `Workflow` call. Follow the same workflow branch described above for both the red stage and the later implementation grouping.
 When a task's pair or trio returns its verdict, observe and record the reports. Advance the contract to `awaiting_review`, then verify the task and advance it to `verified` or to `blocked` or `cancelled` before committing that task's changed files yourself, one commit per task, referencing the task name. Before generating another grouping, read the manifest and wait until every member of the current grouping is `used` or `expired`. A `registered` or `running` member means the grouping is not closed. After each task's verify step, record one `deviq-record.py evidence --phase <phase> --role <engineer-role> --field claim="..." --field check="..." --field result=pass|fail` from the engineer's report. If the paired critic returned BLOCK, also record `deviq-record.py block --phase <phase> --role <critic-role> --field trigger="..." --field consequence="..." --field fix="..." --field status=open`. Continue through the remaining tasks in that wave in PLAN order. Start the next dependency wave only after every task in the current wave is complete. Record command telemetry only after this main-session outcome is observed.
 
 If an engineer deviates from the plan's stated `action`, record that deviation exactly as reported. Do not silently accept it or smooth it over, an unrecorded deviation becomes an unchecked claim `/qa` cannot gate on.
@@ -168,6 +209,8 @@ Report the commits made and the SUMMARY.md path. Tell the user to run `/lbwc:qa 
 ## Failure and recovery
 
 A failed contract, generator, tmux preflight, provision, split-group, bus publish/await/ack, worker verdict, verify command, commit, summary validation, or remediation transition blocks the task and its dependents. Preserve accepted predecessor commits and exact contract state. Report the failing task and recovery command. Never create a placeholder summary or bypass exclusive admission.
+
+If the workflow generator fails or the `Workflow` call is denied for a grouping, leave that grouping's contract `planned` and report the failure verbatim. Do not fall back to `in_process` or `tmux`.
 
 ## Output Format
 

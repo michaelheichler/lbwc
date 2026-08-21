@@ -4,7 +4,7 @@ hidden: true
 disable-model-invocation: true
 description: Verify completed phase work.
 argument-hint: "[phase-number] [--tier=quick|standard|deep] [--effort=thorough|balanced|fast|turbo]"
-allowed-tools: Read, Write, Bash, Glob, Grep, Agent, Skill, LSP
+allowed-tools: Read, Write, Bash, Glob, Grep, Agent, Skill, LSP, AskUserQuestion, Workflow
 ---
 
 # LBWC QA: $ARGUMENTS
@@ -84,6 +84,16 @@ fi`
 ```text
 !`bash "/tmp/.lbwc-plugin-root-link-${CLAUDE_SESSION_ID:-default}/scripts/suggest-compact.sh" qa 2>/dev/null || true`
 ```
+
+## Workflow capability gate
+
+Refresh the saved Claude capability catalog before any QA contract or spawn:
+
+```bash
+bash "{plugin-root}/scripts/lbwc-model" refresh .lbwc-planning
+```
+
+This persists workflow-backend availability as `.workflow` on `.lbwc-planning/claude-capabilities.json`, the authority the execution-mode choice in Step 3 reads before offering or resolving `workflow`. A non-zero exit here does not stop QA. It leaves `RESOLVED_BACKEND` at `in_process`, so QA proceeds on whatever catalog already exists. Only a run that goes on to request or choose `workflow` can still be blocked, by step 0 of `workflow-spawn-protocol.md` and by `workflow-generator.sh`'s own live re-validation at generation time. Skip this gate when `.lbwc-planning/` is missing. Do not create a planning directory here.
 
 ## Guard
 
@@ -248,7 +258,18 @@ Note: Continuous verification handled by hooks. This command is for deep, on-dem
 2. **Resolve phase:** Use `.lbwc-planning/phases/` for phase directories.
 
 3. **Spawn QA:**
-    - Follow `{plugin-root}/references/agent-spawn-protocol.md`. Issue a solo read-only QA contract, generate it with the generic generator, and advance the contract to `dispatched`:
+    - **Choose the execution backend.** Follow step 0 of `{plugin-root}/references/workflow-spawn-protocol.md`, with `<control-root>` bound to `.lbwc-planning`. Use these literal `AskUserQuestion` fields when that step's `ask` branch applies:
+
+      - header: `QA execution`
+      - question: `Where should this QA verification run? Workflow run orchestrates it through a committed background script. Native spawn keeps the current single-agent QA run.`
+      - options:
+        - `Workflow run`: Verify through a committed workflow script in the background.
+        - `Native spawn`: Keep the current native QA spawn.
+        - `Cancel QA`: Do not verify this phase now.
+
+      This gate applies only to standard phase QA. Debug-session QA in `<debug_session_qa>` always spawns `in_process`.
+
+    - Follow `{plugin-root}/references/agent-spawn-protocol.md`. When `RESOLVED_BACKEND` is `in_process`, issue a solo read-only QA contract, generate it with the generic generator, and advance the contract to `dispatched`:
 
         ```bash
         PROJECT_ROOT=$(pwd)
@@ -260,6 +281,27 @@ Note: Continuous verification handled by hooks. This command is for deep, on-dem
         ```
 
       Read `Agent-call parameters:` and `SPAWN_READY`. Spawn QA with only printed `subagent_type`, `name`, and `model`. Do not add any other Agent-call fields.
+
+      When `RESOLVED_BACKEND` is `workflow`, follow `{plugin-root}/references/workflow-spawn-protocol.md`. Issue the same solo QA contract as a schema 3 contract. QA is read-only and its generated definition disallows the `Write` tool outright, so this contract carries no write capability:
+
+        ```bash
+        PROJECT_ROOT=$(pwd)
+        CONTROL_ROOT="$PROJECT_ROOT/.lbwc-planning"
+        QA_BRIEF="verify phase {NN}, tier {ACTIVE_TIER}"
+        CONTRACT_PATH=$(bash "{plugin-root}/scripts/task-contract.sh" issue "$PROJECT_ROOT" "qa-{NN}-{task-slug}" --command qa --role qa --team solo --job "$QA_BRIEF" --control-root "$CONTROL_ROOT" --requested-backend workflow --resolved-backend workflow) || exit 1
+        TASK_ID=$(basename "$CONTRACT_PATH" .json)
+        GENERATOR_OUTPUT=$(bash "{plugin-root}/scripts/agent-generator.sh" qa --job "$QA_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --control-root "$CONTROL_ROOT" --execution-backend workflow) || exit 1
+        NAME=$(printf '%s\n' "$GENERATOR_OUTPUT" | awk '/^SPAWN_READY/{print $2}')
+        ```
+
+      Read `Agent-call parameters:` and `SPAWN_READY <name>` from `GENERATOR_OUTPUT`, captured above as `NAME`, then render and register the workflow:
+
+        ```bash
+        bash "{plugin-root}/scripts/workflow-generator.sh" solo qa --job "$QA_BRIEF" --contract "$CONTRACT_PATH" --task-id "$TASK_ID" --name "$NAME" --control-root "$CONTROL_ROOT" || exit 1
+        bash "{plugin-root}/scripts/task-contract.sh" state "$PROJECT_ROOT" "$TASK_ID" dispatched >/dev/null || exit 1
+        ```
+
+      Read the `Workflow-call parameters:` block and the `WORKFLOW_READY <task-id>` line that follows it. Call `Workflow` exactly once with `scriptPath` set to the printed `path` value. Never pass `script`, and never inline or paraphrase the rendered file into the call. The `PreToolUse` guard on `Workflow` independently revalidates the path against the registered digest. A denial is a stop, not a fallback trigger. `Workflow` runs QA in the background. Its own tool result reports only the launch, never the QA verdict. Wait for the run's own terminal result. A `user_decision_required` result is the only path back to the user, ask exactly one bounded `AskUserQuestion` about it. Any other terminal result carries the `qa_verdict` payload. Process it exactly like the `in_process` branch above through the rest of this step and Step 4.
 
     - Display: `◆ Spawning QA...`
     - Resolve the VERIFICATION output path before spawning QA:
@@ -416,6 +458,7 @@ Then display the output.
 ## Failure and recovery
 
 - If a contract, generator, spawn, qa_verdict validation, or writer step fails, stop and report the error verbatim. Do not create an uncontracted QA fallback.
+- If the workflow generator fails or the `Workflow` call is denied, leave the contract `planned` and report the failure verbatim. Do not fall back to `in_process`.
 - Preserve phase and debug-session state until the main-session write succeeds.
 
 ## Output Format

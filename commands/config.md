@@ -191,7 +191,7 @@ Validate setting + value. Update config.json. Display ✓ with ➜.
 
 Execution settings use the same transaction and validation path as every other setting:
 
-- `agent_execution_mode` accepts only `in_process`, `tmux`, or `ask`.
+- `agent_execution_mode` accepts only `in_process`, `tmux`, `workflow`, or `ask`.
 - `tmux_execution.<field>` updates one validated field without replacing the other fields.
 - `set-json` accepts a complete `tmux_execution` object for atomic replacement. The object must contain every documented field and no unknown fields.
 - `tmux_execution.enabled` is false by default and becomes true only after the TMUX option is accepted.
@@ -262,7 +262,7 @@ Note: `auto_commit` controls source-task commits during Execute mode. Planning a
 | visual_format | string | unicode/ascii | unicode |
 | max_tasks_per_plan | number | 1-7 | 5 |
 | prefer_teams | string | always/auto/never | auto |
-| agent_execution_mode | string | in_process/tmux/ask | ask |
+| agent_execution_mode | string | in_process/tmux/workflow/ask | ask |
 | tmux_execution | object | strict TMUX backend and restriction object | enabled: false |
 | tmux_execution.enabled | boolean | true/false | false |
 | tmux_execution.session_name_prefix | string | ASCII name prefix, 1-32 characters | lbwc |
@@ -275,6 +275,8 @@ Note: `auto_commit` controls source-task commits during Execute mode. Planning a
 | tmux_execution.cleanup_policy | string | kill_on_complete/keep_panes | kill_on_complete |
 | tmux_execution.layout | string | main-vertical/main-horizontal/tiled/even-horizontal/even-vertical | main-vertical |
 | tmux_execution.restrictions | object | four strict boolean restrictions | see defaults |
+| workflow_execution | object | strict workflow backend object | enabled: false |
+| workflow_execution.enabled | boolean | true/false | false |
 | pipeline_research | boolean | true/false | false |
 | branch_per_milestone | boolean | true/false | false |
 | plain_summary | boolean | true/false | true |
